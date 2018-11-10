@@ -34,11 +34,11 @@ public class Urticaria_display : MonoBehaviour
     public void Set_Questions()
     {
 
-        uasData = new UASData();
-        Current_Question_dat = uasData.GetQuestion();
-        Question_Data_List = uasData.questionDataList;
-        Question_text.text = Question_Data_List[0].question;
+       
+        uasData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS) as UASData;
+        Question_text.text = uasData.GetQuestion().question;
         Reset_buttn(Option_set_1);
+
 
 
 
@@ -47,53 +47,39 @@ public class Urticaria_display : MonoBehaviour
     {
         try
         {
-            temp = uasData.GetQuestion();
-            //Debug.Log(temp.question);
-            Current_Question_dat = uasData.SetAnswer(temp, x);
-            //Debug.Log(uasData.GetScore());
-            Question_text.text = Current_Question_dat.question;
-           // Debug.Log("coming");
-            Reset_buttn(Option_set_1);
+            var question = uasData.GetQuestion();
+           
+            Question_text.text =uasData.SetAnswer(question,x).question;
+            
+          
+           Reset_buttn(Option_set_1);
         }
         catch(Exception ex)
         {
            if(ex!=null)
             {
-                JSONObject jSONObject=uasData.FormatToJson();
-                string Data_file =jSONObject.Print();
-                //Debug.Log(jSONObject.Count);
-                //Debug.Log(jSONObject.GetField("date"));
-                //Debug.Log(jSONObject.Print());
-                //Debug.Log(jSONObject.GetField("option"));
-                //Debug.Log("no questions");
-              
+                TrackerManager.UpdateEntry(DateTime.Today, uasData);
                 Score_panel.SetActive(true);
                 Points_txt.text ="Score: "+uasData.GetScore().ToString() ;
             }
 
         }
 
-        // current_question++;
+
 
     }
-    public void Score_Controller(int indx)
-    {
-
-        //Total_Score += Question_Data_List[current_question].answersOption[indx].points;
-
-    }
+   
 
     private void Reset_buttn(GameObject obj)
     {
-        Score_panel.SetActive(false);
-        // Debug.Log(obj.transform.childCount);
+       // Debug.Log(obj.transform.childCount);
         for (int i = 0; i < obj.transform.childCount; i++)
         {
             _child = obj.transform.GetChild(i);
             _child.GetComponent<Toggle>().isOn = false;
             //Debug.Log(_child.GetChild(1).name);
 
-            _child.GetChild(1).GetComponent<Text>().text = Current_Question_dat.answersOption[i].description;
+            _child.GetChild(1).GetComponent<Text>().text =uasData.GetQuestion().answersOption[i].description;
 
 
         }

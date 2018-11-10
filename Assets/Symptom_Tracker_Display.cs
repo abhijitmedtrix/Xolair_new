@@ -36,10 +36,10 @@ public class Symptom_Tracker_Display : MonoBehaviour {
     public void Set_Questions()
     {
 
-        symptomData = new SymptomData();
-        Question_Data_List = symptomData.questionDataList;
-        Question_text.text =Question_Data_List[current_question].question;
-        if (Question_Data_List[current_question].answersOption.Length == 3)
+
+        symptomData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom) as SymptomData;
+        Question_text.text = symptomData.GetQuestion().question;
+        if (symptomData.GetQuestion().answersOption.Length == 3)
         {
             Reset_buttn(Button_set_2);
             Reset_buttn(Button_set_1);
@@ -70,11 +70,11 @@ public class Symptom_Tracker_Display : MonoBehaviour {
         //Debug.Log(temp.question);
         try
         {
-            temp = symptomData.GetQuestion();
-            Current_Question_dat = symptomData.SetAnswer(temp, x);
-            Question_text.text = Current_Question_dat.question;
+            var question = symptomData.GetQuestion();
 
-            if (Current_Question_dat.answersOption.Length == 3)
+            Question_text.text = symptomData.SetAnswer(question, x).question;
+
+            if (symptomData.SetAnswer(question, x).answersOption.Length == 3)
             {
 
 
@@ -96,6 +96,7 @@ public class Symptom_Tracker_Display : MonoBehaviour {
         {
             if(ex!=null)
             {
+                TrackerManager.UpdateEntry(DateTime.Today, symptomData);
                 Debug.Log("coming");
                 Debug.Log(symptomData.GetScore());
 
@@ -105,12 +106,12 @@ public class Symptom_Tracker_Display : MonoBehaviour {
                
    
       }
-    public void Score_Controller(int indx)
-    {
+    //public void Score_Controller(int indx)
+    //{
 
-        Total_Score+=Question_Data_List[current_question].answersOption[indx].points;
+    //    Total_Score+=Question_Data_List[current_question].answersOption[indx].points;
 
-    }
+    //}
 
     private void Reset_buttn(GameObject obj)
     {
