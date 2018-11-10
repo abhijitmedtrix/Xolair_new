@@ -3,50 +3,49 @@ using System.Collections.Generic;
 using UnityEngine;
 using App.Data.SSA;
 using System;
+using App.Data;
 using UnityEngine.UI;
 
-public class Symptom_Tracker_Display : MonoBehaviour {
+public class Symptom_Tracker_Display : MonoBehaviour
+{
     public SymptomData symptomData;
-    [SerializeField]
-    private List<SymptomData.QuestionData> Question_Data_List;
-    SymptomData.QuestionData temp,Current_Question_dat;
+    [SerializeField] private List<SymptomData.QuestionData> Question_Data_List;
+    SymptomData.QuestionData temp, Current_Question_dat;
 
-    [SerializeField]
-    private Text Question_text;
-    private int current_optn=0,current_question=0;
-    
+    [SerializeField] private GameObject Score_panel;
+    [SerializeField] private Text Points_txt;
+    [SerializeField] private Text Question_text;
+
+    private int current_optn = 0, current_question = 0;
+
     public static int Total_Score;
 
-    [SerializeField]
-    private GameObject  Button_set_1,Button_set_2;
+    [SerializeField] private GameObject Button_set_1, Button_set_2;
 
     private bool Isclicked;
-	// Use this for initialization
-	void Start () {
-        
-        //symptomData = new SymptomData();
-       
-       // Debug.Log(Question_Data_List[3].question);
-        //Debug.Log(Question_Data_List[3].answersOption[0].points);
-        
-       
-        Set_Questions();
 
+    // Use this for initialization
+    void Start()
+    {
+        //symptomData = new SymptomData();
+
+        // Debug.Log(Question_Data_List[3].question);
+        //Debug.Log(Question_Data_List[3].answersOption[0].points);
+
+
+        Set_Questions();
     }
+
     public void Set_Questions()
     {
-
-        symptomData = new SymptomData();
-        Question_Data_List = symptomData.questionDataList;
-        Question_text.text =Question_Data_List[current_question].question;
-        if (Question_Data_List[current_question].answersOption.Length == 3)
+        symptomData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom) as SymptomData;
+        Question_text.text = symptomData.GetQuestion().question;
+        if (symptomData.GetQuestion().answersOption.Length == 3)
         {
             Reset_buttn(Button_set_2);
             Reset_buttn(Button_set_1);
             Button_set_1.SetActive(true);
             Button_set_2.SetActive(false);
-
-
         }
         else
         {
@@ -54,30 +53,24 @@ public class Symptom_Tracker_Display : MonoBehaviour {
             Reset_buttn(Button_set_1);
             Button_set_1.SetActive(false);
             Button_set_2.SetActive(true);
-
         }
-
-
-
     }
-  
+
     public void Next_Question(int x)
     {
-
         // Debug.Log(x);
 
         //Debug.Log(temp.answersOption.Length);
         //Debug.Log(temp.question);
+        var question = symptomData.GetQuestion();
+
         try
         {
-            temp = symptomData.GetQuestion();
-            Current_Question_dat = symptomData.SetAnswer(temp, x);
-            Question_text.text = Current_Question_dat.question;
+            QuestionBasedTrackerData.QuestionData nextQuestion = symptomData.SetAnswer(question, x);
+            Question_text.text = nextQuestion.question;
 
-            if (Current_Question_dat.answersOption.Length == 3)
+            if (nextQuestion.answersOption.Length == 3)
             {
-
-
                 Reset_buttn(Button_set_2);
                 Reset_buttn(Button_set_1);
                 Button_set_1.SetActive(true);
@@ -85,44 +78,35 @@ public class Symptom_Tracker_Display : MonoBehaviour {
             }
             else
             {
-
                 Reset_buttn(Button_set_2);
                 Reset_buttn(Button_set_1);
                 Button_set_1.SetActive(false);
                 Button_set_2.SetActive(true);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            if(ex!=null)
-            {
-                Debug.Log("coming");
-                Debug.Log(symptomData.GetScore());
+            TrackerManager.UpdateEntry(DateTime.Today, symptomData);
+            Debug.Log("Score: "+symptomData.GetScore());
+            Score_panel.SetActive(true);
+            Points_txt.text = "Score: " + symptomData.GetScore();
 
-            }
-
+            Debug.LogWarning(
+                "Exception caught trying to get new question. Seems there is no more questions for this data. Ex: " +
+                ex.Message);
         }
-               
-   
-      }
-    public void Score_Controller(int indx)
-    {
-
-        Total_Score+=Question_Data_List[current_question].answersOption[indx].points;
-
     }
+
+    // public void Score_Controller(int indx)
+    // {
+    // Total_Score += Question_Data_List[current_question].answersOption[indx].points;
+    // }
 
     private void Reset_buttn(GameObject obj)
     {
-        for (int i = 0; i < obj.transform.childCount ;i++)
+        for (int i = 0; i < obj.transform.childCount; i++)
         {
             obj.transform.GetChild(i).GetComponent<Toggle>().isOn = false;
-
         }
     }
-    // Update is called once per frame
-    void Update () 
-    {
-       
-	}
 }

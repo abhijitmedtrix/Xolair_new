@@ -30,10 +30,8 @@ public class Asthma_control_display : MonoBehaviour
 
     public void Set_Questions()
     {
-        asthmaData = new AsthmaData();
-        Current_Question_dat = asthmaData.GetQuestion();
-        Question_Data_List = asthmaData.questionDataList;
-        Question_text.text = Question_Data_List[0].question;
+        asthmaData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma) as AsthmaData;
+        Question_text.text = asthmaData.GetQuestion().question;
         Reset_buttn(Option_set_1);
 
 
@@ -43,16 +41,16 @@ public class Asthma_control_display : MonoBehaviour
     {
         try
         {
-            temp = asthmaData.GetQuestion();
-            Current_Question_dat = asthmaData.SetAnswer(temp, x);
-            Question_text.text = Current_Question_dat.question;
-            Debug.Log("coming");
+            var question = asthmaData.GetQuestion();
+
+            Question_text.text = asthmaData.SetAnswer(question, x).question;
             Reset_buttn(Option_set_1);
         }
         catch(Exception ex)
         {
             if(ex!=null)
             {
+                TrackerManager.UpdateEntry(DateTime.Today, asthmaData);
                 string score= asthmaData.GetScore().ToString();
                 Score_txt.text =score;
                 Score_panel.SetActive(true);
@@ -78,7 +76,7 @@ public class Asthma_control_display : MonoBehaviour
             _child.GetComponent<Toggle>().isOn = false;
             //Debug.Log(_child.GetChild(1).name);
 
-            _child.GetChild(1).GetComponent<Text>().text = Current_Question_dat.answersOption[i].description;
+            _child.GetChild(1).GetComponent<Text>().text = asthmaData.GetQuestion().answersOption[i].description;
             //Debug.Log(i);
 
         }

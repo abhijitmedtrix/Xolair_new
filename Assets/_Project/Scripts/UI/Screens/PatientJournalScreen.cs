@@ -13,7 +13,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     [SerializeField] protected ScreenConfig _screenConfig;
     [SerializeField] protected RawImage _graphImage;
     [SerializeField] protected RectTransform _graphContainer;
-    [SerializeField] protected RectTransform _rectTransform;
+    [SerializeField] protected RectTransform _scrollerRectTransform;
     [SerializeField] protected RectTransform _graphPoint;
 
     [Header("Hints")] [SerializeField] protected Hint _scoreHint;
@@ -58,7 +58,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         List<DateTime> maxDateRange = TrackerManager.GetMaxDateRange();
         SetData(maxDateRange);
 
-        Debug.Log("total dates: " + maxDateRange.Count);
+        Debug.Log("Max date range to show: " + maxDateRange.Count);
         Debug.Log("Last date: " + maxDateRange[maxDateRange.Count - 1]);
 
         int maxScore;
@@ -111,7 +111,20 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             SetDateRange(_lastMiddleCellIndex);
         }
 
-        // Debug.Log("Get closest point: " + _lastMiddleCellIndex);
+        // for debug only
+        /*
+        if (scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) != null)
+        {
+            CalendarScrollItemView itemView =
+                scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) as CalendarScrollItemView;
+            Debug.Log("Get closest point: " + _lastMiddleCellIndex
+                                            + " with data " + itemView.data.ToShortDateString());
+        }
+        else
+        {
+            Debug.Log("Get closest point: " + _lastMiddleCellIndex);
+        }
+        */
     }
 
     public void SetType(TrackerManager.TrackerType type)
@@ -129,8 +142,8 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // update graph paddings
         Vector2 min = _graphContainer.offsetMin;
         Vector2 max = _graphContainer.offsetMax;
-        min.x = _rectTransform.rect.width / 7 / 2f;
-        max.x = -_rectTransform.rect.width / 7 / 2f;
+        min.x = _scrollerRectTransform.rect.width / 7 / 2f;
+        max.x = -_scrollerRectTransform.rect.width / 7 / 2f;
         _graphContainer.offsetMin = min;
         _graphContainer.offsetMax = max;
     }
@@ -156,6 +169,8 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             counter++;
         }
+        
+        Debug.Log($"Date range defined. Min: {_data[middleIndex - 3].ToShortDateString()} and Max: {_data[middleIndex + 3].ToShortDateString()}");
 
         // update graph mesh
         _graphRenderer.UpdateGraph(_scoreByDaysRange);
@@ -210,7 +225,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 Texture2D[] textures = csuData.GetAllPhotos();
 
                 // TODO - implement popup update here
-                Debug.Log("Textures count to open: "+textures.Length);
+                Debug.Log("Textures count to open: " + textures.Length);
             }
         }
     }
@@ -238,7 +253,8 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     /// <returns>The size of the cell</returns>
     public float GetCellViewSize(EnhancedScroller scroller, int dataIndex)
     {
-        return _rectTransform.rect.width / 7;
+        // Debug.Log($"Screen width: {Screen.width}, _rectTransform size delta: {_scrollerRectTransform.sizeDelta} and rect size: {_scrollerRectTransform.rect.size}");
+        return _scrollerRectTransform.rect.width / _daysToShow;
     }
 
     /// <summary>

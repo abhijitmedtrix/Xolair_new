@@ -45,16 +45,15 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
     private void Awake()
     {
-       
         DateTime today = DateTime.Now.Date;
 
         // parse log files on start if exists
 
         // symptom tracker
         string path = Path.Combine(Helper.GetDataPath(), LOGS_FOLDER, SYMPTOM_LOG);
-       // Debug.Log(path);
+        // Debug.Log(path);
         //Debug.Log(Helper.GetDataPath());
-        
+
         List<JSONObject> jsonList = GetJsonList(path);
 
         for (int i = 0; i < jsonList.Count; i++)
@@ -262,24 +261,28 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                     {
                         return logData.asthmaData.GetScore();
                     }
+
                     break;
                 case TrackerType.Symptom:
                     if (logData.asthmaData != null)
                     {
                         return logData.symptomData.GetScore();
                     }
+
                     break;
                 case TrackerType.CSU:
                     if (logData.csuData != null)
                     {
                         return logData.csuData.GetScore();
                     }
+
                     break;
                 case TrackerType.UAS:
                     if (logData.uasData != null)
                     {
                         return logData.uasData.GetScore();
                     }
+
                     break;
             }
         }
@@ -480,6 +483,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                     // just create a dummy instance to calculate max score
                     return new SymptomData(DateTime.Today).GetMaxScore();
                 }
+
                 break;
             case TrackerType.CSU:
                 if (_csuJsonObjectList.Count > 0)
@@ -491,6 +495,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                     // just create a dummy instance to calculate max score
                     return new CSUData(DateTime.Today).GetMaxScore();
                 }
+
                 break;
             case TrackerType.UAS:
                 if (_uasJsonObjectList.Count > 0)
@@ -502,6 +507,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                     // just create a dummy instance to calculate max score
                     return new UASData(DateTime.Today).GetMaxScore();
                 }
+
                 break;
         }
 
@@ -517,7 +523,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     [MenuItem("Tools/Generate random log data")]
     public static void FillTestData()
     {
-       // Debug.Log("call");
+        // Debug.Log("call");
         // load random textures form resources
         Texture2D[] textures = Resources.LoadAll<Texture2D>("RandomTextures");
 
@@ -617,7 +623,10 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     public static void DeleteLogs()
     {
         string dir = Path.Combine(Helper.GetDataPath(), LOGS_FOLDER);
-        Directory.Delete(dir, true);
+        if (Directory.Exists(dir))
+        {
+            Directory.Delete(dir, true);
+        }
     }
 #endif
 

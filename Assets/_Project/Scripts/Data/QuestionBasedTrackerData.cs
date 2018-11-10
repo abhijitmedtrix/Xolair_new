@@ -38,7 +38,6 @@ namespace App.Data
 
         protected QuestionBasedTrackerData(DateTime date) : base(date)
         {
-            
         }
 
         public QuestionBasedTrackerData(string json) : base(json)
@@ -54,21 +53,19 @@ namespace App.Data
 
         public QuestionBasedTrackerData()
         {
-
         }
 
         public virtual QuestionData SetAnswer(QuestionData question, int option)
         {
             // get question index
             _currentQuestionIndex = questionDataList.IndexOf(question);
-          
+
             // create or update existing answer
+            
             // update
-          
             if (_currentQuestionIndex < _answers.Count)
             {
                 _answers[_currentQuestionIndex].option = option;
-               
             }
             // create new
             else
@@ -76,46 +73,67 @@ namespace App.Data
                 _answers.Add(new Answer
                 {
                     option = option
-
                 });
-               
             }
 
             // if there are some more questions after that
-            if (_currentQuestionIndex < questionDataList.Count - 1)
+            if (_currentQuestionIndex + 1 < questionDataList.Count)
             {
-                _currentQuestionIndex++;
-              
-                if (option == 0 && questionDataList[_currentQuestionIndex].canBeSkipped)
+                // define next question index
+                int nextQuestionIndex = _currentQuestionIndex + 1;
+                
+                // if user selected a 1st answer which allow to skip the next question
+                if (option == 0 && questionDataList[nextQuestionIndex].canBeSkipped)
                 {
-                  
                     // create or update next dummy answer with default params
-                    if (_currentQuestionIndex < _answers.Count)
+                    if (nextQuestionIndex < _answers.Count)
                     {
-                        _answers[_currentQuestionIndex].option = option;
+                        _answers[nextQuestionIndex].option = option;
                     }
-                    // create new default
+                    // create new default with option set to <-1>
                     else
                     {
                         _answers.Add(new Answer());
                     }
-
-                    if (_currentQuestionIndex < questionDataList.Count - 1)
+                    
+                    Debug.Log("Skipping question with index: "+nextQuestionIndex);
+                    
+                    // if there are still some questions after skipped 
+                    if (nextQuestionIndex + 1 < questionDataList.Count)
                     {
+                        // Debug.Log("Current question index: " + _currentQuestionIndex);
+    
                         // jump over skipped question if some more questions exists
-                        _currentQuestionIndex++;
+                        _currentQuestionIndex = nextQuestionIndex + 1;
+                    }
+                    // otherwise user completed all questions
+                    else
+                    {
+                        // inform listeners about completion
+                        OnComplete?.Invoke(GetScore());
+
+                        // returning null will allow to understand that there are no more questions
+                        return null;
                     }
                 }
+                else
+                {
+                    _currentQuestionIndex++;
+                }
+                
+                // Debug.Log("Current question index: " + _currentQuestionIndex);
 
                 // return next question data
                 return GetQuestion();
             }
+            else
+            {
+                // inform listeners about completion
+                OnComplete?.Invoke(GetScore());
 
-            // inform listeners about completion
-            OnComplete?.Invoke(GetScore());
-
-            // returning null will allow to understand that there are no more questions
-            return null;
+                // returning null will allow to understand that there are no more questions
+                return null;
+            }
         }
 
         public override JSONObject FormatToJson()
@@ -129,6 +147,7 @@ namespace App.Data
                 // just add entry to the list
                 answersObject.Add(_answers[i].FormatToJson());
             }
+
             jsonObject.AddField("answers", answersObject);
             return jsonObject;
         }
@@ -151,16 +170,16 @@ namespace App.Data
         public virtual int GetScore()
         {
             _totalScore = 0;
-            //Debug.Log("questiondatalist"+questionDataList.Count);
-            //Debug.Log("answers" + _answers.Count);
+            // Debug.Log("question data count: " + questionDataList.Count);
+            // Debug.Log("answers count:" + _answers.Count);
             for (int i = 0; i < _answers.Count; i++)
             {
+                // Debug.Log($"answer option at index <{i}> is {_answers[i].option}");
+                
                 // in some cases for "empty" answer we just initialise default Result data with default value -1
                 if (_answers[i].option > -1)
                 {
-                    //Debug.Log("count "+i);
-                    //Debug.Log("answer option"+questionDataList[i].answersOption.Length);
-                    //Debug.Log("answerssss"+_answers[i].option);
+                    // Debug.Log("answer options count: " + questionDataList[i].answersOption.Length);
                     _totalScore += questionDataList[i].answersOption[_answers[i].option].points;
                 }
             }
@@ -178,7 +197,7 @@ namespace App.Data
 
             return max;
         }
-        
+
         public abstract List<QuestionData> questionDataList { get; }
 
         public class QuestionData
@@ -189,7 +208,7 @@ namespace App.Data
 
             // this option is actual only for SymptomData, in other cases keep it always <false>
             public bool canBeSkipped;
-            
+
             public int GetMaxScore()
             {
                 return answersOption[answersOption.Length - 1].points;
