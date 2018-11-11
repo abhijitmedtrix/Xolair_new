@@ -22,6 +22,17 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     protected int _lastMiddleCellIndex;
     protected int _daysToShow = 7;
     protected int[] _scoreByDaysRange = new int[7];
+    public TrackerManager.TrackerType _TrackerType
+    {
+        get
+        {
+            return _trackerType;
+        }
+        set
+        {
+            _trackerType=value;
+        }
+    }
 
     /// <summary>
     /// In this example we are going to use a standard generic List. We could have used
@@ -52,7 +63,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         OnShowStarted();
         scroller.scrollerScrolled = ScrollerScrolled;
     }
-
+   
     private void OnShowStarted()
     {
         List<DateTime> maxDateRange = TrackerManager.GetMaxDateRange();
