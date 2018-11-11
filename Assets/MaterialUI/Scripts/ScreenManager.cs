@@ -20,9 +20,33 @@ namespace MaterialUI
 		public ScreenConfig currentScreen;
 		[HideInInspector]
 		public ScreenConfig lastScreen;
-
-		public void Set(int index)
+        public PatientJournalScreen patientJournalScreen;
+        private bool Choice;
+        private void Start()
+        {
+            patientJournalScreen = GameObject.Find("ScreenCSUPatientJournal").GetComponent<PatientJournalScreen>();
+            Choice = false;
+        }
+        public void Set(int index)
 		{
+            if(index==3&&!Choice)
+            {
+                patientJournalScreen._TrackerType = TrackerManager.TrackerType.CSU;
+                Choice = true;
+            }
+            else if(index==2 && !Choice)
+            {
+                patientJournalScreen._TrackerType = TrackerManager.TrackerType.Symptom;
+                Choice = true;
+            }
+            else if(index==6)
+            {
+                patientJournalScreen._TrackerType = TrackerManager.TrackerType.Symptom;
+            }
+            else if(index==5)
+            {
+                patientJournalScreen._TrackerType = TrackerManager.TrackerType.Asthma;
+            }
 			screens[index].transform.SetAsLastSibling();
 
 			screens[index].Show(currentScreen);
