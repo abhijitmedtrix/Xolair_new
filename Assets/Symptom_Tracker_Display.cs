@@ -58,7 +58,7 @@ public class Symptom_Tracker_Display : MonoBehaviour
 
     public void Next_Question(int x)
     {
-        // Debug.Log(x);
+        Debug.Log(x);
 
         //Debug.Log(temp.answersOption.Length);
         //Debug.Log(temp.question);

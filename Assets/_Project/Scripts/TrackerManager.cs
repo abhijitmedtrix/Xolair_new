@@ -251,9 +251,11 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     /// <returns>Return null if doesn't exists</returns>
     public static int GetScore(DateTime date, TrackerType type)
     {
+        // Debug.Log($"_trackerDictionary contains entry for date: {date.ToShortDateString()}? {_trackerDictionary.ContainsKey(date)}. Requesting type: {type}");
         if (_trackerDictionary.ContainsKey(date))
         {
             LogData logData = _trackerDictionary[date];
+            
             switch (type)
             {
                 case TrackerType.Asthma:
@@ -264,7 +266,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
                     break;
                 case TrackerType.Symptom:
-                    if (logData.asthmaData != null)
+                    if (logData.symptomData != null)
                     {
                         return logData.symptomData.GetScore();
                     }

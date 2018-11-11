@@ -178,6 +178,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
                                              TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
             }
 
+            // Debug.Log($"Updated score for data: {_data[i].ToShortDateString()}, total score is: {_scoreByDaysRange[counter]}");
             counter++;
         }
         
