@@ -5811,7 +5811,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 0
+  m_PreferredHeight: -1
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -8315,11 +8315,6 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 278177088}
   m_CullTransparentMesh: 0
---- !u!224 &279890016 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 224961118103045740, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-    type: 2}
-  m_PrefabInternal: {fileID: 1594812932}
 --- !u!1001 &279902212
 Prefab:
   m_ObjectHideFlags: 0
@@ -8455,6 +8450,26 @@ Prefab:
         type: 2}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114155972928489552, guid: 21a01deb9abd94b8e9bd9fbd39889641,
+        type: 2}
+      propertyPath: m_Text
+      value: "Your score: \nCSU: <size=40>{0}</size>\nUAS: <size=40>{1}</size>"
+      objectReference: {fileID: 0}
+    - target: {fileID: 224958171356529022, guid: 21a01deb9abd94b8e9bd9fbd39889641,
+        type: 2}
+      propertyPath: m_AnchoredPosition.x
+      value: 100.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 224958171356529022, guid: 21a01deb9abd94b8e9bd9fbd39889641,
+        type: 2}
+      propertyPath: m_SizeDelta.x
+      value: 161
+      objectReference: {fileID: 0}
+    - target: {fileID: 224223862738013324, guid: 21a01deb9abd94b8e9bd9fbd39889641,
+        type: 2}
+      propertyPath: m_SizeDelta.x
+      value: 201
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21a01deb9abd94b8e9bd9fbd39889641, type: 2}
@@ -43827,7 +43842,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 0
+  m_PreferredHeight: -1
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -44948,11 +44963,6 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1410564658}
   m_CullTransparentMesh: 0
---- !u!224 &1411285578 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 224136189007012836, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-    type: 2}
-  m_PrefabInternal: {fileID: 1594812932}
 --- !u!1 &1413570553
 GameObject:
   m_ObjectHideFlags: 0
@@ -50878,59 +50888,19 @@ Prefab:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 1973522925816232, guid: 21a01deb9abd94b8e9bd9fbd39889641, type: 2}
-      propertyPath: m_Name
-      value: ScreenSymptomPatientJournal
-      objectReference: {fileID: 0}
-    - target: {fileID: 114482301565105866, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: _graphRenderer
-      value: 
-      objectReference: {fileID: 368275530}
-    - target: {fileID: 114482301565105866, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: _rectTransform
-      value: 
-      objectReference: {fileID: 279890016}
-    - target: {fileID: 114482301565105866, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: _scrollerRectTransform
-      value: 
-      objectReference: {fileID: 1411285578}
-    - target: {fileID: 114482301565105866, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: _trackerType
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 224367257273906384, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: m_LocalScale.x
-      value: 1.0000086
-      objectReference: {fileID: 0}
-    - target: {fileID: 224367257273906384, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: m_LocalScale.y
-      value: 1.0000086
-      objectReference: {fileID: 0}
-    - target: {fileID: 224367257273906384, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: m_LocalScale.z
-      value: 1.0000086
-      objectReference: {fileID: 0}
     - target: {fileID: 114503208729300154, guid: 21a01deb9abd94b8e9bd9fbd39889641,
         type: 2}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1639873736}
-    - target: {fileID: 114503208729300154, guid: 21a01deb9abd94b8e9bd9fbd39889641,
+    - target: {fileID: 114482301565105866, guid: 21a01deb9abd94b8e9bd9fbd39889641,
         type: 2}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: Set
-      objectReference: {fileID: 0}
-    - target: {fileID: 114503208729300154, guid: 21a01deb9abd94b8e9bd9fbd39889641,
-        type: 2}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument
-      value: 2
+      propertyPath: _graphRenderer
+      value: 
+      objectReference: {fileID: 368275530}
+    - target: {fileID: 1973522925816232, guid: 21a01deb9abd94b8e9bd9fbd39889641, type: 2}
+      propertyPath: m_Name
+      value: ScreenSymptomPatientJournal
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21a01deb9abd94b8e9bd9fbd39889641, type: 2}
