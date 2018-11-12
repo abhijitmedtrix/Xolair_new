@@ -170,7 +170,7 @@ namespace App.Data
         public virtual int GetScore()
         {
             _totalScore = 0;
-            Debug.Log($"question data count: {questionDataList.Count} and answers count: {_answers.Count}");
+            // Debug.Log($"question data count: {questionDataList.Count} and answers count: {_answers.Count}");
             for (int i = 0; i < _answers.Count; i++)
             {
                 // Debug.Log($"answer option at index <{i}> is {_answers[i].option}");
@@ -178,7 +178,7 @@ namespace App.Data
                 // in some cases for "empty" answer we just initialise default Result data with default value -1
                 if (_answers[i].option > -1)
                 {
-                    Debug.Log($"Index: {i}, question answer options count: {questionDataList[i].answersOption.Length}, and selected answer option: {_answers[i].option}");
+                    // Debug.Log($"Index: {i}, question answer options count: {questionDataList[i].answersOption.Length}, and selected answer option: {_answers[i].option}");
                     _totalScore += questionDataList[i].answersOption[_answers[i].option].points;
                 }
             }

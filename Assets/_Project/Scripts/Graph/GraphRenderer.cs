@@ -51,13 +51,13 @@ public class GraphRenderer : MonoBehaviour
         _camera.targetTexture = _renderTexture;
     }
 
-    public void UpdateGraph(int[] values)
+    public void UpdateGraph(List<PatientJournalScreen.ScoreStruct[]> values)
     {
         // format points to Vector3[]
-        for (int i = 0; i < values.Length; i++)
+        for (int i = 0; i < values.Count; i++)
         {
             // Debug.Log("Value: " + values[i]);
-            _graphPoints[i] = new Vector3(i, values[i], 0);
+            _graphPoints[i] = new Vector3(i, values[i][0].score + values[i][1].score, 0);
         }
 
         // draw a smooth spline using these points

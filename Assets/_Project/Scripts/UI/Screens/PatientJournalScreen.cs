@@ -8,6 +8,12 @@ using UnityEngine.UI;
 
 public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 {
+    public struct ScoreStruct
+    {
+        public TrackerManager.TrackerType type;
+        public int score;
+    }
+    
     [SerializeField] protected TrackerManager.TrackerType _trackerType;
     [SerializeField] protected GraphRenderer _graphRenderer;
     [SerializeField] protected ScreenConfig _screenConfig;
@@ -21,7 +27,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     protected int _lastMiddleCellIndex;
     protected int _daysToShow = 7;
-    protected int[] _scoreByDaysRange = new int[7];
+    protected List<ScoreStruct[]> _scoreByDaysRange = new List<ScoreStruct[]>();
     public TrackerManager.TrackerType _TrackerType
     {
         get
@@ -54,6 +60,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void Awake()
     {
         _screenConfig.OnShowStarted += OnShowStarted;
+        
+        // fill up score struct
+        for (int i = 0; i < _daysToShow; i++)
+        {
+            _scoreByDaysRange.Add(new ScoreStruct[2]);
+        }
     }
 
     private void Start()
@@ -167,15 +179,17 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
             {
-                _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.CSU)
-                                             +
-                                             TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
+                _scoreByDaysRange[counter][0].type = TrackerManager.TrackerType.CSU;
+                _scoreByDaysRange[counter][0].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.CSU);
+                _scoreByDaysRange[counter][1].type = TrackerManager.TrackerType.UAS;
+                _scoreByDaysRange[counter][1].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
             }
             else
             {
-                _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma)
-                                             +
-                                             TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
+                _scoreByDaysRange[counter][0].type = TrackerManager.TrackerType.Symptom;
+                _scoreByDaysRange[counter][0].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
+                _scoreByDaysRange[counter][1].type = TrackerManager.TrackerType.Asthma;
+                _scoreByDaysRange[counter][1].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma);
             }
 
             // Debug.Log($"Updated score for data: {_data[i].ToShortDateString()}, total score is: {_scoreByDaysRange[counter]}");
@@ -196,7 +210,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _graphPoint.localPosition = localPos;
 
         // update score hint
-        _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString());
+        _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Count - 1]);
 
         // update photo hint if needed
         if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
@@ -212,7 +226,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 _photoHint.gameObject.SetActive(photosCount != 0);
 
                 // update photos count text
-                _photoHint.UpdateValue(photosCount.ToString());
+                _photoHint.UpdateValue(photosCount);
 
                 // set it to the left of point 
                 _photoHint.rectTransform.localPosition = _graphPoint.localPosition - Vector3.right * 100;
