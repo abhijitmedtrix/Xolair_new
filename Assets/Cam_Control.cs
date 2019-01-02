@@ -14,7 +14,7 @@ public class Cam_Control : MonoBehaviour
     [SerializeField]
     private List<Texture2D> pics;
     [SerializeField]
-    private RawImage[] Captured_Images;
+    private List<RawImage> Captured_Images;
     private const byte Pic_count = 5;
     [SerializeField]
     private Text txt;
@@ -24,6 +24,10 @@ public class Cam_Control : MonoBehaviour
     private Audio_Manager audio_Manager;
     public AudioSource audioSource;
     public AudioClip camsound;
+    [SerializeField]
+    private CSU_Display cSU_Display;
+    [SerializeField]
+    private List<Texture2D> Finalimg;
     void Start()
     {
         //webCamTexture = new WebCamTexture();
@@ -39,20 +43,20 @@ public class Cam_Control : MonoBehaviour
     {
         //int x = webCamTexture.videoRotationAngle;
         //txt.text = x.ToString();
-      Camera_Screen.rectTransform.localEulerAngles = Vector3.forward *90;
+      //Camera_Screen.rectTransform.localEulerAngles = Vector3.forward *90;
        // Debug.Log("webcam"+webCamTexture.videoRotationAngle);
-        if (Input.GetKeyUp(KeyCode.A))
-        {
+        //if (Input.GetKeyUp(KeyCode.A))
+        //{
 
-            TakePhoto();
+        //    TakePhoto();
 
-        }
-        if (Input.GetKeyUp(KeyCode.D))
-        {
+        //}
+        //if (Input.GetKeyUp(KeyCode.D))
+        //{
 
-            StopPhoto();
+        //    StopPhoto();
 
-        }
+        //}
     }
     public void TakePhoto()
     {
@@ -78,27 +82,87 @@ public class Cam_Control : MonoBehaviour
             //Debug.Log(Application.dataPath);
         }
     }
-    public void Save_IMG() 
+    public void Set_IMG() 
     {
         webCamTexture.Stop();
+        foreach (RawImage r in Captured_Images)
+        {
+            r.gameObject.SetActive(false);
+        }
         if (pics.Count!=0)
         {
-            foreach(RawImage r in Captured_Images)
-            {
-                r.gameObject.SetActive(false);
-            }
+          
             for (int i = 0; i < pics.Count;i++)
             {
                 Captured_Images[i].gameObject.SetActive(true);
                 Captured_Images[i].texture = pics[i];
 
             }
+           
         }
         else
         {
             Debug.Log("no picture captured");
         }
 
+    }
+    public void Save_IMG()
+    {
+        if (Finalimg.Count != 0)
+        {
+            cSU_Display.Save_Img(Finalimg.ToArray());
+        }
+    }
+    public void Setbutn(GameObject obj)
+    {
+        Texture2D temp;
+        switch (obj.tag)
+        {
+            case "delete":
+                {
+                     temp=   (obj.transform.parent.GetComponent<RawImage>().texture)as Texture2D;
+                  
+                    pics.Remove(temp);
+                    for (int i = 0; i < Captured_Images.Count;i++)
+                    {
+                        Captured_Images[i].gameObject.SetActive(false);
+                        
+                    }
+                    Captured_Images.RemoveAt(Captured_Images.Count-1);
+                    Finalimg.Remove(temp);
+                    for (int i = 0; i < pics.Count; i++)
+                    {
+
+                        Captured_Images[i].texture = pics[i];
+                        Captured_Images[i].gameObject.SetActive(true);
+
+                        //for (int x = 0; x < Finalimg.Count; x++)
+                        //{
+                          
+                        //}
+                    }
+                   
+
+                    
+                    
+                    break;
+                }
+            case "add":
+                {
+                    temp = (obj.transform.parent.GetComponent<RawImage>().texture) as Texture2D;
+                    if(!Finalimg.Contains(temp))
+                    {
+                        Finalimg.Add(temp);
+                    }
+                    break;
+                }
+            case "remove":
+                {
+                    temp = (obj.transform.parent.GetComponent<RawImage>().texture) as Texture2D;
+                    Finalimg.Remove(temp);
+                    break;
+                }
+        }
     }
     public void StopPhoto()
     {
@@ -111,6 +175,8 @@ public class Cam_Control : MonoBehaviour
         webCamTexture.Play();
         Camera_Screen.texture = webCamTexture;
         Cam_buttn.SetActive(false);
+        pics.Clear();
+        Finalimg.Clear();
 
     }
 }

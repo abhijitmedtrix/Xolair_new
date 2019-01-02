@@ -37,7 +37,7 @@ public class OnClick_Step1 : MonoBehaviour {
                     for (int i = 0; i < Head_butn.Length;i++)
                     {
                         x++;
-                        Debug.Log(x);
+                      //  Debug.Log(x);
                         if(i==0||i==2)
                         {
                             Head_butn[i].SetActive(true);

@@ -32,7 +32,7 @@ public class GraphRenderer : MonoBehaviour
         _basePoints[0] = new Vector3(daysToShow - 1, -0.0001f, 0);
         _basePoints[1] = new Vector3(0, -0.0001f, 0);
 
-        Debug.Log($"daysToShow: {daysToShow}, maxValue: {maxValue}");
+       // Debug.Log($"daysToShow: {daysToShow}, maxValue: {maxValue}");
         _daysToShow = daysToShow;
         _maxValue = maxValue;
 
@@ -51,13 +51,13 @@ public class GraphRenderer : MonoBehaviour
         _camera.targetTexture = _renderTexture;
     }
 
-    public void UpdateGraph(List<PatientJournalScreen.ScoreStruct[]> values)
+    public void UpdateGraph(int[] values)
     {
         // format points to Vector3[]
-        for (int i = 0; i < values.Count; i++)
+        for (int i = 0; i < values.Length; i++)
         {
             // Debug.Log("Value: " + values[i]);
-            _graphPoints[i] = new Vector3(i, values[i][0].score + values[i][1].score, 0);
+            _graphPoints[i] = new Vector3(i, values[i], 0);
         }
 
         // draw a smooth spline using these points

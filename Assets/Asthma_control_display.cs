@@ -17,22 +17,32 @@ public class Asthma_control_display : MonoBehaviour
     private Text Question_text,Score_txt;
     [SerializeField]
     private Transform _child;
-
-    //public static int Total_Score;
+    [SerializeField] private Button acqButtn;
+    [SerializeField] private MaterialUI.ScreenManager screenManager;
+   
 
     [SerializeField]
     private GameObject Option_set_1;
+   
     // Use this for initialization
     void Start () 
     {
-        Set_Questions();
+        //PlayerPrefs.DeleteAll();
 	}
 
     public void Set_Questions()
     {
-        asthmaData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma) as AsthmaData;
-        Question_text.text = asthmaData.GetQuestion().question;
-        Reset_buttn(Option_set_1);
+        if(PlayerPrefs.GetInt("ACQtaken")!=DateTime.Today.DayOfYear)
+        {
+            asthmaData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma) as AsthmaData;
+            asthmaData.set_indx();
+            Question_text.text = asthmaData.GetQuestion().question;
+            Reset_buttn(Option_set_1);
+            PlayerPrefs.SetInt("ACQtaken", DateTime.Today.DayOfYear);
+            screenManager.Set(5);
+            acqButtn.interactable = false;
+        }
+
 
 
 
@@ -51,9 +61,21 @@ public class Asthma_control_display : MonoBehaviour
             if(ex!=null)
             {
                 TrackerManager.UpdateEntry(DateTime.Today, asthmaData);
-                string score= asthmaData.GetScore().ToString();
-                Score_txt.text =score;
+                string score= (asthmaData.GetScore()/36f).ToString();
+                if(score.Length>1)
+                {
+                    Score_txt.text = score.Substring(0,3);
+                   
+                }
+                else
+                {
+                    Score_txt.text = score;
+
+                }
+                //Score_txt.text =score[0].ToString();
+
                 Score_panel.SetActive(true);
+                AppManager.SecondTest = true;
             }
         }
 
@@ -76,7 +98,7 @@ public class Asthma_control_display : MonoBehaviour
             _child.GetComponent<Toggle>().isOn = false;
             //Debug.Log(_child.GetChild(1).name);
 
-            _child.GetChild(1).GetComponent<Text>().text = asthmaData.GetQuestion().answersOption[i].description;
+            _child.GetChild(1).GetComponent<Text>().text = "         "+asthmaData.GetQuestion().answersOption[i].description;
             //Debug.Log(i);
 
         }

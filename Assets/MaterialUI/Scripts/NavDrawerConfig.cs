@@ -16,7 +16,7 @@ using UnityEngine.EventSystems;
 
 namespace MaterialUI
 {
-	public class NavDrawerConfig : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+	public class NavDrawerConfig : MonoBehaviour//, IBeginDragHandler, IDragHandler, IEndDragHandler
 	{
 		private float maxPosition;
 		private float minPosition;
@@ -41,7 +41,10 @@ namespace MaterialUI
 
 		private Vector2 tempVector2;
 		private float positionCompensation;
-
+        [SerializeField]
+        private GameObject notfnButn;
+        [SerializeField]
+        private AudioSource audioSource;
 		void Awake()
 		{
 			thisRectTransform = gameObject.GetComponent<RectTransform>();
@@ -67,12 +70,15 @@ namespace MaterialUI
 
 		public void Open()
 		{
+            audioSource.Stop();
+            notfnButn.SetActive(false);
 			currentPos = thisRectTransform.anchoredPosition;
 			currentBackgroundAlpha = backgroundCanvasGroup.alpha;
 			currentShadowAlpha = shadowCanvasGroup.alpha;
 			backgroundCanvasGroup.blocksRaycasts = true;
 			animStartTime = Time.realtimeSinceStartup;
 			state = 1;
+
 		}
 
 		public void Close ()
@@ -127,39 +133,39 @@ namespace MaterialUI
 			thisRectTransform.anchoredPosition = new Vector2(Mathf.Clamp(thisRectTransform.anchoredPosition.x, minPosition, maxPosition), thisRectTransform.anchoredPosition.y);
 		}
 
-		public void OnBeginDrag(PointerEventData data)
-		{
-			state = 0;
-		}
+		//public void OnBeginDrag(PointerEventData data)
+		//{
+		//	state = 0;
+		//}
 
-		public void OnDrag(PointerEventData data)
-		{
+		//public void OnDrag(PointerEventData data)
+		//{
            
-			tempVector2 = thisRectTransform.position;
-			tempVector2.x += data.delta.x;
+		//	tempVector2 = thisRectTransform.position;
+		//	tempVector2.x += data.delta.x;
 
-			thisRectTransform.position = tempVector2;
+		//	thisRectTransform.position = tempVector2;
 
-			backgroundCanvasGroup.alpha = 1 - (maxPosition - thisRectTransform.anchoredPosition.x) / (maxPosition - minPosition);
-			shadowCanvasGroup.alpha = 1 - (maxPosition - thisRectTransform.anchoredPosition.x) / ((maxPosition - minPosition) * 2);
-		}
+		//	backgroundCanvasGroup.alpha = 1 - (maxPosition - thisRectTransform.anchoredPosition.x) / (maxPosition - minPosition);
+		//	shadowCanvasGroup.alpha = 1 - (maxPosition - thisRectTransform.anchoredPosition.x) / ((maxPosition - minPosition) * 2);
+		//}
 
-		public void OnEndDrag(PointerEventData data)
-		{
-			if (Mathf.Abs(data.delta.x) >= 0.5f)
-			{
-				if (data.delta.x > 0.5f)
-					Open();
-				else
-					Close();
-			}
-			else
-			{
-				if ((thisRectTransform.anchoredPosition.x - minPosition) > (maxPosition - thisRectTransform.anchoredPosition.x))
-					Open();
-				else
-					Close();
-			}
-		}
+		//public void OnEndDrag(PointerEventData data)
+		//{
+		//	if (Mathf.Abs(data.delta.x) >= 0.5f)
+		//	{
+		//		if (data.delta.x > 0.5f)
+		//			Open();
+		//		else
+		//			Close();
+		//	}
+		//	else
+		//	{
+		//		if ((thisRectTransform.anchoredPosition.x - minPosition) > (maxPosition - thisRectTransform.anchoredPosition.x))
+		//			Open();
+		//		else
+		//			Close();
+		//	}
+		//}
 	}
 }

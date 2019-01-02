@@ -8,12 +8,6 @@ using UnityEngine.UI;
 
 public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 {
-    public struct ScoreStruct
-    {
-        public TrackerManager.TrackerType type;
-        public int score;
-    }
-    
     [SerializeField] protected TrackerManager.TrackerType _trackerType;
     [SerializeField] protected GraphRenderer _graphRenderer;
     [SerializeField] protected ScreenConfig _screenConfig;
@@ -24,10 +18,13 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     [Header("Hints")] [SerializeField] protected Hint _scoreHint;
     [SerializeField] protected Hint _photoHint;
-
+    [SerializeField] private Show_Images show_Images;
     protected int _lastMiddleCellIndex;
     protected int _daysToShow = 7;
-    protected List<ScoreStruct[]> _scoreByDaysRange = new List<ScoreStruct[]>();
+    protected int[] _scoreByDaysRange = new int[7];
+    protected int[] _asthmaByDaysRange = new int[7];
+ 
+ 
     public TrackerManager.TrackerType _TrackerType
     {
         get
@@ -60,20 +57,18 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void Awake()
     {
         _screenConfig.OnShowStarted += OnShowStarted;
-        
-        // fill up score struct
-        for (int i = 0; i < _daysToShow; i++)
-        {
-            _scoreByDaysRange.Add(new ScoreStruct[2]);
-        }
     }
 
     private void Start()
     {
+       
         // set up the scroller delegates
         scroller.Delegate = this;
         OnShowStarted();
         scroller.scrollerScrolled = ScrollerScrolled;
+        //asthmaval = 11f / 36f;
+        //Debug.Log(asthmaval);
+
     }
    
     private void OnShowStarted()
@@ -81,10 +76,10 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         List<DateTime> maxDateRange = TrackerManager.GetMaxDateRange();
         SetData(maxDateRange);
 
-        Debug.Log("Max date range to show: " + maxDateRange.Count);
-        Debug.Log("Last date: " + maxDateRange[maxDateRange.Count - 1]);
+      //  Debug.Log("Max date range to show: " + maxDateRange.Count);
+      //  Debug.Log("Last date: " + maxDateRange[maxDateRange.Count - 1]);
 
-        int maxScore;
+        int maxScore=0;
         if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
         {
             maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.CSU) +
@@ -92,14 +87,27 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             _photoHint.gameObject.SetActive(true);
         }
-        else
+        //roman code
+        //else
+        //{
+        //    maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Asthma) +
+        //               TrackerManager.GetMaxScore(TrackerManager.TrackerType.Symptom);
+
+        //    _photoHint.gameObject.SetActive(false);
+        //}
+        else if(_trackerType==TrackerManager.TrackerType.Asthma)
         {
-            maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Asthma) +
-                       TrackerManager.GetMaxScore(TrackerManager.TrackerType.Symptom);
+            maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Asthma);
+        
 
             _photoHint.gameObject.SetActive(false);
         }
-
+        else if(_trackerType==TrackerManager.TrackerType.Symptom)
+        {
+            maxScore= TrackerManager.GetMaxScore(TrackerManager.TrackerType.Symptom);
+            _photoHint.gameObject.SetActive(false);
+        }
+       // Debug.Log(maxScore);
         _graphRenderer.Init(maxScore, _daysToShow);
         _graphImage.texture = _graphRenderer.GetRenderTexture();
 
@@ -178,21 +186,32 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         for (int i = middleIndex - 3; i < middleIndex + 4; i++)
         {
             if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
-            {
-                _scoreByDaysRange[counter][0].type = TrackerManager.TrackerType.CSU;
-                _scoreByDaysRange[counter][0].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.CSU);
-                _scoreByDaysRange[counter][1].type = TrackerManager.TrackerType.UAS;
-                _scoreByDaysRange[counter][1].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
-            }
-            else
-            {
-                _scoreByDaysRange[counter][0].type = TrackerManager.TrackerType.Symptom;
-                _scoreByDaysRange[counter][0].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
-                _scoreByDaysRange[counter][1].type = TrackerManager.TrackerType.Asthma;
-                _scoreByDaysRange[counter][1].score = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma);
-            }
+            {   //roman
+                //_scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.CSU)
+                //+
+                //TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
+                _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
 
-            // Debug.Log($"Updated score for data: {_data[i].ToShortDateString()}, total score is: {_scoreByDaysRange[counter]}");
+            }
+           // else
+            //{
+            //    _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma)
+            //                                 +
+            //                                 TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
+            //}
+            else if(_trackerType==TrackerManager.TrackerType.Asthma||_trackerType==TrackerManager.TrackerType.Symptom)
+            {
+                _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
+                _asthmaByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma);
+               // Debug.Log(_asthmaByDaysRange[counter]);
+
+            }
+            //else if(_trackerType==TrackerManager.TrackerType.Symptom)
+            //{
+            //    _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
+            //}
+
+             Debug.Log($"Updated score for data: {_data[i].ToShortDateString()}, total score is: {_scoreByDaysRange[counter]}");
             counter++;
         }
         
@@ -210,8 +229,33 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _graphPoint.localPosition = localPos;
 
         // update score hint
-        _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Count - 1]);
+        //roman
+        //_scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString());
+        //praveen
+        if (_trackerType == TrackerManager.TrackerType.Symptom || _trackerType == TrackerManager.TrackerType.Asthma)
+        {
+            //  Debug.Log(_scoreByDaysRange[_scoreByDaysRange.Length - 1]);
 
+            //  Debug.Log(_asthmaByDaysRange[_asthmaByDaysRange.Length - 1]);
+            string asthmaval = (((float) _asthmaByDaysRange[_asthmaByDaysRange.Length - 1])/36f).ToString() ;
+
+            //Debug.Log(asthmaval);
+            if(asthmaval.Length>1)
+            {
+                _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString(), asthmaval.Substring(0,3));
+            }
+            else
+            {
+                _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString(), asthmaval);
+            }
+            //_scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString(),asthmaval.ToString());
+        }
+        else
+        {
+            _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString());
+           
+
+        }
         // update photo hint if needed
         if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
         {
@@ -226,7 +270,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 _photoHint.gameObject.SetActive(photosCount != 0);
 
                 // update photos count text
-                _photoHint.UpdateValue(photosCount);
+                _photoHint.UpdateValue(photosCount.ToString());
 
                 // set it to the left of point 
                 _photoHint.rectTransform.localPosition = _graphPoint.localPosition - Vector3.right * 100;
@@ -249,7 +293,17 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             if (csuData != null)
             {
                 Texture2D[] textures = csuData.GetAllPhotos();
+                if(textures.Length!=0)
+                {
+                    AppManager.Images.Clear();
 
+                    foreach(Texture2D tx in textures)
+                    {
+                        AppManager.Images.Add(tx);
+                    }
+                    show_Images.set();
+
+                }
                 // TODO - implement popup update here
                 Debug.Log("Textures count to open: " + textures.Length);
             }

@@ -82,6 +82,7 @@ namespace App.Data.CSU
                 }
                 else
                 {
+                    
                     Debug.LogWarning($"Key {key} wasn't found in json {json}");
                 }
             }
@@ -98,7 +99,10 @@ namespace App.Data.CSU
                 {BodyPart.Legs, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}}
             };
         }
-
+        public void Set_indx()
+        {
+            _currentQuestionIndex = 0;
+        }
         public override JSONObject FormatToJson()
         {
             JSONObject jsonObject = base.FormatToJson();

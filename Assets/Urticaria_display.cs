@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System;
 using System.IO;
 using App.Utils;
-
+using  App.Data;
 public class Urticaria_display : MonoBehaviour
 {
     private UASData uasData;
@@ -14,7 +14,8 @@ public class Urticaria_display : MonoBehaviour
     [SerializeField] private GameObject Score_panel;
     [SerializeField] private Text Points_txt;
     [SerializeField] private Text Question_text;
-
+    [SerializeField] private Button uasButtn;
+    [SerializeField] private MaterialUI.ScreenManager screenManager;
     private Transform _child;
 
     //public static int Total_Score;
@@ -24,14 +25,23 @@ public class Urticaria_display : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Set_Questions();
+        //Set_Questions();
     }
 
     public void Set_Questions()
     {
-        uasData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS) as UASData;
-        Question_text.text = uasData.GetQuestion().question;
-        Reset_buttn(Option_set_1);
+        if(PlayerPrefs.GetInt("UAStaken")!=DateTime.Today.DayOfYear)
+        {
+            uasData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS) as UASData;
+            uasData.set_indx();
+            Question_text.text = uasData.GetQuestion().question;
+
+            Reset_buttn(Option_set_1);
+            PlayerPrefs.SetInt("UAStaken", DateTime.Today.DayOfYear);
+            screenManager.Set(16);
+            uasButtn.interactable = false;
+        }
+
     }
 
     public void Next_Question(int x)
@@ -52,6 +62,7 @@ public class Urticaria_display : MonoBehaviour
                 TrackerManager.UpdateEntry(DateTime.Today, uasData);
                 Score_panel.SetActive(true);
                 Points_txt.text = "Score: " + uasData.GetScore().ToString();
+                AppManager.SecondTest = true;
             }
         }
     }
@@ -66,7 +77,7 @@ public class Urticaria_display : MonoBehaviour
             _child.GetComponent<Toggle>().isOn = false;
             //Debug.Log(_child.GetChild(1).name);
 
-            _child.GetChild(1).GetComponent<Text>().text = uasData.GetQuestion().answersOption[i].description;
+            _child.GetChild(1).GetComponent<Text>().text = "         " +uasData.GetQuestion().answersOption[i].description;
         }
     }
 }

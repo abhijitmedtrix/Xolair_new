@@ -1,7 +1,7 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
-
-
+using App.Data.CSU;
+using System;
 public class CSU_Display : MonoBehaviour
 {
     [SerializeField] private Slider Itch_slider;
@@ -11,8 +11,10 @@ public class CSU_Display : MonoBehaviour
     [SerializeField] private GameObject[] Images, Images1;
     [SerializeField] private GameObject[] Head_Hives, Middle_Hives, Torso_Hives;
     [SerializeField] private GameObject[] Buttons_1, Buttons_2;
-    [SerializeField] private int X;
-
+    [SerializeField] private int X,option;
+    [SerializeField] private Button csuButtn;
+    [SerializeField] private MaterialUI.ScreenManager screenManager;
+    private CSUData cSUData;
     [SerializeField]
     private enum Select_Mode
     {
@@ -29,30 +31,35 @@ public class CSU_Display : MonoBehaviour
         Mode = Select_Mode.None;
     }
 
-    public void Reset()
+    public void Set()
     {
-    }
-
-    public void Next(GameObject obj)
-    {
-        switch (obj.tag)
+        if(PlayerPrefs.GetInt("CSUtaken")!=DateTime.Today.DayOfYear)
         {
-            case "next_1":
-            {
-                break;
-            }
+            cSUData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU) as CSUData;
+            cSUData.Set_indx();
+            PlayerPrefs.SetInt("CSUtaken", DateTime.Today.DayOfYear);
+            screenManager.Set(23);
+            csuButtn.interactable = false;
 
-            case "next_2":
-            {
-                break;
-            }
-            case "next_3":
-            {
-                break;
-            }
         }
+       
     }
 
+    public void Save_Img(Texture2D[] imgs )
+    {
+        Debug.Log(imgs.Length);
+        if(imgs.Length!=0)
+        {
+            cSUData.SavePhotos(imgs);
+        }
+        TrackerManager.UpdateEntry(DateTime.Today, cSUData);
+    }
+    public void next()
+    {
+        var question = cSUData.GetQuestion();
+        cSUData.SetAnswer(question, option);
+        //Debug.Log(cSUData.GetScore());
+    }
     public void OnSliderExit_1()
     {
         X = 0;
@@ -60,18 +67,22 @@ public class CSU_Display : MonoBehaviour
         if (Itch_slider.value >= 0f && Itch_slider.value < 0.18f)
         {
             Mode = Select_Mode.None;
+            option = 0;
         }
         else if (Itch_slider.value > 0.18f && Itch_slider.value < 0.5f)
         {
             Mode = Select_Mode.Mild;
+            option = 1;
         }
         else if (Itch_slider.value > 0.5f && Itch_slider.value < 0.83f)
         {
             Mode = Select_Mode.Moderate;
+            option = 2;
         }
         else if (Itch_slider.value > 0.83f)
         {
             Mode = Select_Mode.Severe;
+            option = 3;
         }
 
         switch (Mode)
@@ -257,18 +268,22 @@ public class CSU_Display : MonoBehaviour
         if (Hive_slider.value >= 0f && Hive_slider.value < 0.18f)
         {
             Mode = Select_Mode.None;
+            option = 0;
         }
         else if (Hive_slider.value > 0.18f && Hive_slider.value < 0.5f)
         {
             Mode = Select_Mode.Mild;
+            option = 1;
         }
         else if (Hive_slider.value > 0.5f && Hive_slider.value < 0.83f)
         {
             Mode = Select_Mode.Moderate;
+            option = 2;
         }
         else if (Hive_slider.value > 0.83f)
         {
             Mode = Select_Mode.Severe;
+            option = 3;
         }
 
         switch (Mode)

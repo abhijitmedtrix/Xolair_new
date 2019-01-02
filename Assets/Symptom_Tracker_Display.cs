@@ -15,10 +15,11 @@ public class Symptom_Tracker_Display : MonoBehaviour
     [SerializeField] private GameObject Score_panel;
     [SerializeField] private Text Points_txt;
     [SerializeField] private Text Question_text;
+    [SerializeField] private MaterialUI.ScreenManager screenmanager;
+    [SerializeField] private Button SAAbutn;
+    
 
-    private int current_optn = 0, current_question = 0;
-
-    public static int Total_Score;
+  
 
     [SerializeField] private GameObject Button_set_1, Button_set_2;
 
@@ -31,29 +32,38 @@ public class Symptom_Tracker_Display : MonoBehaviour
 
         // Debug.Log(Question_Data_List[3].question);
         //Debug.Log(Question_Data_List[3].answersOption[0].points);
+       // PlayerPrefs.DeleteKey("SAAtaken");
 
-
-        Set_Questions();
+       // Set_Questions();
     }
 
     public void Set_Questions()
     {
-        symptomData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom) as SymptomData;
-        Question_text.text = symptomData.GetQuestion().question;
-        if (symptomData.GetQuestion().answersOption.Length == 3)
+     if (PlayerPrefs.GetInt("SAAtaken")!=DateTime.Today.DayOfYear)
         {
-            Reset_buttn(Button_set_2);
-            Reset_buttn(Button_set_1);
-            Button_set_1.SetActive(true);
-            Button_set_2.SetActive(false);
+           
+            symptomData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom) as SymptomData;
+            symptomData.set_indx();
+            Question_text.text = symptomData.GetQuestion().question;
+            if (symptomData.GetQuestion().answersOption.Length == 3)
+            {
+                Reset_buttn(Button_set_2);
+                Reset_buttn(Button_set_1);
+                Button_set_1.SetActive(true);
+                Button_set_2.SetActive(false);
+            }
+            else
+            {
+                Reset_buttn(Button_set_2);
+                Reset_buttn(Button_set_1);
+                Button_set_1.SetActive(false);
+                Button_set_2.SetActive(true);
+            }
+            screenmanager.Set(6);
+            PlayerPrefs.SetInt("SAAtaken", DateTime.Today.DayOfYear);
+            SAAbutn.interactable = false;
         }
-        else
-        {
-            Reset_buttn(Button_set_2);
-            Reset_buttn(Button_set_1);
-            Button_set_1.SetActive(false);
-            Button_set_2.SetActive(true);
-        }
+
     }
 
     public void Next_Question(int x)
@@ -90,7 +100,7 @@ public class Symptom_Tracker_Display : MonoBehaviour
             Debug.Log("Score: "+symptomData.GetScore());
             Score_panel.SetActive(true);
             Points_txt.text = "Score: " + symptomData.GetScore();
-
+            AppManager.FirstTest = true;
             Debug.LogWarning(
                 "Exception caught trying to get new question. Seems there is no more questions for this data. Ex: " +
                 ex.Message);

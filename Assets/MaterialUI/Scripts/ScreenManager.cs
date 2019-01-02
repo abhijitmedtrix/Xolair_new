@@ -10,43 +10,69 @@
 
 using System;
 using UnityEngine;
-
+using RogoDigital.Lipsync;
 namespace MaterialUI
 {
 	public class ScreenManager : MonoBehaviour
 	{
+        public Vector3 pos;
 		public ScreenConfig[] screens;
 		[HideInInspector]
 		public ScreenConfig currentScreen;
 		[HideInInspector]
 		public ScreenConfig lastScreen;
-        public PatientJournalScreen patientJournalScreen;
-        private bool Choice;
+        [SerializeField]
+        private GameObject avatar;
+        [SerializeField]
+        private GameObject graphrenderer;
+       
+       // private Animator animator;
+        [SerializeField]
+        private AudioSource audioSource;
+      // public PatientJournalScreen patientJournalScreen;
+       // private bool Choice;
         private void Start()
         {
-            patientJournalScreen = GameObject.Find("ScreenCSUPatientJournal").GetComponent<PatientJournalScreen>();
-            Choice = false;
+           //patientJournalScreen = GameObject.Find("ScreenCSUPatientJournal").GetComponent<PatientJournalScreen>();
+            //Choice = false;
+            
         }
         public void Set(int index)
 		{
-            if(index==3&&!Choice)
+     
+          if(index==7)
             {
-                patientJournalScreen._TrackerType = TrackerManager.TrackerType.CSU;
-                Choice = true;
+                graphrenderer.SetActive(true);
             }
-            else if(index==2 && !Choice)
+            else if(index==17)
             {
-                patientJournalScreen._TrackerType = TrackerManager.TrackerType.Symptom;
-                Choice = true;
+                graphrenderer.SetActive(true);
             }
-            else if(index==6)
+            else
             {
-                patientJournalScreen._TrackerType = TrackerManager.TrackerType.Symptom;
+                graphrenderer.SetActive(false);
+                audioSource.Stop();
+                //avatar.transform.position = Vector3.one * 1000;
             }
-            else if(index==5)
-            {
-                patientJournalScreen._TrackerType = TrackerManager.TrackerType.Asthma;
-            }
+
+                //if(index==3&&!Choice)
+            //{
+            //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.CSU;
+            //    Choice = true;
+            //}
+            //else if(index==2 && !Choice)
+            //{
+            //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.Symptom;
+            //    Choice = true;
+            //}
+            //else if(index==6)
+            //{
+            //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.Symptom;
+            //}
+            //else if(index==5)
+            //{
+            //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.Asthma;
+            //}
 			screens[index].transform.SetAsLastSibling();
 
 			screens[index].Show(currentScreen);

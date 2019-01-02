@@ -9,7 +9,7 @@ public class Submit_ACT : MonoBehaviour {
     {
         if (option.activeSelf)
         {
-            Debug.Log("coming");
+           // Debug.Log("coming");
             for (int i = 0; i < option.transform.childCount; i++)
             {
                 if (option.transform.GetChild(i).GetComponent<Toggle>().isOn)

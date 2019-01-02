@@ -22,9 +22,9 @@ namespace App.Data.SSA
         {
             get { return questions; }
         }
-        public  AsthmaData()
+        public void set_indx()
         {
-
+            _currentQuestionIndex = 0;
         }
         public static List<QuestionData> questions = new List<QuestionData>
         {

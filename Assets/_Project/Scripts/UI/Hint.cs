@@ -14,18 +14,12 @@ public class Hint : MonoBehaviour
         _initialText = _text.text;
     }
 
-    public void UpdateValue(int score)
+    public void UpdateValue(string score)
     {
         _text.text = string.Format(_initialText, score);
     }
-    
-    public void UpdateValue(int score1, int score2)
+    public void UpdateValue(string score1,string score2)
     {
-        _text.text = string.Format(_initialText, score1, score2);
-    }
-    
-    public void UpdateValue(PatientJournalScreen.ScoreStruct[] data)
-    {
-        _text.text = string.Format(_initialText, data[0].score, data[1].score);
+        _text.text =string.Format(_initialText,score1,score2);
     }
 }
