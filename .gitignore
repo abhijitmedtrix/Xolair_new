@@ -4,6 +4,7 @@ temp/
 .idea/
 Assets/Plugins/Editor/JetBrains/
 Assets/StreamingAssets/logs/
+OtherResources/
 .vs/
 *.sln
 *.csproj
