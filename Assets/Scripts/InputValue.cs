@@ -29,10 +29,10 @@ public class InputValue : MonoBehaviour {
         {
             AppManager.UserName = PlayerPrefs.GetString("UserName");
             Name.text = PlayerPrefs.GetString("UserName");
-            Age.text = PlayerPrefs.GetString("Age");
+           //Age.text = PlayerPrefs.GetString("Age");
         //text = PlayerPrefs.GetString("Age");
 
-            //CSUName.text = PlayerPrefs.GetString("UserName");
+            CSUName.text = PlayerPrefs.GetString("UserName");
            // CSUAge.text = PlayerPrefs.GetString("Age");
           //CSUGender.text = PlayerPrefs.GetString("Age");
             screenManager.Set(1);
@@ -52,10 +52,10 @@ public class InputValue : MonoBehaviour {
            // PlayerPrefs.SetString("Gender",AppManager.Gender);
             PlayerPrefs.SetString("Age", AppManager.Age);
             Name.text = Myname.text;
-            Age.text = age.text;
+            //Age.text = age.text;
            // Gender.text = gender.text;
 
-           // CSUName.text = Myname.text;
+            CSUName.text = Myname.text;
            // CSUAge.text = age.text;
            // CSUGender.text = gender.text;
             screenManager.Set(1);

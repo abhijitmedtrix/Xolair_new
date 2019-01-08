@@ -33,9 +33,12 @@ public class AppManager : MonoBehaviour
    // [SerializeField] private LipSyncData[] lipsync;
     [SerializeField] private Sprite[] spriteswap;
     [SerializeField] private ExampleConversation exampleConversation;
-
+    [SerializeField] private AudioSource audioSource;
     //[SerializeField] private GameObject[] saa;
     //[SerializeField] private GameObject[] csu;
+    public static List<string> Saanotfn=new List<string>();
+    public static List<string> cusnotfn = new List<string>();
+    [SerializeField] public Text[] Saanotfn_txt,Csunotfn_text;
     public enum Mode
     {
         SSA,
@@ -49,9 +52,10 @@ public class AppManager : MonoBehaviour
     [SerializeField]
     private Text[] saa_Txt, csu_Txt;
     public Action<Mode> OnModeChange;
+
     private void Start()
     {
-        Debug.Log(saa_Txt[0].fontStyle);
+        //Debug.Log(saa_Txt[0].fontStyle);
        // Debug.Log(UnityEngine.iOS.CalendarUnit.Year);
         FirstTest = false;
         SecondTest = false;
@@ -97,42 +101,75 @@ public class AppManager : MonoBehaviour
     #endregion
     public void OnClick_saa()
     {
-        if (SAA_not.active)
+        if(SAA_not.active)
         {
-            Notification.SetActive(false);
             SAA_not.SetActive(false);
         }
         else
         {
             SAA_not.SetActive(true);
         }
-        var asthma = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma);
-        var symptom = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom);
-    
- 
-        if (asthma.GetScore() > 19 && symptom.GetScore() >= 1)
+        if(Saanotfn.Count==0)
         {
-            UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
-            notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
-            notif.alertBody = "PLEASE TAKE THE CSU TEST";
-            // Notification.SetActive(true);
-            SAA_not.transform.GetChild(0).GetComponent<Text>().text = "No notification";
+            foreach(Text tx in Saanotfn_txt)
+            {
+                tx.text = null;
+            }
+            Saanotfn_txt[0].text = "NO NEW NOTIFICATION";
         }
-        else if (asthma.GetScore() >= 19)
+        else if(Saanotfn.Count==1)
         {
+           
+            Saanotfn_txt[0].text = Saanotfn[0];
+            Saanotfn_txt[1].text = null;
+            //Notification.SetActive(true);
+        }
+        else if(Saanotfn.Count==2)
+        {
+            Saanotfn_txt[0].text = Saanotfn[0];
+            Saanotfn_txt[1].text = Saanotfn[1];
+           // Notification.SetActive(true);
+        }
+        Notification.SetActive(false);
+        Saanotfn.Clear();
+        //if (SAA_not.active)
+        //{
+        //    Notification.SetActive(false);
+        //    SAA_not.SetActive(false);
+        //}
+        //else
+        //{
+        //    Notification.SetActive(false);
+        //    SAA_not.SetActive(true);
+        //}
+        //var asthma = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma);
+        //var symptom = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom);
 
-            SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE SYMPTOM TRACKER TEST";
-        }
-        else if (symptom.GetScore() >= 1)
-        {
 
-            SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE VISIT A PHYSICIAN";
-        }
-        else
-        {
-            Notification.gameObject.SetActive(false);
-            SAA_not.SetActive(false);
-        }
+        //if (asthma.GetScore() > 19 && symptom.GetScore() >= 1)
+        //{
+        //    //UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
+        //    //notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
+        //    //notif.alertBody = "PLEASE TAKE THE CSU TEST";
+        //   // Notification.SetActive(true);
+        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE CONSULT A PHYSICIAN SOON";
+        //}
+        //else if (asthma.GetScore() >= 19)
+        //{
+
+        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE SYMPTOM TRACKER TEST";
+        //}
+        //else if (symptom.GetScore() >= 1)
+        //{
+
+        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE VISIT A PHYSICIAN";
+        //}
+        //else
+        //{
+        //    Notification.gameObject.SetActive(false);
+        //    //SAA_not.SetActive(true);
+        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "NO NEW NOTIFICATIONS";
+        //}
         //SAA_not.transform.GetChild(0).GetComponent<Text>()=
     }
     public void Onclick_csu()
@@ -140,39 +177,52 @@ public class AppManager : MonoBehaviour
 
         if (CSU_not.active)
         {
-            Notification_CSU.SetActive(false);
+           
             CSU_not.SetActive(false);
         }
         else
         {
-            Notification_CSU.SetActive(false);
+           
             CSU_not.SetActive(true);
         }
-        var CSU = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU);
-        var UAS = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS);
-
-        if (CSU.GetScore() > 1 && UAS.GetScore() >= 2)
+        if(cusnotfn.Count==0)
         {
-            UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
-            notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
-            notif.alertBody = "PLEASE TAKE THE CSU TEST";
-            // Notification.SetActive(true);
-            CSU_not.transform.GetChild(0).GetComponent<Text>().text = "No notification";
-        }
-        else if (CSU.GetScore() >= 1)
-        {
-
-            CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE UAS TEST";
-        }
-        else if (UAS.GetScore() >= 2)
-        {
-            CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE CSU TEST";
+            CSU_not.transform.GetChild(0).GetComponent<Text>().text = "NO NEW NOTIFICATION";
         }
         else
         {
-            Notification_CSU.SetActive(false);
-            CSU_not.SetActive(false);
+            CSU_not.transform.GetChild(0).GetComponent<Text>().text = cusnotfn[0];
         }
+        Notification_CSU.SetActive(false);
+        cusnotfn.Clear();
+        //if(csuno)
+        //var CSU = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU);
+        //var UAS = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS);
+
+        //if (CSU.GetScore() > 1 && UAS.GetScore() >= 2)
+        //{
+        //    UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
+        //    notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
+        //    notif.alertBody = "PLEASE TAKE THE CSU TEST";
+        //    // Notification.SetActive(true);
+        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE VISIT A PHYSICIAN";
+        //}
+        //else if (CSU.GetScore() >= 1)
+        //{
+
+        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE UAS TEST";
+        //}
+        //else if (UAS.GetScore() >= 2)
+        //{
+        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE CSU TEST";
+        //}
+        //else
+        //{
+        //    Notification_CSU.SetActive(false);
+        //    CSU_not.SetActive(true);
+
+        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "NO NEW NOTIFICATIONS";
+        //}
     }
     private void OnDisable()
     {
@@ -223,22 +273,26 @@ public class AppManager : MonoBehaviour
         if (AppManager.Current_mode == "CSU")
         {
             CSU_butn.image.sprite = spriteswap[0];
+            yield return new WaitForSeconds(1);
+            screenManager.Set(3);
 
         }
         else if (AppManager.Current_mode == "SAA")
         {
             SAA_butn.image.sprite = spriteswap[1];
-        }
-        yield return new WaitForSeconds(1);
-        if(AppManager.Current_mode=="CSU")
-        {
-            screenManager.Set(3);
-        }
-        else if(AppManager.Current_mode=="SAA")
-        {
+            yield return new WaitForSeconds(1);
             screenManager.Set(2);
         }
-        yield return new WaitForSeconds(1);
+       
+        //if(AppManager.Current_mode=="CSU")
+        //{
+        //    screenManager.Set(3);
+        //}
+        //else if(AppManager.Current_mode=="SAA")
+        //{
+        //    screenManager.Set(2);
+        //}
+
         if(PlayerPrefs.HasKey("first"))
         {
 
@@ -258,22 +312,47 @@ public class AppManager : MonoBehaviour
     {
         if(Current_mode=="SAA")
         {
-            if(saa_Scroll.value>0.5)
+            if(saa_Scroll.value>=0.5f)
             {
                 saa_Txt[0].fontStyle = FontStyle.Normal;
                 csu_Txt[0].fontStyle = FontStyle.Bold;
                 saa_Scroll.value = 1;
-            }
-            else 
-            {
-                saa_Txt[0].fontStyle = FontStyle.Bold;
-                csu_Txt[0].fontStyle = FontStyle.Normal;
+               
+                Current_mode = "CSU";
+                exampleConversation.Set_Avatar(Current_mode);
+                Onclick();
                 saa_Scroll.value = 0;
             }
+
+            //else
+            //{
+            //    saa_Scroll.value = 1;
+            //}
+           
         }
         else if(Current_mode=="CSU")
         {
+           
+            if(csu_Scroll.value<=0.5f)
+            {
+                saa_Txt[1].fontStyle = FontStyle.Bold;
+                csu_Txt[1].fontStyle = FontStyle.Normal;
+                csu_Scroll.value = 0;
+                //screenManager.Set(2);
+                Current_mode = "SAA";
+                exampleConversation.Set_Avatar(Current_mode);
+                Onclick();
+                csu_Scroll.value = 1;
 
+            }
+            //else
+            //{
+            //    csu_Scroll.value=0;
+            //}
         }
+    }
+    public void Stop_avtranim()
+    {
+        audioSource.Stop();
     }
 }

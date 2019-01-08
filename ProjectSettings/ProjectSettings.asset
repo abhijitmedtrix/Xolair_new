@@ -179,22 +179,22 @@ PlayerSettings:
   uIStatusBarHidden: 1
   uIExitOnSuspend: 0
   uIStatusBarStyle: 0
-  iPhoneSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263, type: 3}
-  iPhoneHighResSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPhoneSplashScreen: {fileID: 2800000, guid: 81b1b3cd1b77148899e92e45a8753711, type: 3}
+  iPhoneHighResSplashScreen: {fileID: 2800000, guid: 81b1b3cd1b77148899e92e45a8753711,
     type: 3}
-  iPhoneTallHighResSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPhoneTallHighResSplashScreen: {fileID: 2800000, guid: 81b1b3cd1b77148899e92e45a8753711,
     type: 3}
-  iPhone47inSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPhone47inSplashScreen: {fileID: 2800000, guid: 81b1b3cd1b77148899e92e45a8753711,
     type: 3}
-  iPhone55inPortraitSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPhone55inPortraitSplashScreen: {fileID: 2800000, guid: 81b1b3cd1b77148899e92e45a8753711,
     type: 3}
   iPhone55inLandscapeSplashScreen: {fileID: 0}
-  iPhone58inPortraitSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPhone58inPortraitSplashScreen: {fileID: 2800000, guid: 429a2e31566174722bcb109f8d05631c,
     type: 3}
   iPhone58inLandscapeSplashScreen: {fileID: 0}
-  iPadPortraitSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPadPortraitSplashScreen: {fileID: 2800000, guid: dad542685236f46c6bdda566c12ca0e9,
     type: 3}
-  iPadHighResPortraitSplashScreen: {fileID: 2800000, guid: 49f279ce2de304c8aacc6521e4d69263,
+  iPadHighResPortraitSplashScreen: {fileID: 2800000, guid: dad542685236f46c6bdda566c12ca0e9,
     type: 3}
   iPadLandscapeSplashScreen: {fileID: 0}
   iPadHighResLandscapeSplashScreen: {fileID: 0}
@@ -319,6 +319,36 @@ PlayerSettings:
       m_Height: 29
       m_Kind: 1
       m_SubKind: iPad
+    - m_Textures:
+      - {fileID: 2800000, guid: 1c515e5756b864f0984c72ac07077cde, type: 3}
+      m_Width: 180
+      m_Height: 180
+      m_Kind: 0
+      m_SubKind: iPhone
+    - m_Textures:
+      - {fileID: 2800000, guid: 26a5ab244f8d24107a6265b6cf01eb97, type: 3}
+      m_Width: 120
+      m_Height: 120
+      m_Kind: 0
+      m_SubKind: iPhone
+    - m_Textures:
+      - {fileID: 0}
+      m_Width: 167
+      m_Height: 167
+      m_Kind: 0
+      m_SubKind: iPad
+    - m_Textures:
+      - {fileID: 0}
+      m_Width: 152
+      m_Height: 152
+      m_Kind: 0
+      m_SubKind: iPad
+    - m_Textures:
+      - {fileID: 0}
+      m_Width: 76
+      m_Height: 76
+      m_Kind: 0
+      m_SubKind: iPad
     - m_Textures: []
       m_Width: 60
       m_Height: 60
@@ -344,33 +374,6 @@ PlayerSettings:
       m_Height: 1024
       m_Kind: 4
       m_SubKind: App Store
-    - m_Textures:
-      - {fileID: 2800000, guid: 1c515e5756b864f0984c72ac07077cde, type: 3}
-      m_Width: 180
-      m_Height: 180
-      m_Kind: 0
-      m_SubKind: iPhone
-    - m_Textures:
-      - {fileID: 2800000, guid: 26a5ab244f8d24107a6265b6cf01eb97, type: 3}
-      m_Width: 120
-      m_Height: 120
-      m_Kind: 0
-      m_SubKind: iPhone
-    - m_Textures: []
-      m_Width: 167
-      m_Height: 167
-      m_Kind: 0
-      m_SubKind: iPad
-    - m_Textures: []
-      m_Width: 152
-      m_Height: 152
-      m_Kind: 0
-      m_SubKind: iPad
-    - m_Textures: []
-      m_Width: 76
-      m_Height: 76
-      m_Kind: 0
-      m_SubKind: iPad
   m_BuildTargetBatching:
   - m_BuildTarget: Standalone
     m_StaticBatching: 1
@@ -421,7 +424,7 @@ PlayerSettings:
   actionOnDotNetUnhandledException: 1
   enableInternalProfiler: 0
   logObjCUncaughtExceptions: 1
-  enableCrashReportAPI: 0
+  enableCrashReportAPI: 1
   cameraUsageDescription: 'need to capture images '
   locationUsageDescription: need to access location
   microphoneUsageDescription: 

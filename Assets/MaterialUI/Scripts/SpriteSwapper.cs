@@ -32,15 +32,23 @@ namespace MaterialUI
 		    if (!thisImage)
 		    {
 			    thisImage = gameObject.GetComponent<Image>();
+              //  Debug.Log("call 1");
 		    }
 
 		    if (!scaler)
 		    {
-			    scaler = gameObject.GetComponentInParent<Canvas>().GetComponent<MaterialUIScaler>();
+              
+                if(scaler!=null)
+                {
+                    Debug.Log("call 2");
+                    scaler = gameObject.GetComponentInParent<Canvas>().GetComponent<MaterialUIScaler>();
+                }
+
 		    }
 		    else
 		    {
-				if (scaleFactor != scaler.scaleFactor)
+                //Debug.Log("call 3");
+                if (scaleFactor != scaler.scaleFactor)
 			    {
 					scaleFactor = scaler.scaleFactor;
 
