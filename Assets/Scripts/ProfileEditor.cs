@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ProfileEditor : MonoBehaviour {
 
     public Text Nameinput, Namesave,Nameholder;
-    public Text Ageinput,Agesave,Ageholder;
+    public Text Ageinput,Ageholder;
     public InputField Name, Age;
     public Text Update_info;
     //public Text Genderinput,Gendersave,Genderholder;
@@ -34,13 +34,13 @@ public class ProfileEditor : MonoBehaviour {
     public void Ageset()
     {
         PlayerPrefs.SetString("Age", Ageholder.text);
-        Agesave.text = PlayerPrefs.GetString("Age");
+        //Agesave.text = PlayerPrefs.GetString("Age");
     }
     public void submit()
     {
         Namesave.text = PlayerPrefs.GetString("UserName");
        // Gendersave.text = PlayerPrefs.GetString("Gender");
-        Agesave.text = PlayerPrefs.GetString("Age");
+        //Agesave.text = PlayerPrefs.GetString("Age");
         Update_info.gameObject.SetActive(true);
         Invoke("delay", 1f);
      
