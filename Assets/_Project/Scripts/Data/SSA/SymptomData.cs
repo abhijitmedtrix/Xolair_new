@@ -12,22 +12,20 @@ namespace App.Data.SSA
         public SymptomData(string json) : base(json)
         {
         }
-        
-        public SymptomData(DateTime date) : base (date)
+
+        public SymptomData(DateTime date) : base(date)
         {
         }
+
         public SymptomData()
         {
-
         }
+
         public override List<QuestionData> questionDataList
         {
             get { return questions; }
         }
-        public void set_indx()
-        {
-            _currentQuestionIndex = 0;
-        }
+
         public static List<QuestionData> questions = new List<QuestionData>
         {
             // =================
@@ -35,7 +33,7 @@ namespace App.Data.SSA
             // =================
             new QuestionData
             {
-                question = "How many days were you bothered by coughing during the past 2 weeks?",
+                question = "How many days were you bothered by <b>coughing</b> during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -47,7 +45,7 @@ namespace App.Data.SSA
             },
             new QuestionData
             {
-                question = "On average, how severe was your coughing during the past 2 weeks?",
+                question = "On average, how severe was your <b>coughing</b> during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -63,7 +61,7 @@ namespace App.Data.SSA
             // =================
             new QuestionData
             {
-                question = "How many days were you bothered by wheezing during the past 2 weeks?",
+                question = "How many days were you bothered by <b>wheezing</b> during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -75,7 +73,7 @@ namespace App.Data.SSA
             },
             new QuestionData
             {
-                question = "On average, how severe was your wheezing during the past 2 weeks?",
+                question = "On average, how severe was your <b>wheezing</b> during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -91,7 +89,8 @@ namespace App.Data.SSA
             // =================
             new QuestionData
             {
-                question = "How many days were you bothered by shortness of breath during the past 2 weeks?",
+                question =
+                    "How many days were you bothered by <b>shortness of breath</b> during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -103,7 +102,7 @@ namespace App.Data.SSA
             },
             new QuestionData
             {
-                question = "On average, how severe was your shortness of breath during the past 2 weeks?",
+                question = "On average, how severe was your <b>shortness of breath</b> during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -119,7 +118,7 @@ namespace App.Data.SSA
             // =================
             new QuestionData
             {
-                question = "How many days were you awakened at night during the past 2 weeks?",
+                question = "How many days were you <b>awakened</b> at night during the past 2 weeks?",
                 answersOption =
                     new AnswerOption[]
                     {
@@ -128,18 +127,6 @@ namespace App.Data.SSA
                         new AnswerOption {option = 2, points = 2, description = "4-7 days"},
                         new AnswerOption {option = 3, points = 3, description = "8-14 days"}
                     }
-            },
-            new QuestionData
-            {
-                question = "On average, how severe was your coughing during the past 2 weeks?",
-                answersOption =
-                    new AnswerOption[]
-                    {
-                        new AnswerOption {option = 1, points = 1, description = "Mild"},
-                        new AnswerOption {option = 2, points = 2, description = "Moderate"},
-                        new AnswerOption {option = 3, points = 3, description = "Severe"}
-                    },
-                canBeSkipped = true
             }
         };
     }

@@ -5,6 +5,13 @@ using System.Linq;
 using App.Utils;
 using UnityEngine;
 
+public enum BodyPart
+{
+    Head,
+    Chest,
+    Legs
+}
+
 namespace App.Data.CSU
 {
     /*
@@ -31,16 +38,9 @@ namespace App.Data.CSU
         {
             get { return questions; }
         }
-        
-        public enum BodyPart
-        {
-            Head,
-            Chest,
-            Legs
-        }
 
         // set default dictionary values
-        private Dictionary<BodyPart, Answer[]> _answersDict;
+        private Dictionary<BodyPart, List<Answer>> _answersDict;
 
         private BodyPart _activeBodyPart;
 
@@ -49,13 +49,13 @@ namespace App.Data.CSU
         public CSUData(string json) : base(json)
         {
             // set default data values
-            _answersDict = new Dictionary<BodyPart, Answer[]>
+            _answersDict = new Dictionary<BodyPart, List<Answer>>
             {
-                {BodyPart.Head, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}},
-                {BodyPart.Chest, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}},
-                {BodyPart.Legs, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}}
+                {BodyPart.Head, new List<Answer> {new Answer {option = 0}, new Answer {option = 0}}},
+                {BodyPart.Chest, new List<Answer> {new Answer {option = 0}, new Answer {option = 0}}},
+                {BodyPart.Legs, new List<Answer> {new Answer {option = 0}, new Answer {option = 0}}}
             };
-            
+
             // clear incorrectly filled array from base QuestionBaseTrackerData constructor
             _answers.Clear();
 
@@ -63,58 +63,50 @@ namespace App.Data.CSU
             JSONObject answersObject = _jsonObject.GetField("answers");
 
             var values = Enum.GetValues(typeof(BodyPart));
-            
+
             // fill up dictionary
             foreach (BodyPart key in values)
             {
                 string keyString = key.ToString().ToLower();
                 if (answersObject.HasField(keyString))
                 {
-                    Answer[] answers = new Answer[2];
+                    List<Answer> answers = _answersDict[key];
                     JSONObject obj = answersObject.GetField(keyString);
                     for (int i = 0; i < obj.list.Count; i++)
                     {
-                        answers[i] = new Answer{option = (int) obj.list[i].GetField("option").n};
+                        answers[i] = new Answer {option = (int) obj.list[i].GetField("option").n};
                     }
-
-                    _answersDict[key] = answers;
-                    
                 }
                 else
                 {
-                    
                     Debug.LogWarning($"Key {key} wasn't found in json {json}");
                 }
             }
-
         }
 
         public CSUData(DateTime date) : base(date)
         {
             // set default data values
-            _answersDict = new Dictionary<BodyPart, Answer[]>
+            _answersDict = new Dictionary<BodyPart, List<Answer>>
             {
-                {BodyPart.Head, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}},
-                {BodyPart.Chest, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}},
-                {BodyPart.Legs, new Answer[] {new Answer {option = 0}, new Answer {option = 0}}}
+                {BodyPart.Head, new List<Answer> {new Answer {option = 0}, new Answer {option = 0}}},
+                {BodyPart.Chest, new List<Answer> {new Answer {option = 0}, new Answer {option = 0}}},
+                {BodyPart.Legs, new List<Answer> {new Answer {option = 0}, new Answer {option = 0}}}
             };
         }
-        public void Set_indx()
-        {
-            _currentQuestionIndex = 0;
-        }
+
         public override JSONObject FormatToJson()
         {
             JSONObject jsonObject = base.FormatToJson();
             jsonObject.RemoveField("answers");
-            
+
             JSONObject answersObject = new JSONObject();
 
             foreach (BodyPart key in Enum.GetValues(typeof(BodyPart)))
             {
-                Answer[] answers = _answersDict[key];
+                List<Answer> answers = _answersDict[key];
                 JSONObject objArray = new JSONObject();
-                for (int i = 0; i < answers.Length; i++)
+                for (int i = 0; i < answers.Count; i++)
                 {
                     objArray.Add(answers[i].FormatToJson());
                 }
@@ -122,15 +114,27 @@ namespace App.Data.CSU
                 // add body part answers
                 answersObject.AddField(key.ToString().ToLower(), objArray);
             }
+
             jsonObject.AddField("answers", answersObject);
             return jsonObject;
+        }
+
+        public virtual List<Answer> GetAnswers()
+        {
+            return _answersDict[_activeBodyPart];
+        }
+        
+        public override void SetAnswers(List<Answer> answers)
+        {
+            _answersDict[_activeBodyPart].Clear();
+            _answersDict[_activeBodyPart].AddRange(answers);
         }
 
         public override QuestionData SetAnswer(QuestionData question, int option)
         {
             _currentQuestionIndex = questionDataList.IndexOf(question);
-
-            Answer[] answers = _answersDict[_activeBodyPart];
+            
+            List<Answer> answers = _answersDict[_activeBodyPart];
             answers[_currentQuestionIndex].option = option;
 
             if (_currentQuestionIndex < questionDataList.Count - 1)
@@ -154,10 +158,10 @@ namespace App.Data.CSU
         {
             _totalScore = 0;
 
-            foreach (KeyValuePair<BodyPart, Answer[]> entry in _answersDict)
+            foreach (KeyValuePair<BodyPart, List<Answer>> entry in _answersDict)
             {
-                Answer[] answers = entry.Value;
-                for (int i = 0; i < answers.Length; i++)
+                List<Answer> answers = entry.Value;
+                for (int i = 0; i < answers.Count; i++)
                 {
                     _totalScore += questionDataList[i].answersOption[answers[i].option].points;
                 }
@@ -169,9 +173,9 @@ namespace App.Data.CSU
         public override int GetMaxScore()
         {
             int max = 0;
-            
+
             var values = Enum.GetValues(typeof(BodyPart));
-            
+
             for (int i = 0; i < questionDataList.Count; i++)
             {
                 max += questionDataList[i].GetMaxScore();
@@ -182,7 +186,7 @@ namespace App.Data.CSU
 
             return max;
         }
-        
+
         public void ChangeBodyPart(int index)
         {
             ChangeBodyPart((BodyPart) index);
@@ -195,7 +199,8 @@ namespace App.Data.CSU
 
         public void SavePhotos(Texture2D[] textures)
         {
-            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"),
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"),
                 _activeBodyPart.ToString().ToLower());
 
             for (int i = 0; i < textures.Length; i++)
@@ -203,6 +208,13 @@ namespace App.Data.CSU
                 string filePath = Path.Combine(folderPath, i + ".png");
 
                 FileInfo file = new FileInfo(Path.Combine(folderPath, i + ".png"));
+
+                // cleanup entire directory before saving new pictures
+                if (file.Directory.Exists)
+                {
+                    file.Directory.Delete();
+                }
+
                 file.Directory.Create();
                 File.WriteAllBytes(file.FullName, textures[i].EncodeToPNG());
             }
@@ -237,10 +249,11 @@ namespace App.Data.CSU
 
             return textures;
         }
-        
+
         public int GetPhotosCount()
         {
-            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"));
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"));
 
             DirectoryInfo directory = new DirectoryInfo(folderPath);
             if (!directory.Exists)
@@ -251,10 +264,11 @@ namespace App.Data.CSU
 
             return Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories).Length;
         }
-        
+
         public Texture2D[] GetAllPhotos()
         {
-            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"));
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"));
 
             DirectoryInfo directory = new DirectoryInfo(folderPath);
             if (!directory.Exists)
@@ -262,6 +276,7 @@ namespace App.Data.CSU
                 Debug.LogWarning("No such directory found: " + directory.FullName);
                 return null;
             }
+
             string[] files = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
 
             // load all existing textures
@@ -291,17 +306,6 @@ namespace App.Data.CSU
         {
             new QuestionData()
             {
-                question = "Select number of itches",
-                answersOption = new AnswerOption[]
-                {
-                    new AnswerOption {option = 0, points = 0, description = "None"},
-                    new AnswerOption {option = 1, points = 1, description = "Mild"},
-                    new AnswerOption {option = 2, points = 2, description = "Moderate"},
-                    new AnswerOption {option = 3, points = 3, description = "Severe"}
-                }
-            },
-            new QuestionData()
-            {
                 question = "Select number of hives",
                 answersOption = new AnswerOption[]
                 {
@@ -309,6 +313,17 @@ namespace App.Data.CSU
                     new AnswerOption {option = 1, points = 1, description = "1-4"},
                     new AnswerOption {option = 2, points = 2, description = "5-10"},
                     new AnswerOption {option = 3, points = 3, description = ">10"}
+                }
+            },
+            new QuestionData()
+            {
+                question = "Select number of itches",
+                answersOption = new AnswerOption[]
+                {
+                    new AnswerOption {option = 0, points = 0, description = "None"},
+                    new AnswerOption {option = 1, points = 1, description = "Mild"},
+                    new AnswerOption {option = 2, points = 2, description = "Moderate"},
+                    new AnswerOption {option = 3, points = 3, description = "Severe"}
                 }
             }
         };

@@ -8,7 +8,7 @@ public class Trackerclick : MonoBehaviour
     {
         //Debug.Log("coming");
         //Debug.Log(PlayerPrefs.GetInt("CSUtaken"));
-        //if (AppManager.Current_mode == "CSU")
+        //if (AppManager.Instance.CurrentMode == "CSU")
         //{
         //    if (PlayerPrefs.GetInt("CSUtaken") == DateTime.Today.DayOfYear)
         //    {
@@ -28,7 +28,7 @@ public class Trackerclick : MonoBehaviour
         //        }
         //    }
         //}
-        //else if (AppManager.Current_mode == "SAA")
+        //else if (AppManager.Instance.CurrentMode == "SAA")
         //{
         //    if (PlayerPrefs.GetInt("SAAtaken") == DateTime.Today.DayOfYear)
         //    {

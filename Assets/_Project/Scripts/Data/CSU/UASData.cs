@@ -13,8 +13,8 @@ namespace App.Data.CSU
         public UASData(string json) : base(json)
         {
         }
-        
-        public UASData(DateTime date) : base (date)
+
+        public UASData(DateTime date) : base(date)
         {
         }
 
@@ -22,14 +22,11 @@ namespace App.Data.CSU
         {
             get { return questions; }
         }
+
         public UASData()
         {
-            
         }
-        public void set_indx()
-        {
-            _currentQuestionIndex = 0;
-        }
+
         public static List<QuestionData> questions = new List<QuestionData>()
         {
             new QuestionData

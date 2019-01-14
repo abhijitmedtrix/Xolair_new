@@ -7,6 +7,8 @@ namespace App.Data
 {
     public class LogData
     {
+        public DateTime date;
+        
         // SSA
         public SymptomData symptomData;
         public AsthmaData asthmaData;
@@ -39,6 +41,26 @@ namespace App.Data
         {
             uasData = data;
             OnUpdate?.Invoke();
+        }
+
+        public QuestionBasedTrackerData TryGetData(TrackerManager.TrackerType type)
+        {
+            switch (type)
+            {
+                case TrackerManager.TrackerType.Asthma:
+                    return asthmaData;
+
+                case TrackerManager.TrackerType.Symptom:
+                    return symptomData;
+
+                case TrackerManager.TrackerType.CSU:
+                    return csuData;
+
+                case TrackerManager.TrackerType.UAS:
+                    return uasData;
+            }
+
+            return null;
         }
 
         public void DeleteLocalContent()

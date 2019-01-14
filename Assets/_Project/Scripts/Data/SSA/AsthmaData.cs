@@ -46,7 +46,7 @@ namespace App.Data.SSA
             new QuestionData()
             {
                 question =
-                    "On average, during the past week, how often were you woken by your asthma during the night?",
+                    "On average, during the past week, how bad were your asthma symptoms when you woke up in the morning?",
                 answersOption = new AnswerOption[]
                 {
                     new AnswerOption {option = 0, points = 0, description = "No symptoms"},

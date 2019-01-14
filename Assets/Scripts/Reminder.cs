@@ -38,7 +38,7 @@ public class Reminder : MonoBehaviour
 
     public void OnClick()
     {
-      //  Debug.Log(AppManager.Current_mode);
+      //  Debug.Log(AppManager.Instance.CurrentMode);
         hour_display = int.Parse(Hour.text);
         minute_display = int.Parse(Minute.text);
         if (Day.text=="AM")
@@ -60,7 +60,7 @@ public class Reminder : MonoBehaviour
 
                 {
                    
-                    key = AppManager.Current_mode + "," + notifdate.Day.ToString()+"/"+notifdate.Month.ToString()+"/"+notifdate.Year.ToString();
+                    key = AppManager.Instance.CurrentMode + "," + notifdate.Day.ToString()+"/"+notifdate.Month.ToString()+"/"+notifdate.Year.ToString();
                     Debug.Log(key);
                 
                     dat = key + "," + Hour.text + "/" + Minute.text+","+Day.text;
@@ -75,13 +75,13 @@ public class Reminder : MonoBehaviour
            // DateTime time = new DateTime(Calander_Manager.Reminder_Year, Calander_Manager.Reminder_Month, Calander_Manager.Reminder_Day, hour_display, minute_display, 0);
             
 
-           // dat = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + Hour.text + "/" + Minute.text + count.ToString() ;
-          //  key = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + ","+count.ToString();
+           // dat = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + Hour.text + "/" + Minute.text + count.ToString() ;
+          //  key = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + ","+count.ToString();
             // Debug.Log(key);
             //while (PlayerPrefs.HasKey(key))
             //{
             //    count++;
-            //    key = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + count.ToString();
+            //    key = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + count.ToString();
 
             //}
            //Debug.Log(key);
@@ -112,7 +112,7 @@ public class Reminder : MonoBehaviour
                 for (int y = 0; y < 3; y++)
 
                 {
-                    key = AppManager.Current_mode + "," + notifdate.Day.ToString() + "/" + notifdate.Month.ToString() + "/" + notifdate.Year.ToString();
+                    key = AppManager.Instance.CurrentMode + "," + notifdate.Day.ToString() + "/" + notifdate.Month.ToString() + "/" + notifdate.Year.ToString();
                     dat = key + "," + Hour.text + "/" + Minute.text+"," + Day.text;
                    
                     PlayerPrefs.SetString(key, dat);
@@ -128,13 +128,13 @@ public class Reminder : MonoBehaviour
             // DateTime time = new DateTime(Calander_Manager.Reminder_Year, Calander_Manager.Reminder_Month, Calander_Manager.Reminder_Day, hour_display, minute_display, 0);
             // count = 1;
 
-            // dat = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + Hour.text + "/" + Minute.text + "," + Details_txt.text;
-            // key = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + count.ToString();
+            // dat = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + Hour.text + "/" + Minute.text + "," + Details_txt.text;
+            // key = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + count.ToString();
             // // Debug.Log(key);
             // while (PlayerPrefs.HasKey(key))
             // {
             //     count++;
-            //     key = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + count.ToString();
+            //     key = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() + "," + count.ToString();
 
             // }
             // //Debug.Log(key);

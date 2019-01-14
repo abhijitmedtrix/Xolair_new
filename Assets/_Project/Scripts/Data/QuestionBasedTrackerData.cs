@@ -55,13 +55,19 @@ namespace App.Data
         {
         }
 
+        public virtual void SetAnswers(List<Answer> answers)
+        {
+            _answers.Clear();
+            _answers.AddRange(answers);
+        }
+
         public virtual QuestionData SetAnswer(QuestionData question, int option)
         {
             // get question index
             _currentQuestionIndex = questionDataList.IndexOf(question);
 
             // create or update existing answer
-            
+
             // update
             if (_currentQuestionIndex < _answers.Count)
             {
@@ -81,7 +87,7 @@ namespace App.Data
             {
                 // define next question index
                 int nextQuestionIndex = _currentQuestionIndex + 1;
-                
+
                 // if user selected a 1st answer which allow to skip the next question
                 if (option == 0 && questionDataList[nextQuestionIndex].canBeSkipped)
                 {
@@ -95,14 +101,14 @@ namespace App.Data
                     {
                         _answers.Add(new Answer());
                     }
-                    
-                    Debug.Log("Skipping question with index: "+nextQuestionIndex);
-                    
+
+                    Debug.Log("Skipping question with index: " + nextQuestionIndex);
+
                     // if there are still some questions after skipped 
                     if (nextQuestionIndex + 1 < questionDataList.Count)
                     {
                         // Debug.Log("Current question index: " + _currentQuestionIndex);
-    
+
                         // jump over skipped question if some more questions exists
                         _currentQuestionIndex = nextQuestionIndex + 1;
                     }
@@ -120,7 +126,7 @@ namespace App.Data
                 {
                     _currentQuestionIndex++;
                 }
-                
+
                 // Debug.Log("Current question index: " + _currentQuestionIndex);
 
                 // return next question data
@@ -152,15 +158,50 @@ namespace App.Data
             return jsonObject;
         }
 
+        public void ResetQuestionIndex()
+        {
+            _currentQuestionIndex = 0;
+        }
+
+        public int GetCurrentQuestionIndex()
+        {
+            return _currentQuestionIndex;
+        }
+
         public QuestionData GetQuestion()
         {
             // Debug.Log($"In data {this.GetType().Name} first question is {questionDataList[0].question}");
             return questionDataList[_currentQuestionIndex];
         }
 
+        public QuestionData GetQuestion(int questionIndex)
+        {
+            _currentQuestionIndex = questionIndex;
+            return GetQuestion();
+        }
+
+        public int GetAnswerOption(int questionIndex)
+        {
+            if (questionIndex > _answers.Count - 1)
+            {
+                throw new Exception("You are requesting for the answer which wasn't provided yet");
+            }
+            if (_answers[questionIndex].option < 0)
+            {
+                throw new Exception("You are requesting for the answer with option set to -1 (default)");
+            }
+
+            return _answers[questionIndex].option;
+        }
+
         public virtual bool IsCompleted()
         {
             return _answers.Count == questionDataList.Count;
+        }
+
+        public bool WasQuestionSkipped(QuestionData questionData)
+        {
+            return questionData.canBeSkipped && _answers[questionDataList.IndexOf(questionData)].option <= 0;
         }
 
         /// <summary>
@@ -170,15 +211,16 @@ namespace App.Data
         public virtual int GetScore()
         {
             _totalScore = 0;
-            Debug.Log($"question data count: {questionDataList.Count} and answers count: {_answers.Count}");
+            // Debug.Log($"question data count: {questionDataList.Count} and answers count: {_answers.Count}");
             for (int i = 0; i < _answers.Count; i++)
             {
                 // Debug.Log($"answer option at index <{i}> is {_answers[i].option}");
-                
+
                 // in some cases for "empty" answer we just initialise default Result data with default value -1
                 if (_answers[i].option > -1)
                 {
-                    Debug.Log($"Index: {i}, question answer options count: {questionDataList[i].answersOption.Length}, and selected answer option: {_answers[i].option}");
+                    // Debug.Log(
+                        // $"Index: {i}, question answer options count: {questionDataList[i].answersOption.Length}, and selected answer option: {_answers[i].option}");
                     _totalScore += questionDataList[i].answersOption[_answers[i].option].points;
                 }
             }
@@ -197,6 +239,11 @@ namespace App.Data
             return max;
         }
 
+        public virtual List<Answer> GetAnswers()
+        {
+            return _answers;
+        }
+        
         public abstract List<QuestionData> questionDataList { get; }
 
         public class QuestionData

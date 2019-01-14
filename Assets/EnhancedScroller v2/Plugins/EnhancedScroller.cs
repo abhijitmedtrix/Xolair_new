@@ -2344,5 +2344,10 @@ namespace EnhancedUI.EnhancedScroller
         }
 
         #endregion
+
+        public SmallList<EnhancedScrollerCellView> GetActiveCellViews()
+        {
+            return _activeCellViews;
+        }
     }
 }

@@ -5,17 +5,18 @@ using UnityEngine;
 
 public class GraphRenderer : MonoBehaviour
 {
+    [SerializeField] protected bool _useLinesOnly;
     [SerializeField] protected Camera _camera;
     [SerializeField] protected Draw2D _drawer;
     [SerializeField] protected iTweenPath _iTweenPath;
     [SerializeField] protected bool _useSmoothGraph;
+    [SerializeField] protected LineRenderer _lineRenderer;
 
     // protected Path _graphPath;
     protected Vector3[] _graphPoints;
     protected Vector3[] _basePoints = new Vector3[2];
     protected Vector3[] _smoothedPoints = new Vector3[100];
-    [SerializeField]
-    protected RenderTexture _renderTexture;
+    [SerializeField] protected RenderTexture _renderTexture;
 
     protected int _maxValue;
     protected int _daysToShow;
@@ -32,7 +33,7 @@ public class GraphRenderer : MonoBehaviour
         _basePoints[0] = new Vector3(daysToShow - 1, -0.0001f, 0);
         _basePoints[1] = new Vector3(0, -0.0001f, 0);
 
-       // Debug.Log($"daysToShow: {daysToShow}, maxValue: {maxValue}");
+        // Debug.Log($"daysToShow: {daysToShow}, maxValue: {maxValue}");
         _daysToShow = daysToShow;
         _maxValue = maxValue;
 
@@ -69,7 +70,7 @@ public class GraphRenderer : MonoBehaviour
             {
                 _smoothedPoints[i] = iTween.PointOnPath(_graphPoints, 1f / _smoothedPoints.Length * i);
                 // _smoothedPoints[i] = _iTweenPath.PathGetPoint(1f / 50 * i);
-                
+
                 // using smooth graph we cant allow any y value < 0 otherwise graph mesh will not be drawn
                 _smoothedPoints[i].y = Mathf.Clamp(_smoothedPoints[i].y, 0, _maxValue);
             }
@@ -91,8 +92,7 @@ public class GraphRenderer : MonoBehaviour
             */
         }
 
-        // update mesh
-        // _drawer.vertices = _points.ToList();
+        // setup points
         List<Vector3> points = new List<Vector3>(_basePoints);
         if (_useSmoothGraph)
         {
@@ -103,8 +103,16 @@ public class GraphRenderer : MonoBehaviour
             points.AddRange(_graphPoints.ToList());
         }
 
-        _drawer.vertices = points;
-        _drawer.MakeMesh();
+        if (_useLinesOnly)
+        {
+            _lineRenderer.SetPositions(points.ToArray());
+        }
+        else
+        {
+            // update mesh
+            _drawer.vertices = points;
+            _drawer.MakeMesh();
+        }
     }
 
     public RenderTexture GetRenderTexture()
@@ -120,7 +128,7 @@ public class GraphRenderer : MonoBehaviour
         // return (Vector3)RectTransformUtility.WorldToScreenPoint(_camera, point);
         return _camera.WorldToViewportPoint(point);
     }
-    
+
     private void OnDrawGizmos()
     {
         if (Application.isPlaying && _graphPoints != null)

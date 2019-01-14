@@ -11,40 +11,36 @@
 using System;
 using UnityEngine;
 using RogoDigital.Lipsync;
+
 namespace MaterialUI
 {
-	public class ScreenManager : MonoBehaviour
-	{
+    public class ScreenManager : MonoSingleton<ScreenManager>
+    {
         public Vector3 pos;
-		public ScreenConfig[] screens;
-		[HideInInspector]
-		public ScreenConfig currentScreen;
-		[HideInInspector]
-		public ScreenConfig lastScreen;
-        [SerializeField]
-        private GameObject avatar;
-        [SerializeField]
-        private GameObject graphrenderer;
-       
-       // private Animator animator;
-        [SerializeField]
-        private AudioSource audioSource;
-      // public PatientJournalScreen patientJournalScreen;
-       // private bool Choice;
+        public ScreenConfig[] screens;
+        [HideInInspector] public ScreenConfig currentScreen;
+        [HideInInspector] public ScreenConfig lastScreen;
+        [SerializeField] private GameObject avatar;
+        [SerializeField] private GameObject graphrenderer;
+
+        // private Animator animator;
+        [SerializeField] private AudioSource audioSource;
+
+        // public PatientJournalScreen patientJournalScreen;
+        // private bool Choice;
         private void Start()
         {
-           //patientJournalScreen = GameObject.Find("ScreenCSUPatientJournal").GetComponent<PatientJournalScreen>();
+            //patientJournalScreen = GameObject.Find("ScreenCSUPatientJournal").GetComponent<PatientJournalScreen>();
             //Choice = false;
-            
         }
+
         public void Set(int index)
-		{
-     
-          if(index==7)
+        {
+            if (index == 7)
             {
                 graphrenderer.SetActive(true);
             }
-            else if(index==17)
+            else if (index == 17)
             {
                 graphrenderer.SetActive(true);
             }
@@ -55,7 +51,7 @@ namespace MaterialUI
                 //avatar.transform.position = Vector3.one * 1000;
             }
 
-                //if(index==3&&!Choice)
+            //if(index==3&&!Choice)
             //{
             //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.CSU;
             //    Choice = true;
@@ -73,32 +69,32 @@ namespace MaterialUI
             //{
             //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.Asthma;
             //}
-			screens[index].transform.SetAsLastSibling();
+            screens[index].transform.SetAsLastSibling();
 
-			screens[index].Show(currentScreen);
-			lastScreen = currentScreen;
-			currentScreen = screens[index];
-		}
+            screens[index].Show(currentScreen);
+            lastScreen = currentScreen;
+            currentScreen = screens[index];
+        }
 
-		public void Set(string name)
-		{
-			for (int i = 0; i < screens.Length; i++)
-			{
-				if (screens[i].screenName == name)
-				{
-					Set(i);
-					return;
-				}
-			}
-		}
+        public void Set(string name)
+        {
+            for (int i = 0; i < screens.Length; i++)
+            {
+                if (screens[i].screenName == name)
+                {
+                    Set(i);
+                    return;
+                }
+            }
+        }
 
-		public void Back()
-		{
-			lastScreen.ShowWithoutTransition();
-			currentScreen.Hide();
-			ScreenConfig temp = currentScreen;
-			currentScreen = lastScreen;
-			lastScreen = temp;
-		}
-	}
+        public void Back()
+        {
+            lastScreen.ShowWithoutTransition();
+            currentScreen.Hide();
+            ScreenConfig temp = currentScreen;
+            currentScreen = lastScreen;
+            lastScreen = temp;
+        }
+    }
 }

@@ -42,7 +42,7 @@ public class Weather_Manager : MonoBehaviour
     }
     public void startservice()
     {
-        if(AppManager.Current_mode=="CSU")
+        if(AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
         {
             if (!datastored)
             {
@@ -86,7 +86,7 @@ public class Weather_Manager : MonoBehaviour
                 screenManager.Set(9);
             }
         }
-        else if(AppManager.Current_mode=="CSU")
+        else if(AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
         {
             if (!datastored)
             {
@@ -213,7 +213,7 @@ public class Weather_Manager : MonoBehaviour
         if(weathhercall.error==null)
         {
             JSONObject jsonobj = new JSONObject(weathhercall.text);
-            Debug.Log(jsonobj.GetField("main").GetField("temp"));
+            // Debug.Log(jsonobj.GetField("main").GetField("temp"));
 
             City_Name.text = jsonobj.GetField("name").ToString().Replace('"', ' ');
             if (jsonobj.GetField("main").GetField("temp").ToString().Length >= 3)

@@ -32,7 +32,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     private static List<QuestionBasedTrackerData> _asthmaJsonObjectList = new List<QuestionBasedTrackerData>();
     private static List<QuestionBasedTrackerData> _symptomJsonObjectList = new List<QuestionBasedTrackerData>();
 
-    private const int LOG_LIFE_TIME = 60;
+    // TODO - commented, but need to clarify, how big log can be
+    private const int LOG_LIFE_TIME = 360;
     public const string LOGS_FOLDER = "logs";
 
     // SSA
@@ -302,8 +303,30 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             return;
         }
 
+        data.date = day;
+        
         _trackerDictionary.Add(day, data);
         _logDataList.Add(data);
+    }
+    
+    public static void UpdateEntry(DateTime day, QuestionBasedTrackerData data)
+    {
+        if (data is CSUData)
+        {
+            UpdateEntry(day, data as CSUData);
+        }
+        else if (data is UASData)
+        {
+            UpdateEntry(day, data as UASData);
+        }
+        else if (data is AsthmaData)
+        {
+            UpdateEntry(day, data as AsthmaData);
+        }
+        else if (data is SymptomData)
+        {
+            UpdateEntry(day, data as SymptomData);
+        }
     }
 
     public static void UpdateEntry(DateTime day, CSUData data)
@@ -458,6 +481,44 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         return dates;
     }
+    
+    /// <summary>
+    /// Grab all existing data by type
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public static List<DateTime> GetDataDateRange(TrackerType type)
+    {
+        List<DateTime> dates = new List<DateTime>();
+
+        // find a 1st entry date
+        DateTime firstDate = DateTime.Today;
+
+        Debug.Log("First log data: " + _logDataList[0].date);
+        
+        for (int i = 0; i < _logDataList.Count; i++)
+        {
+            QuestionBasedTrackerData data = _logDataList[i].TryGetData(type);
+            if (data != null)
+            {
+                firstDate = data.GetDate();
+                break;
+            }
+        }
+
+        // get total days count
+        TimeSpan total = DateTime.Today.Subtract(firstDate);
+        
+        // Debug.Log($"First date: {firstDate}, type requesting: {type}, Total days: {total.Days}");
+        
+        for (int i = 0; i < total.Days; i++)
+        {
+            dates.Add(firstDate.Date);
+            firstDate = firstDate.AddDays(1);
+        }
+
+        return dates;
+    }
 
     public static int GetMaxScore(TrackerType type)
     {
@@ -567,15 +628,15 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             {
                 if (j == 0)
                 {
-                    csuData.ChangeBodyPart(CSUData.BodyPart.Head);
+                    csuData.ChangeBodyPart(BodyPart.Head);
                 }
                 else if (j == 2)
                 {
-                    csuData.ChangeBodyPart(CSUData.BodyPart.Chest);
+                    csuData.ChangeBodyPart(BodyPart.Chest);
                 }
                 else if (j == 4)
                 {
-                    csuData.ChangeBodyPart(CSUData.BodyPart.Legs);
+                    csuData.ChangeBodyPart(BodyPart.Legs);
                 }
 
                 QuestionBasedTrackerData.QuestionData qData = csuData.GetQuestion();
@@ -693,15 +754,15 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         {
             if (j == 0)
             {
-                csuData.ChangeBodyPart(CSUData.BodyPart.Head);
+                csuData.ChangeBodyPart(BodyPart.Head);
             }
             else if (j == 2)
             {
-                csuData.ChangeBodyPart(CSUData.BodyPart.Chest);
+                csuData.ChangeBodyPart(BodyPart.Chest);
             }
             else if (j == 4)
             {
-                csuData.ChangeBodyPart(CSUData.BodyPart.Legs);
+                csuData.ChangeBodyPart(BodyPart.Legs);
             }
 
             QuestionBasedTrackerData.QuestionData qData = csuData.GetQuestion();

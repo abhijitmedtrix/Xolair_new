@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,6 +29,11 @@ namespace DTools
 
 		private static UpdateManager _instance;
 
+		
+		// modification
+		private static float _secondsCounter;
+		public static event Action OnMinuteChange; 
+		
 		public static void AddUpdateCatcher(IUpdateCatcher updateCatcher)
 		{
 			if (_updateCatchers.Contains(updateCatcher))
@@ -101,6 +107,15 @@ namespace DTools
 
 		private void Update()
 		{
+			_secondsCounter += Time.deltaTime;
+			if (_secondsCounter >= 60)
+			{
+				// inform listeners about minute change
+				OnMinuteChange.Invoke();
+
+				_secondsCounter -= 60;
+			}
+			
 			CheckUpdateCatchers();
 			_updateInProgress = true;
 

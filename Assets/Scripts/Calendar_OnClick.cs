@@ -29,15 +29,15 @@ public class Calendar_OnClick : MonoBehaviour {
        // dat.Clear();
         highlight.transform.position = transform.position;
         Calander_Manager.Reminder_Day = int.Parse(gameObject.tag);
-        // key = AppManager.Current_mode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() +","+ count.ToString();
-        key = AppManager.Current_mode + "," +gameObject.tag.ToString()+ "/" + Calander_Manager.Current_Month.ToString() + "/" + Calander_Manager.Current_Year.ToString()  ;
+        // key = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() +","+ count.ToString();
+        key = AppManager.Instance.CurrentMode + "," +gameObject.tag.ToString()+ "/" + Calander_Manager.Current_Month.ToString() + "/" + Calander_Manager.Current_Year.ToString()  ;
         Debug.Log(key);
         if(PlayerPrefs.HasKey(key))
         {
             Debug.Log("coming");
-            switch(AppManager.Current_mode)
+            switch(AppManager.Instance.CurrentMode)
             {
-                case"CSU":
+                case AppManager.Mode.CSU:
                     {
                         csu.value = 0;
                         xolairshot.value = 0;
@@ -45,7 +45,7 @@ public class Calendar_OnClick : MonoBehaviour {
                        
                         break;
                     }
-                case "SAA":
+                case AppManager.Mode.SAA:
                     {
                         saa.value = 0;
                         acq.value = 0;
@@ -66,9 +66,9 @@ public class Calendar_OnClick : MonoBehaviour {
 
             }
             DateTime Today = new DateTime(Calander_Manager.Current_Year, Calander_Manager.Current_Month, Int32.Parse(gameObject.tag));
-            switch(AppManager.Current_mode)
+            switch(AppManager.Instance.CurrentMode)
             {
-                case "CSU":
+                case AppManager.Mode.CSU:
                     {
                         if(Today.DayOfYear==PlayerPrefs.GetInt("CSUtaken"))
                         {
@@ -82,7 +82,7 @@ public class Calendar_OnClick : MonoBehaviour {
                         }
                         break;
                     }
-                case "SAA":
+                case AppManager.Mode.SAA:
                     {
                         if(Today.DayOfYear==PlayerPrefs.GetInt("SAAtaken"))
                         {
@@ -114,7 +114,7 @@ public class Calendar_OnClick : MonoBehaviour {
         //    Debug.Log("going"+dat[0]);
 
         //    count++;
-        //    key = AppManager.Current_mode + "," + gameObject.tag + "/" + Calander_Manager.Current_Month.ToString() + "/" + Calander_Manager.Current_Year.ToString() ;
+        //    key = AppManager.Instance.CurrentMode + "," + gameObject.tag + "/" + Calander_Manager.Current_Month.ToString() + "/" + Calander_Manager.Current_Year.ToString() ;
 
            
         //}
