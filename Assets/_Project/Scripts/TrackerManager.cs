@@ -492,8 +492,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         List<DateTime> dates = new List<DateTime>();
 
         // find a 1st entry date
-        DateTime firstDate = DateTime.Today;
-
+        DateTime firstDate = DateTime.MinValue;
         Debug.Log("First log data: " + _logDataList[0].date);
         
         for (int i = 0; i < _logDataList.Count; i++)
@@ -504,6 +503,13 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                 firstDate = data.GetDate();
                 break;
             }
+        }
+
+        // if there is no entry at all
+        if (firstDate == DateTime.MinValue)
+        {
+            Debug.LogError("There is no dates with data to return");
+            return null;
         }
 
         // get total days count

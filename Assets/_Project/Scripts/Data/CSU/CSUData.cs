@@ -119,9 +119,20 @@ namespace App.Data.CSU
             return jsonObject;
         }
 
-        public virtual List<Answer> GetAnswers()
+        public override List<Answer> GetAnswers()
         {
-            return _answersDict[_activeBodyPart];
+            return GetAnswers(_activeBodyPart);
+        }
+        
+        public List<Answer> GetAnswers(BodyPart bp)
+        {
+            return _answersDict[bp];
+        }
+        
+        public string GetAnswerDescription(int questionIndex, BodyPart bodyPart)
+        {
+            int answerIndex = _answersDict[bodyPart][questionIndex].option;
+            return questionDataList[questionIndex].answersOption[answerIndex].description;
         }
         
         public override void SetAnswers(List<Answer> answers)

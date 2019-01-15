@@ -228,6 +228,11 @@ namespace App.Data
             return _totalScore;
         }
 
+        public virtual string GetAnswerDescription(int questionIndex, int answerIndex)
+        {
+            return questionDataList[questionIndex].answersOption[answerIndex].description;
+        }
+        
         public virtual int GetMaxScore()
         {
             int max = 0;

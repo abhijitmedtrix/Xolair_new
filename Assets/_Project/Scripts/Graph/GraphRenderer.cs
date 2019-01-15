@@ -52,13 +52,13 @@ public class GraphRenderer : MonoBehaviour
         _camera.targetTexture = _renderTexture;
     }
 
-    public void UpdateGraph(int[] values)
+    public void UpdateGraph(PatientJournalScreen.GraphScruct[] values)
     {
         // format points to Vector3[]
         for (int i = 0; i < values.Length; i++)
         {
             // Debug.Log("Value: " + values[i]);
-            _graphPoints[i] = new Vector3(i, values[i], 0);
+            _graphPoints[i] = new Vector3(i, values[i].interpolatedScore, 0);
         }
 
         // draw a smooth spline using these points
