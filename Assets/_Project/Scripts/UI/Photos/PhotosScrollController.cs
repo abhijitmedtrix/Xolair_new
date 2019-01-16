@@ -44,31 +44,7 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
         // Debug.Log($"_lastMiddleCellIndex: {_lastMiddleCellIndex}, closest cell: {scroller.GetClosestCell()}");
-        int focusedCellIndex = scroller.GetClosestCell();
-
-        // check is start and end cell items indexes are in a range of 7 days and value not equals to previously cached value
-        // if (_lastMiddleCellIndex != focusedCellIndex && focusedCellIndex - 3 >= 0 && focusedCellIndex + 3 < _data.Count)
-        // {
-        // _lastMiddleCellIndex = scroller.GetClosestCell();
-
-        // update date range
-        // SetDateRange(_lastMiddleCellIndex);
-        // }
-
-        // for debug only
-        /*
-        if (scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) != null)
-        {
-            CalendarScrollItemView itemView =
-                scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) as CalendarScrollItemView;
-            Debug.Log("Get closest point: " + _lastMiddleCellIndex
-                                            + " with data " + itemView.data.ToShortDateString());
-        }
-        else
-        {
-            Debug.Log("Get closest point: " + _lastMiddleCellIndex);
-        }
-        */
+        // int focusedCellIndex = scroller.GetClosestCell();
     }
 
     #region EnhancedScroller Handlers

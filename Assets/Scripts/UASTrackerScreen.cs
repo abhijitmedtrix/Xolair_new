@@ -15,7 +15,9 @@ public class UASTrackerScreen : TrackerScreen
 
     public override void StartTracker()
     {
-        _trackerData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS) as UASData;
+        // create new data, because now we don't need to modify existing data until it's been submitted by user in a last step
+        _trackerData = new UASData(DateTime.Today);
+        
         ScreenManager.Instance.Set(16);
 
         base.StartTracker();
@@ -24,7 +26,6 @@ public class UASTrackerScreen : TrackerScreen
     protected override void CompleteTracker()
     {
         base.CompleteTracker();
-
 
         // TODO - remove it later, not clear why was it used
         AppManager.SecondTest = true;

@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 using App.Data.SSA;
 using System;
+using App.Data;
+using App.Data.CSU;
 using MaterialUI;
 
 public class SymptomTrackerScreen : TrackerScreen
 {
     [Header("Notification mess...")] [SerializeField]
     protected GameObject _objectToShow;
-    
+
     private void Start()
     {
         _progressController.OnBackClicked += SetPreviousQuestion;
@@ -15,9 +17,11 @@ public class SymptomTrackerScreen : TrackerScreen
 
     public override void StartTracker()
     {
-        _trackerData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom) as SymptomData;
+        // create new data, because now we don't need to modify existing data until it's been submitted by user in a last step
+        _trackerData = new SymptomData(DateTime.Today);
+
         ScreenManager.Instance.Set(6);
-        
+
         base.StartTracker();
     }
 
@@ -44,7 +48,7 @@ public class SymptomTrackerScreen : TrackerScreen
                     {
                         AppManager.Saanotfn.Add("PLEASE TAKE SYMPTOM TRACKER TEST");
                     }
-    
+
                     if (_objectToShow != null)
                     {
                         _objectToShow.SetActive(true);

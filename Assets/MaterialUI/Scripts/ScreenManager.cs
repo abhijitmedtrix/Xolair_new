@@ -90,6 +90,11 @@ namespace MaterialUI
 
         public void Back()
         {
+            int index = Array.IndexOf(screens, lastScreen);
+            Set(index);
+
+            // TODO - this doesn't work
+            return;
             lastScreen.ShowWithoutTransition();
             currentScreen.Hide();
             ScreenConfig temp = currentScreen;

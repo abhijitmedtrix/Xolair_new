@@ -12,9 +12,12 @@ public class TimePanelController : MonoBehaviour
     private void Start()
     {
         _initialTimeText = _timeText.text;
-        
+
         // set the date
-        _dateText.text = DateTime.Today.ToString("d/M/yyyy");
+
+        string dayInShortCapitals = DateTime.Today.ToString("ddd").ToUpper();
+        string date = DateTime.Today.ToString("d/M/yyyy");
+        _dateText.text = $"{dayInShortCapitals}, {date}";
 
         // set time
         _timeText.text = string.Format(_initialTimeText, DateTime.Now.ToString("hh:mm", CultureInfo.InvariantCulture),

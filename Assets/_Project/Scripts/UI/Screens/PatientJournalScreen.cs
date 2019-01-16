@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 using App.Data;
 using App.Data.CSU;
@@ -11,39 +11,57 @@ using UnityEngine.UI;
 
 public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 {
+    public class GraphData
+    {
+        public GraphData(QuestionBasedTrackerData data, DateTime date, float interpolatedScore, float maxScore)
+        {
+            this.data = data;
+            this.date = date;
+            this.interpolatedScore = interpolatedScore;
+            this.maxScore = maxScore;
+        }
+
+        public QuestionBasedTrackerData data;
+        public DateTime date;
+        public float interpolatedScore;
+        public float maxScore;
+
+        public void UpdateScore(float score)
+        {
+            this.interpolatedScore = score;
+        }
+    }
+
     [SerializeField] protected AppManager.Mode _mode;
+    [SerializeField] protected GraphController _graphController;
+    [SerializeField] protected CSUViewController _CSUViewController;
     [SerializeField] protected GraphRenderer _graphRenderer;
     [SerializeField] protected ScreenConfig _screenConfig;
-    [SerializeField] protected RawImage _graphImage;
     [SerializeField] protected RectTransform _graphContainer;
     [SerializeField] protected RectTransform _scrollerRectTransform;
-    [SerializeField] protected RectTransform _graphPoint;
     [SerializeField] protected Toggle _typeToggle;
 
     [Header("Hints")] [SerializeField] protected Hint _scoreHint;
     [SerializeField] protected Hint _photoHint;
-    [SerializeField] private Show_Images show_Images;
+    [SerializeField] private PhotosScreen photosScreen;
+
+    protected Dictionary<TrackerManager.TrackerType, float> _scrollLastPositions =
+        new Dictionary<TrackerManager.TrackerType, float>();
 
     protected TrackerManager.TrackerType _trackerType;
-    protected int _lastMiddleCellIndex;
-    protected int[] _scoreByDaysRange = new int[7];
-    protected int[] _asthmaByDaysRange = new int[7];
+    private DayScrollItemView _lastActiveCellView;
+    protected int _lastActiveCellIndex = -1;
+    protected int _lastActiveDataIndex = 0;
     protected int _daysToShow;
-
-    protected List<QuestionBasedTrackerData> _datas;
-
-    public TrackerManager.TrackerType trackerType
-    {
-        get { return _trackerType; }
-        set { _trackerType = value; }
-    }
+    protected bool _initialized;
+    protected List<GraphData> _graphDatas = new List<GraphData>();
 
     /// <summary>
     /// In this example we are going to use a standard generic List. We could have used
     /// a SmallList for efficiency, but this is just a demonstration that other list
     /// types can be used.
     /// </summary>
-    private List<DateTime> _data;
+    private List<GraphData> _data;
 
     /// <summary>
     /// Reference to the scrollers
@@ -57,6 +75,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     private void Awake()
     {
+        _typeToggle.onValueChanged.AddListener(OnTrackerTypeToggleValueChanged);
         _screenConfig.OnShowStarted += OnShowStarted;
 
         // setup scroller parameters
@@ -81,135 +100,272 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     private void OnShowStarted()
     {
-        // define what to show
-        if (_mode == AppManager.Mode.SAA)
-        {
-            if (!_typeToggle.isOn)
-            {
-                // show Symptom Tracker (ST)
-            }
-            else
-            {
-                // show Asthma Control Test (AST)
-            }
-        }
-        else if (_mode == AppManager.Mode.CSU)
-        {
-            if (!_typeToggle.isOn)
-            {
-                // show CSU
-            }
-            else
-            {
-                // show UAS
-            }
-        }
+        // initialize only if it's a new tracker type or 1st screen open 
+        // if (_trackerType == DefineTrackerType(_typeToggle.isOn) && _initialized)
+        // {
+        // return;
+        // }
 
-        List<DateTime> maxDateRange = TrackerManager.GetDataDateRange(_trackerType);
+        _trackerType = DefineTrackerType(_typeToggle.isOn);
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        // clear old data
+        Dispose();
+
+        Debug.Log("Tracker type: " + _trackerType);
+
+        _graphContainer.gameObject.SetActive(false);
+        _CSUViewController.gameObject.SetActive(false);
+
+        // hide both hints
+        _scoreHint.UpdateValue(string.Empty);
+        _photoHint.UpdateValue(string.Empty);
+
+        List<DateTime> fullDateRange = TrackerManager.GetDataDateRange(_trackerType);
+
+        // can ba a case when there is no date at all
+        if (fullDateRange == null)
+        {
+            return;
+        }
+        else
+        {
+            Debug.Log("Max date range count: " + fullDateRange.Count);
+        }
 
         // for SAA we should add last some Data to set start with Sunday for weeks display        
         if (_mode == AppManager.Mode.SAA)
         {
-            DateTime firstEntryData = maxDateRange[0];
+            DateTime firstEntryData = fullDateRange[0];
 
             // originally DayOfWeek enum starts with Sunday, so if it's not Sunday, insert some days in a list 
             int dayInt = (int) firstEntryData.DayOfWeek;
 
             for (int i = 0; i < dayInt; i++)
             {
-                maxDateRange.Insert(0, firstEntryData.AddDays(-(i + 1)));
+                fullDateRange.Insert(0, firstEntryData.AddDays(-(i + 1)));
             }
-            
+
             Debug.Log($"Added {dayInt} days");
         }
 
-        SetData(maxDateRange);
+        int maxScore = 0;
+        int numOfLabels = 1;
+
+        switch (_trackerType)
+        {
+            // define what to show
+            case TrackerManager.TrackerType.Symptom:
+                _graphContainer.gameObject.SetActive(true);
+                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Symptom);
+                numOfLabels = 8;
+                break;
+            case TrackerManager.TrackerType.Asthma:
+                _graphContainer.gameObject.SetActive(true);
+                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Asthma);
+                numOfLabels = 13;
+                break;
+            case TrackerManager.TrackerType.CSU:
+                _CSUViewController.gameObject.SetActive(true);
+                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.CSU);
+                break;
+            case TrackerManager.TrackerType.UAS:
+                _graphContainer.gameObject.SetActive(true);
+                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.UAS);
+                numOfLabels = 8;
+                break;
+        }
+
+        Debug.Log("Max score: " + maxScore);
+
+        // fill up all data with struct
+        List<GraphData> listWithData = new List<GraphData>();
+        List<GraphData> interpolationList = new List<GraphData>();
+
+        GraphData graphData;
+        for (int i = 0; i < fullDateRange.Count; i++)
+        {
+            QuestionBasedTrackerData data = TrackerManager.GetData(fullDateRange[i], _trackerType, false);
+
+            // create default struct
+            graphData = new GraphData(data, fullDateRange[i], 0, maxScore);
+
+            // if some entry exist at this date that GraphStruct will be 1 of 2 interpolation side values
+            if (data != null)
+            {
+                listWithData.Add(graphData);
+                graphData.UpdateScore(data.GetScore());
+
+                // each time new entry with data is added need to interpolate all values between 2 entries
+                if (listWithData.Count > 1)
+                {
+                    InterpolateData(listWithData[0].interpolatedScore,
+                        listWithData[listWithData.Count - 1].interpolatedScore, interpolationList);
+
+                    // remove 1st base object used in last interpolation
+                    listWithData.RemoveAt(0);
+
+                    interpolationList.Clear();
+                }
+            }
+            else
+            {
+                // add to interpolation list which will be used later to fill up middle values for dates, without data
+                interpolationList.Add(graphData);
+            }
+
+            _graphDatas.Add(graphData);
+        }
 
         // set up the scroller delegates
         scroller.Delegate = this;
         scroller.scrollerScrolled = ScrollerScrolled;
 
+        // set scroller data
+        SetData(_graphDatas);
+
         // Debug.Log(
-            // $"First date: {maxDateRange[0]}, max date range to show: {maxDateRange.Count}, Last date: {maxDateRange[maxDateRange.Count - 1]}");
+        // $"First date: {fullDateRange[0]}, max date range to show: {fullDateRange.Count}, Last date: {fullDateRange[fullDateRange.Count - 1]}");
 
-        int maxScore = 0;
-
-        _photoHint.gameObject.SetActive(false);
-
-        switch (_trackerType)
+        // if it's a mode with active graph controller
+        if (_trackerType != TrackerManager.TrackerType.CSU)
         {
-            // CSU
-            case TrackerManager.TrackerType.CSU:
-                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.CSU);
-                break;
-            case TrackerManager.TrackerType.UAS:
-                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.UAS);
-                _photoHint.gameObject.SetActive(true);
-                break;
+            // update graph mesh, labels and other data
+            _graphController.Initialize(_graphDatas.ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
+                _daysToShow, numOfLabels);
 
-            // SAA
-            case TrackerManager.TrackerType.Asthma:
-                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Asthma);
-                break;
-            case TrackerManager.TrackerType.Symptom:
-                maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Symptom);
-                break;
+            _graphController.UpdateCameraView(scroller.NormalizedScrollPosition);
         }
 
-        // Debug.Log(maxScore);
-        // _graphRenderer.Init(maxScore, _daysToShow);
-        // _graphImage.texture = _graphRenderer.GetRenderTexture();
-
-        // update graph by middle index
-        // SetDateRange(maxDateRange.Count - 4);
-
-        // scroll to the end
-        // scroller.JumpToDataIndex(maxDateRange.Count - 1);
+        Debug.Log("Data count: " + _data.Count);
+        _initialized = true;
     }
 
-    public void SwitchTrackerType(TrackerManager.TrackerType type)
+    private void InterpolateData(float startValue, float endValue, List<GraphData> list)
     {
-        trackerType = type;
+        float interval = 1f / (list.Count + 1);
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            GraphData obj = list[i];
+            obj.interpolatedScore = Mathf.Lerp(startValue, endValue, interval * i);
+        }
     }
 
-    public void OnDragStart()
+    private TrackerManager.TrackerType DefineTrackerType(bool toggleIsOn)
     {
-        scroller.snapping = false;
+        Debug.Log("toggleIsOn: " + toggleIsOn);
+
+        // define what to show
+        if (_mode == AppManager.Mode.SAA)
+        {
+            if (!toggleIsOn)
+            {
+                return TrackerManager.TrackerType.Symptom;
+            }
+            else
+            {
+                return TrackerManager.TrackerType.Asthma;
+            }
+        }
+        else
+        {
+            if (!toggleIsOn)
+            {
+                return TrackerManager.TrackerType.CSU;
+            }
+            else
+            {
+                return TrackerManager.TrackerType.UAS;
+            }
+        }
     }
 
-    public void OnDragStop()
+    private void OnTrackerTypeToggleValueChanged(bool toggleIsOn)
     {
-        scroller.snapping = true;
+        _trackerType = DefineTrackerType(toggleIsOn);
+        Initialize();
     }
 
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
-        // Debug.Log($"_lastMiddleCellIndex: {_lastMiddleCellIndex}, closest cell: {scroller.GetClosestCell()}");
-        int focusedCellIndex = scroller.GetClosestCell();
+        int currentActiveCellIndex = scroller.GetClosestCellIndex();
+        // Debug.Log($"focusedCellIndex: {currentActiveCellIndex}, total data count: {_data.Count}");
 
         // check is start and end cell items indexes are in a range of 7 days and value not equals to previously cached value
-        if (_lastMiddleCellIndex != focusedCellIndex && focusedCellIndex - 3 >= 0 && focusedCellIndex + 3 < _data.Count)
+        if (_lastActiveCellIndex != currentActiveCellIndex && currentActiveCellIndex > -1 &&
+            currentActiveCellIndex < _data.Count)
         {
-            _lastMiddleCellIndex = scroller.GetClosestCell();
+            _lastActiveCellIndex = currentActiveCellIndex;
 
-            // update date range
-            SetDateRange(_lastMiddleCellIndex);
+            EnhancedScrollerCellView activeCell = scroller.GetClosestCellView();
+
+            if (activeCell != null)
+            {
+                _lastActiveDataIndex = activeCell.dataIndex;
+
+                // set focus of cells only for daily view in CSU mode
+                if (_mode == AppManager.Mode.CSU)
+                {
+                    if (activeCell != null)
+                    {
+                        _lastActiveCellView?.SetFocus(false);
+
+                        _lastActiveCellView = (activeCell as DayScrollItemView);
+                        // Debug.Log(
+                        // $"active cell data: {_lastActiveCellView.graphData.data}, date: {_lastActiveCellView.graphData.date}, value: {_lastActiveCellView.graphData.interpolatedScore}");
+                        _lastActiveCellView.SetFocus(true);
+                    }
+                }
+            }
         }
 
-        // for debug only
-        /*
-        if (scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) != null)
+        // Debug.Log($"_data count: {_data.Count}, _lastActiveDataIndex: {_lastActiveDataIndex}, data: {_data[_lastActiveDataIndex].data}");
+        QuestionBasedTrackerData data = _data[_lastActiveDataIndex].data;
+
+        // for CSU
+        if (_trackerType == TrackerManager.TrackerType.CSU)
         {
-            CalendarScrollItemView itemView =
-                scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) as CalendarScrollItemView;
-            Debug.Log("Get closest point: " + _lastMiddleCellIndex
-                                            + " with data " + itemView.data.ToShortDateString());
+            Debug.Log("data: " + data);
+
+            // hide by default
+            _photoHint.UpdateValue(null);
+
+            if (data != null)
+            {
+                // if there are some photos
+                int numOfPhotos = (data as CSUData).GetPhotosCount();
+                // Debug.Log("Photos count: " + numOfPhotos);
+                if (numOfPhotos > 0)
+                {
+                    _photoHint.UpdateValue(numOfPhotos.ToString());
+                }
+            }
+
+            _CSUViewController.UpdateData(data as CSUData);
+        }
+        // if using the graph (3 of 4 trackers)
+        else
+        {
+            // move graph camera together with a slider
+            _graphController.UpdateCameraView(val.x);
+
+            // set score
+            _scoreHint.UpdateValue(data == null ? string.Empty : data.GetScore().ToString());
+        }
+
+        // cache last scroll position to restore last position on screen Hide >> Show or tracker type change
+        if (_scrollLastPositions.ContainsKey(_trackerType))
+        {
+            _scrollLastPositions[_trackerType] = val.x;
         }
         else
         {
-            Debug.Log("Get closest point: " + _lastMiddleCellIndex);
+            _scrollLastPositions.Add(_trackerType, val.x);
         }
-        */
     }
 
     public void SetType(TrackerManager.TrackerType type)
@@ -217,159 +373,52 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _trackerType = type;
     }
 
-    public void SetData(List<DateTime> datas)
+    public void SetData(List<GraphData> graphDatas)
     {
-        _data = datas;
+        _data = graphDatas;
+
+        float scrollPosition;
+        // if some value been cached before
+        if (!_scrollLastPositions.TryGetValue(_trackerType, out scrollPosition))
+        {
+            scrollPosition = 1;
+        }
 
         // tell the scroller to reload now that we have the data
-        scroller.ReloadData();
-
-        // update graph paddings
-        Vector2 min = _graphContainer.offsetMin;
-        Vector2 max = _graphContainer.offsetMax;
-        min.x = _scrollerRectTransform.rect.width / 7 / 2f;
-        max.x = -_scrollerRectTransform.rect.width / 7 / 2f;
-        _graphContainer.offsetMin = min;
-        _graphContainer.offsetMax = max;
+        scroller.ReloadData(scrollPosition);
+        
+        // we need to snap immediately but scroller asset got some limitation here, thats why need to use this workaround
+        EnhancedScroller.TweenType tween = scroller.snapTweenType;
+        scroller.snapTweenType = EnhancedScroller.TweenType.immediate;
+        scroller.Snap();
+        scroller.snapTweenType = tween;
     }
 
-    private void SetDateRange(int middleIndex)
+    private IEnumerator WaitForFrameRoutine()
     {
-        // get score points for current period
-        int counter = 0;
-        for (int i = middleIndex - 3; i < middleIndex + 4; i++)
-        {
-            if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
-            {
-                //roman
-                //_scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.CSU)
-                //+
-                //TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
-                _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.UAS);
-            }
-            // else
-            //{
-            //    _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma)
-            //                                 +
-            //                                 TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
-            //}
-            else if (_trackerType == TrackerManager.TrackerType.Asthma ||
-                     _trackerType == TrackerManager.TrackerType.Symptom)
-            {
-                _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
-                _asthmaByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Asthma);
-                // Debug.Log(_asthmaByDaysRange[counter]);
-            }
-            //else if(_trackerType==TrackerManager.TrackerType.Symptom)
-            //{
-            //    _scoreByDaysRange[counter] = TrackerManager.GetScore(_data[i], TrackerManager.TrackerType.Symptom);
-            //}
-
-            // Debug.Log(
-            // $"Updated score for data: {_data[i].ToShortDateString()}, total score is: {_scoreByDaysRange[counter]}");
-            counter++;
-        }
-
-        Debug.Log(
-            $"Date range defined. Min: {_data[middleIndex - 3].ToShortDateString()} and Max: {_data[middleIndex + 3].ToShortDateString()}");
-
-        // update graph mesh
-        _graphRenderer.UpdateGraph(_scoreByDaysRange);
-
-        // transform render texture (graph camera) point position to UI graph
-        Vector3 viewportPos = _graphRenderer.GetLastDayPointViewportPosition();
-        Vector3 localPos = new Vector3(_graphContainer.rect.width * _graphContainer.pivot.x,
-            _graphContainer.rect.height * viewportPos.y, 0);
-
-        // set point
-        _graphPoint.localPosition = localPos;
-
-        // update score hint
-        //roman
-        //_scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString());
-        //praveen
-        if (_trackerType == TrackerManager.TrackerType.Symptom || _trackerType == TrackerManager.TrackerType.Asthma)
-        {
-            //  Debug.Log(_scoreByDaysRange[_scoreByDaysRange.Length - 1]);
-
-            //  Debug.Log(_asthmaByDaysRange[_asthmaByDaysRange.Length - 1]);
-            string asthmaval = (((float) _asthmaByDaysRange[_asthmaByDaysRange.Length - 1]) / 36f).ToString();
-
-            //Debug.Log(asthmaval);
-            if (asthmaval.Length > 1)
-            {
-                _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString(),
-                    asthmaval.Substring(0, 3));
-            }
-            else
-            {
-                _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString(), asthmaval);
-            }
-
-            //_scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString(),asthmaval.ToString());
-        }
-        else
-        {
-            _scoreHint.UpdateValue(_scoreByDaysRange[_scoreByDaysRange.Length - 1].ToString());
-        }
-
-        // update photo hint if needed
-        if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
-        {
-            CSUData csuData =
-                TrackerManager.GetData(_data[_lastMiddleCellIndex + 3], TrackerManager.TrackerType.CSU) as CSUData;
-            // if data exists
-            if (csuData != null)
-            {
-                int photosCount = csuData.GetPhotosCount();
-
-                // don't show it if it's 0, there will be a UI positioning issue + it's not needed at all 
-                _photoHint.gameObject.SetActive(photosCount != 0);
-
-                // update photos count text
-                _photoHint.UpdateValue(photosCount.ToString());
-
-                // set it to the left of point 
-                _photoHint.rectTransform.localPosition = _graphPoint.localPosition - Vector3.right * 100;
-            }
-            else
-            {
-                _photoHint.gameObject.SetActive(false);
-            }
-        }
+        yield return null;
     }
 
     public void ShowPhotosPopup()
     {
         // update photo hint if needed
-        if (_trackerType == TrackerManager.TrackerType.CSU || _trackerType == TrackerManager.TrackerType.UAS)
+        if (_trackerType == TrackerManager.TrackerType.CSU)
         {
             CSUData csuData =
-                TrackerManager.GetData(_data[_lastMiddleCellIndex + 3], TrackerManager.TrackerType.CSU) as CSUData;
+                TrackerManager.GetData(_data[_lastActiveCellIndex].date, TrackerManager.TrackerType.CSU) as CSUData;
+
             // if data exists
             if (csuData != null)
             {
                 Texture2D[] textures = csuData.GetAllPhotos();
-                if (textures.Length != 0)
-                {
-                    AppManager.Images.Clear();
-
-                    foreach (Texture2D tx in textures)
-                    {
-                        AppManager.Images.Add(tx);
-                    }
-
-                    show_Images.set();
-                }
-
-                // TODO - implement popup update here
-                Debug.Log("Textures count to open: " + textures.Length);
+                photosScreen.Show(textures, csuData.GetDate());
             }
         }
     }
 
     public void Dispose()
     {
+        _graphDatas.Clear();
         _data = null;
 
         // set up the scroller delegates
@@ -425,32 +474,35 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         cellView.name = "Cell " + dataIndex.ToString();
 
         // in this example, we just pass the data to our cell's view which will update its UI
-        DateTime firstDate = _data[0];
-        DateTime data = _data[dataIndex];
+        DateTime firstDate = _data[0].date;
+        GraphData graphData = _data[dataIndex];
 
         // define what data to provide
         if (_mode == AppManager.Mode.SAA)
         {
+            // Debug.Log($"data date: {data.date}, firstDate: {firstDate}");
             // show week text only for the 1st day of the week (Sunday)
-            if (data.DayOfWeek == DayOfWeek.Sunday)
+            if (graphData.date.DayOfWeek == DayOfWeek.Sunday)
             {
                 // check num of week
-                int numOfWeek = Mathf.FloorToInt(data.Subtract(firstDate).Days / 7) + 1;
+                int numOfWeek = Mathf.FloorToInt(graphData.date.Subtract(firstDate).Days / 7f) + 1;
 
-                DateTime periodEndDate = data.AddDays(7);
+                DateTime periodEndDate = graphData.date.AddDays(7);
 
-                cellView.SetData(data, false, numOfWeek, new StringBuilder(data.FormatToDateMonth()).Append("-").Append(periodEndDate.FormatToDateMonth()).ToString());
+                cellView.SetData(graphData, false, numOfWeek,
+                    new StringBuilder(graphData.date.FormatToDateMonth()).Append("-")
+                        .Append(periodEndDate.FormatToDateMonth())
+                        .ToString());
             }
             else
             {
-                cellView.SetData(data, false);
+                cellView.SetData(graphData, false);
             }
         }
         else
         {
-            cellView.SetData(data, true);
+            cellView.SetData(graphData, true);
         }
-
 
         // return the cell to the scroller
         return cellView;
@@ -462,19 +514,17 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void NextDay()
     {
-        if (_lastMiddleCellIndex + 4 < _data.Count)
+        if (_lastActiveCellIndex + 4 < _data.Count)
         {
-            _lastMiddleCellIndex++;
-            SetDateRange(_lastMiddleCellIndex);
+            _lastActiveCellIndex++;
         }
     }
 
     public void PrevDay()
     {
-        if (_lastMiddleCellIndex - 4 >= 0)
+        if (_lastActiveCellIndex - 4 >= 0)
         {
-            _lastMiddleCellIndex--;
-            SetDateRange(_lastMiddleCellIndex);
+            _lastActiveCellIndex--;
         }
     }
 

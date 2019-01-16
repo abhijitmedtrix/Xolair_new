@@ -29,7 +29,6 @@ public class AppManager : MonoSingleton<AppManager>
 
     public static bool FirstTest, SecondTest;
     public static string User_name;
-    public static List<Texture2D> Images;
     public static string UserName, Gender, Age;
     public static string Password = "xolair";
     public static int AnswerIndx;
@@ -42,7 +41,6 @@ public class AppManager : MonoSingleton<AppManager>
         // Debug.Log(UnityEngine.iOS.CalendarUnit.Year);
         FirstTest = false;
         SecondTest = false;
-        Images = new List<Texture2D>();
         //  Debug.Log(DateTime.Today.DayOfYear);
         //PlayerPrefs.DeleteAll();
         currentinfo[2].text =
