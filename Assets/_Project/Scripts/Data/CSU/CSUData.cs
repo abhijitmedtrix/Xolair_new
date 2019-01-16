@@ -123,18 +123,18 @@ namespace App.Data.CSU
         {
             return GetAnswers(_activeBodyPart);
         }
-        
+
         public List<Answer> GetAnswers(BodyPart bp)
         {
             return _answersDict[bp];
         }
-        
+
         public string GetAnswerDescription(int questionIndex, BodyPart bodyPart)
         {
             int answerIndex = _answersDict[bodyPart][questionIndex].option;
             return questionDataList[questionIndex].answersOption[answerIndex].description;
         }
-        
+
         public override void SetAnswers(List<Answer> answers)
         {
             _answersDict[_activeBodyPart].Clear();
@@ -144,7 +144,7 @@ namespace App.Data.CSU
         public override QuestionData SetAnswer(QuestionData question, int option)
         {
             _currentQuestionIndex = questionDataList.IndexOf(question);
-            
+
             List<Answer> answers = _answersDict[_activeBodyPart];
             answers[_currentQuestionIndex].option = option;
 
@@ -231,6 +231,32 @@ namespace App.Data.CSU
             }
         }
 
+        /// <summary>
+        /// Check is there any photos at all and get num of.
+        /// </summary>
+        /// <returns>Num of photos in sub directories</returns>
+        public int GetPhotosCount()
+        {
+            string folderPath = Path.Combine(Helper.GetDataPath(), CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"));
+            FileInfo[] fileList = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
+            return fileList.Length;
+        }
+
+        public Texture2D[] GetAllPhotos()
+        {
+            string folderPath = Path.Combine(Helper.GetDataPath(), CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"));
+            FileInfo[] files = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
+            Texture2D[] textures = new Texture2D[files.Length];
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                textures[i] = new Texture2D(2, 2);
+                textures[i].LoadImage(File.ReadAllBytes(files[i].FullName));
+            }
+
+            return textures;
+        }
+
         public Texture2D[] GetPhotos(BodyPart bodyPart)
         {
             string folderPath = Path.Combine(Helper.GetDataPath(), CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"),
@@ -256,46 +282,6 @@ namespace App.Data.CSU
             {
                 textures[i] = new Texture2D(2, 2);
                 textures[i].LoadImage(File.ReadAllBytes(files[i].FullName));
-            }
-
-            return textures;
-        }
-
-        public int GetPhotosCount()
-        {
-            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
-                this.GetDate().ToString("dd-MM-yyyy"));
-
-            DirectoryInfo directory = new DirectoryInfo(folderPath);
-            if (!directory.Exists)
-            {
-                Debug.LogWarning("No such directory found: " + directory.FullName);
-                return 0;
-            }
-
-            return Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories).Length;
-        }
-
-        public Texture2D[] GetAllPhotos()
-        {
-            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
-                this.GetDate().ToString("dd-MM-yyyy"));
-
-            DirectoryInfo directory = new DirectoryInfo(folderPath);
-            if (!directory.Exists)
-            {
-                Debug.LogWarning("No such directory found: " + directory.FullName);
-                return null;
-            }
-
-            string[] files = Directory.GetFiles(folderPath, "*.*", SearchOption.AllDirectories);
-
-            // load all existing textures
-            Texture2D[] textures = new Texture2D[files.Length];
-            for (int i = 0; i < files.Length; i++)
-            {
-                textures[i] = new Texture2D(2, 2);
-                textures[i].LoadImage(File.ReadAllBytes(files[i]));
             }
 
             return textures;

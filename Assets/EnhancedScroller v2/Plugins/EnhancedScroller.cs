@@ -1569,6 +1569,12 @@ namespace EnhancedUI.EnhancedScroller
             else
                 go.AddComponent<HorizontalLayoutGroup>();
             _container = go.GetComponent<RectTransform>();
+            
+            // modification by Roman
+            _container.SetParent(_scrollRect.viewport);
+            _container.anchorMin = Vector2.zero;
+            _container.anchorMax = Vector2.one;
+            _container.offsetMin = _container.offsetMax = Vector2.zero;
 
             // set the containers anchor and pivot
             if (scrollDirection == ScrollDirectionEnum.Vertical)

@@ -7,8 +7,8 @@ namespace Draw2DShapesLite
     /// <summary>
     /// Draw 2D shapes on the scene of the Unity
     /// </summary>
-    public class Draw2D : MonoBehaviour {
-
+    public class Draw2D : MonoBehaviour
+    {
         public enum UVType
         {
             fit,
@@ -19,6 +19,7 @@ namespace Draw2DShapesLite
         /// Generate a Mesh for this shape?
         /// </summary>
         public bool generateMesh = true;
+
         /// <summary>
         /// Generate a collider for this shape?
         /// </summary>
@@ -28,6 +29,7 @@ namespace Draw2DShapesLite
         /// All points that will be used as vertices for the shape
         /// </summary>
         public List<Vector3> vertices = new List<Vector3>();
+
         /// <summary>
         /// Triangles that will be used for the shape
         /// </summary>
@@ -42,10 +44,10 @@ namespace Draw2DShapesLite
         /// Mesh for the shape
         /// </summary>
         protected Mesh mesh;
-       
-       /// <summary>
-       /// Remove all the vertices(points) for the shape
-       /// </summary>
+
+        /// <summary>
+        /// Remove all the vertices(points) for the shape
+        /// </summary>
         public void CleanVertices()
         {
             vertices.Clear();
@@ -63,7 +65,7 @@ namespace Draw2DShapesLite
             triangles.Clear();
 
             //2D points for the Polygon collider
-			Vector2[] vertices2D = new Vector2[vertices.Count];
+            Vector2[] vertices2D = new Vector2[vertices.Count];
 
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -71,19 +73,19 @@ namespace Draw2DShapesLite
             }
 
             //Triangulate the indices for the mesh
-			Triangulator tri = new Triangulator(vertices2D);
+            Triangulator tri = new Triangulator(vertices2D);
             int[] indices = tri.Triangulate();
-            
+
             //Assing data for the new mesh
             mesh.vertices = vertices.ToArray();
             mesh.triangles = indices;
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
-            
+
 
             MeshFilter filter = GetComponent<MeshFilter>();
             MeshRenderer renderer = GetComponent<MeshRenderer>();
-            
+
             //Create the components if have a mesh
             if (generateMesh)
             {
@@ -99,11 +101,13 @@ namespace Draw2DShapesLite
 
                 Vector2[] uv = new Vector2[vertices.Count];
 
-                if(uvType == UVType.fit)
+                if (uvType == UVType.fit)
                 {
                     for (int i = 0; i < vertices.Count; i++)
                     {
-                        uv[i] = new Vector2((vertices[i].x - mesh.bounds.min.x) / (mesh.bounds.max.x - mesh.bounds.min.x), (vertices[i].y - mesh.bounds.min.y) / (mesh.bounds.max.y - mesh.bounds.min.y));
+                        uv[i] = new Vector2(
+                            (vertices[i].x - mesh.bounds.min.x) / (mesh.bounds.max.x - mesh.bounds.min.x),
+                            (vertices[i].y - mesh.bounds.min.y) / (mesh.bounds.max.y - mesh.bounds.min.y));
                     }
                 }
                 else
@@ -115,7 +119,6 @@ namespace Draw2DShapesLite
                 }
 
                 mesh.uv = uv;
-
             }
             //Else, destroy the components for the mesh
             else
@@ -142,10 +145,6 @@ namespace Draw2DShapesLite
                     DestroyImmediate(collider);
             }
             */
-
         }
-
-       
-       
     }
 }

@@ -34,8 +34,8 @@ public class DayScrollItemView : EnhancedScrollerCellView
 
         DateTime dt = data.date;
         
-        // Debug.Log(
-        // $"newData: {newData.ToShortDateString()}, showDay: {showDay}, numOfWeek: {numOfWeek}, weekDateRange: {weekDateRange}");
+        Debug.Log(
+        $"newData: {newData.date.ToShortDateString()}, showDay: {showDay}, numOfWeek: {numOfWeek}, weekDateRange: {weekDateRange}");
         if (numOfWeek > -1)
         {
             _text.text = string.Format(_initialTextFormat, "WEEK" + numOfWeek, weekDateRange);

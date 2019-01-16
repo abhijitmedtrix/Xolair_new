@@ -326,10 +326,30 @@ public class Weather_Manager : MonoBehaviour
             x++;
             Forecast_obj[i].transform.GetChild(0).GetComponent<Text>().text =
                 DateTime.Now.AddDays(x).DayOfWeek.ToString();
-            string[] eee1 = Forecast_data[i].GetField("weather").ToString().Split(',');
-            string[] temp = eee1[2].Split(':');
-            string temp1 = temp[1].Replace('"', ' ');
-            Forecast_obj[i].transform.GetChild(1).GetComponent<Text>().text = temp1;
+
+            // TODO - had an errors on some app start with related to out of range array element request
+            if (Forecast_data.Count > i)
+            {
+                string[] eee1 = Forecast_data[i].GetField("weather").ToString().Split(',');
+                if (eee1.Length > 2)
+                {
+                    string[] temp = eee1[2].Split(':');
+
+                    if (temp.Length > 1)
+                    {
+                        string temp1 = temp[1].Replace('"', ' ');
+                        Forecast_obj[i].transform.GetChild(1).GetComponent<Text>().text = temp1;
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Requesting wrong data");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Requesting wrong data");
+                }
+            }
         }
     }
 
