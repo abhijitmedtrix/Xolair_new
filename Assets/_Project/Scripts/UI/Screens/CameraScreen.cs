@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using MaterialUI;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CameraScreen : MonoBehaviour
@@ -50,5 +51,7 @@ public class CameraScreen : MonoBehaviour
     {
         CameraManager.StopCamera();
         _snapshotImage.gameObject.SetActive(false);
+        
+        ScreenManager.Instance.Back();
     }
 }

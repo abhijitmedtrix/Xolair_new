@@ -11,12 +11,12 @@ using UnityEngine.UI;
 
 public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 {
-    public struct GraphScruct
+    public class GraphData
     {
-        public GraphScruct(QuestionBasedTrackerData data, DateTime date, float interpolatedScore, float maxScore)
+        public GraphData(QuestionBasedTrackerData data, DateTime date, float interpolatedScore, float maxScore)
         {
             this.data = data;
-            this.data = data;
+            this.date = date;
             this.interpolatedScore = interpolatedScore;
             this.maxScore = maxScore;
         }
@@ -25,6 +25,11 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         public DateTime date;
         public float interpolatedScore;
         public float maxScore;
+
+        public void UpdateScore(float score)
+        {
+            this.interpolatedScore = score;
+        }
     }
 
     [SerializeField] protected AppManager.Mode _mode;
@@ -35,32 +40,28 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     [SerializeField] protected RectTransform _graphContainer;
     [SerializeField] protected RectTransform _scrollerRectTransform;
     [SerializeField] protected Toggle _typeToggle;
-    [SerializeField] protected Canvas _canvas;
-    [SerializeField] protected CanvasGroup _canvasGroup;
 
     [Header("Hints")] [SerializeField] protected Hint _scoreHint;
     [SerializeField] protected Hint _photoHint;
     [SerializeField] private PhotosScreen photosScreen;
 
-    protected float _cellSize = 2;
+    protected Dictionary<TrackerManager.TrackerType, float> _scrollLastPositions =
+        new Dictionary<TrackerManager.TrackerType, float>();
+
     protected TrackerManager.TrackerType _trackerType;
-    protected int _lastMiddleCellIndex;
+    private DayScrollItemView _lastActiveCellView;
+    protected int _lastActiveCellIndex = -1;
+    protected int _lastActiveDataIndex = 0;
     protected int _daysToShow;
     protected bool _initialized;
-    protected List<GraphScruct> _graphDatas = new List<GraphScruct>();
-
-    public TrackerManager.TrackerType trackerType
-    {
-        get { return _trackerType; }
-        set { _trackerType = value; }
-    }
+    protected List<GraphData> _graphDatas = new List<GraphData>();
 
     /// <summary>
     /// In this example we are going to use a standard generic List. We could have used
     /// a SmallList for efficiency, but this is just a demonstration that other list
     /// types can be used.
     /// </summary>
-    private List<GraphScruct> _data;
+    private List<GraphData> _data;
 
     /// <summary>
     /// Reference to the scrollers
@@ -74,7 +75,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     private void Awake()
     {
-        _typeToggle.onValueChanged.AddListener(value => SwitchTrackerType());
+        _typeToggle.onValueChanged.AddListener(OnTrackerTypeToggleValueChanged);
         _screenConfig.OnShowStarted += OnShowStarted;
 
         // setup scroller parameters
@@ -95,28 +96,28 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         RectOffset offset = scroller.padding;
         offset.left = offset.right = Mathf.RoundToInt(_scrollerRectTransform.rect.width / 2);
         scroller.padding = offset;
-        // scroller.spacing = Mathf.RoundToInt(_scrollerRectTransform.rect.width / _daysToShow - _cellSize);
     }
 
     private void OnShowStarted()
     {
         // initialize only if it's a new tracker type or 1st screen open 
-        if (trackerType == DefineTrackerType() && _initialized)
-        {
-            return;
-        }
+        // if (_trackerType == DefineTrackerType(_typeToggle.isOn) && _initialized)
+        // {
+        // return;
+        // }
 
-        trackerType = DefineTrackerType();
-
+        _trackerType = DefineTrackerType(_typeToggle.isOn);
         Initialize();
     }
 
-    private async void Initialize()
+    private void Initialize()
     {
-        // hide graph content until it's initializes and scrolled properly
-        _canvas.enabled = false;
+        // clear old data
+        Dispose();
 
-        _graphController.gameObject.SetActive(false);
+        Debug.Log("Tracker type: " + _trackerType);
+
+        _graphContainer.gameObject.SetActive(false);
         _CSUViewController.gameObject.SetActive(false);
 
         // hide both hints
@@ -124,8 +125,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _photoHint.UpdateValue(string.Empty);
 
         List<DateTime> fullDateRange = TrackerManager.GetDataDateRange(_trackerType);
-
-        Debug.Log("Max date range: " + fullDateRange);
 
         // can ba a case when there is no date at all
         if (fullDateRange == null)
@@ -154,7 +153,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
 
         int maxScore = 0;
-        int numOfLabels = 6;
+        int numOfLabels = 1;
 
         switch (_trackerType)
         {
@@ -162,11 +161,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             case TrackerManager.TrackerType.Symptom:
                 _graphContainer.gameObject.SetActive(true);
                 maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Symptom);
+                numOfLabels = 8;
                 break;
             case TrackerManager.TrackerType.Asthma:
                 _graphContainer.gameObject.SetActive(true);
                 maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.Asthma);
-                numOfLabels = 12;
+                numOfLabels = 13;
                 break;
             case TrackerManager.TrackerType.CSU:
                 _CSUViewController.gameObject.SetActive(true);
@@ -175,91 +175,94 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             case TrackerManager.TrackerType.UAS:
                 _graphContainer.gameObject.SetActive(true);
                 maxScore = TrackerManager.GetMaxScore(TrackerManager.TrackerType.UAS);
+                numOfLabels = 8;
                 break;
         }
 
         Debug.Log("Max score: " + maxScore);
 
         // fill up all data with struct
-        List<GraphScruct> listWithData = new List<GraphScruct>();
-        List<GraphScruct> interpolationList = new List<GraphScruct>();
+        List<GraphData> listWithData = new List<GraphData>();
+        List<GraphData> interpolationList = new List<GraphData>();
 
+        GraphData graphData;
         for (int i = 0; i < fullDateRange.Count; i++)
         {
-            QuestionBasedTrackerData data = TrackerManager.GetData(fullDateRange[i], _trackerType);
+            QuestionBasedTrackerData data = TrackerManager.GetData(fullDateRange[i], _trackerType, false);
 
             // create default struct
-            GraphScruct graphData = new GraphScruct(data, fullDateRange[i], -1, maxScore);
+            graphData = new GraphData(data, fullDateRange[i], 0, maxScore);
 
-            // add to interpolation list which will be used later to fill up middle values for dates, without data
-            interpolationList.Add(graphData);
-
+            // if some entry exist at this date that GraphStruct will be 1 of 2 interpolation side values
             if (data != null)
             {
                 listWithData.Add(graphData);
-                graphData.interpolatedScore = data.GetScore();
+                graphData.UpdateScore(data.GetScore());
 
                 // each time new entry with data is added need to interpolate all values between 2 entries
                 if (listWithData.Count > 1)
                 {
-                    InterpolateData(interpolationList);
-                }
+                    InterpolateData(listWithData[0].interpolatedScore,
+                        listWithData[listWithData.Count - 1].interpolatedScore, interpolationList);
 
-                interpolationList.Clear();
+                    // remove 1st base object used in last interpolation
+                    listWithData.RemoveAt(0);
+
+                    interpolationList.Clear();
+                }
+            }
+            else
+            {
+                // add to interpolation list which will be used later to fill up middle values for dates, without data
+                interpolationList.Add(graphData);
             }
 
             _graphDatas.Add(graphData);
         }
 
-        // set scroller data
-        SetData(_graphDatas);
-
         // set up the scroller delegates
         scroller.Delegate = this;
         scroller.scrollerScrolled = ScrollerScrolled;
 
-        Debug.Log(
-        $"First date: {fullDateRange[0]}, max date range to show: {fullDateRange.Count}, Last date: {fullDateRange[fullDateRange.Count - 1]}");
+        // set scroller data
+        SetData(_graphDatas);
+
+        // Debug.Log(
+        // $"First date: {fullDateRange[0]}, max date range to show: {fullDateRange.Count}, Last date: {fullDateRange[fullDateRange.Count - 1]}");
 
         // if it's a mode with active graph controller
         if (_trackerType != TrackerManager.TrackerType.CSU)
         {
             // update graph mesh, labels and other data
-            _graphController.Initialize(_graphDatas.ToArray(), _mode == AppManager.Mode.SAA, false, maxScore,
+            _graphController.Initialize(_graphDatas.ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
                 _daysToShow, numOfLabels);
+
+            _graphController.UpdateCameraView(scroller.NormalizedScrollPosition);
         }
 
         Debug.Log("Data count: " + _data.Count);
-
-        // wait to allow scroller update
-        await WaitForFrameRoutine();
-
-        // scroll to the end
-        scroller.JumpToDataIndex(_data.Count - 1);
-
-        _canvas.enabled = true;
         _initialized = true;
     }
 
-    private void InterpolateData(List<GraphScruct> list)
+    private void InterpolateData(float startValue, float endValue, List<GraphData> list)
     {
-        float start = list[0].interpolatedScore;
-        float end = list[list.Count - 1].interpolatedScore;
-        float interval = 1 / list.Count - 1;
+        float interval = 1f / (list.Count + 1);
 
-        for (int i = 1; i < list.Count - 1; i++)
+        for (int i = 0; i < list.Count; i++)
         {
-            GraphScruct obj = list[i];
-            obj.interpolatedScore = Mathf.Lerp(start, end, interval * i);
+            GraphData obj = list[i];
+            obj.interpolatedScore = Mathf.Lerp(startValue, endValue, interval * i);
         }
     }
 
-    private TrackerManager.TrackerType DefineTrackerType()
+    private TrackerManager.TrackerType DefineTrackerType(bool toggleIsOn)
     {
+        Debug.Log("toggleIsOn: " + toggleIsOn);
+
         // define what to show
         if (_mode == AppManager.Mode.SAA)
         {
-            if (!_typeToggle.isOn)
+            if (!toggleIsOn)
             {
                 return TrackerManager.TrackerType.Symptom;
             }
@@ -270,7 +273,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
         else
         {
-            if (!_typeToggle.isOn)
+            if (!toggleIsOn)
             {
                 return TrackerManager.TrackerType.CSU;
             }
@@ -281,53 +284,65 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
     }
 
-    public void SwitchTrackerType()
+    private void OnTrackerTypeToggleValueChanged(bool toggleIsOn)
     {
-        DefineTrackerType();
+        _trackerType = DefineTrackerType(toggleIsOn);
         Initialize();
-    }
-
-    public void OnDragStart()
-    {
-        scroller.snapping = false;
-    }
-
-    public void OnDragStop()
-    {
-        scroller.snapping = true;
     }
 
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
-        // Debug.Log($"_lastMiddleCellIndex: {_lastMiddleCellIndex}, closest cell: {scroller.GetClosestCell()}");
-        int focusedCellIndex = scroller.GetClosestCell();
+        int currentActiveCellIndex = scroller.GetClosestCellIndex();
+        // Debug.Log($"focusedCellIndex: {currentActiveCellIndex}, total data count: {_data.Count}");
 
         // check is start and end cell items indexes are in a range of 7 days and value not equals to previously cached value
-        if (_lastMiddleCellIndex != focusedCellIndex && focusedCellIndex - 3 >= 0 && focusedCellIndex + 3 < _data.Count)
+        if (_lastActiveCellIndex != currentActiveCellIndex && currentActiveCellIndex > -1 &&
+            currentActiveCellIndex < _data.Count)
         {
-            _lastMiddleCellIndex = scroller.GetClosestCell();
+            _lastActiveCellIndex = currentActiveCellIndex;
+
+            EnhancedScrollerCellView activeCell = scroller.GetClosestCellView();
+
+            if (activeCell != null)
+            {
+                _lastActiveDataIndex = activeCell.dataIndex;
+
+                // set focus of cells only for daily view in CSU mode
+                if (_mode == AppManager.Mode.CSU)
+                {
+                    if (activeCell != null)
+                    {
+                        _lastActiveCellView?.SetFocus(false);
+
+                        _lastActiveCellView = (activeCell as DayScrollItemView);
+                        // Debug.Log(
+                        // $"active cell data: {_lastActiveCellView.graphData.data}, date: {_lastActiveCellView.graphData.date}, value: {_lastActiveCellView.graphData.interpolatedScore}");
+                        _lastActiveCellView.SetFocus(true);
+                    }
+                }
+            }
         }
 
-        QuestionBasedTrackerData data = _data[_lastMiddleCellIndex].data;
+        // Debug.Log($"_data count: {_data.Count}, _lastActiveDataIndex: {_lastActiveDataIndex}, data: {_data[_lastActiveDataIndex].data}");
+        QuestionBasedTrackerData data = _data[_lastActiveDataIndex].data;
 
-        /*
         // for CSU
         if (_trackerType == TrackerManager.TrackerType.CSU)
         {
+            Debug.Log("data: " + data);
+
+            // hide by default
+            _photoHint.UpdateValue(null);
+
             if (data != null)
             {
-                _canvasGroup.alpha = 1f;
-
                 // if there are some photos
                 int numOfPhotos = (data as CSUData).GetPhotosCount();
+                // Debug.Log("Photos count: " + numOfPhotos);
                 if (numOfPhotos > 0)
                 {
                     _photoHint.UpdateValue(numOfPhotos.ToString());
                 }
-            }
-            else
-            {
-                _canvasGroup.alpha = 0.5f;
             }
 
             _CSUViewController.UpdateData(data as CSUData);
@@ -339,9 +354,18 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             _graphController.UpdateCameraView(val.x);
 
             // set score
-            _scoreHint.UpdateValue(data.GetScore().ToString());
+            _scoreHint.UpdateValue(data == null ? string.Empty : data.GetScore().ToString());
         }
-        */
+
+        // cache last scroll position to restore last position on screen Hide >> Show or tracker type change
+        if (_scrollLastPositions.ContainsKey(_trackerType))
+        {
+            _scrollLastPositions[_trackerType] = val.x;
+        }
+        else
+        {
+            _scrollLastPositions.Add(_trackerType, val.x);
+        }
     }
 
     public void SetType(TrackerManager.TrackerType type)
@@ -349,12 +373,25 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _trackerType = type;
     }
 
-    public void SetData(List<GraphScruct> graphDatas)
+    public void SetData(List<GraphData> graphDatas)
     {
         _data = graphDatas;
 
+        float scrollPosition;
+        // if some value been cached before
+        if (!_scrollLastPositions.TryGetValue(_trackerType, out scrollPosition))
+        {
+            scrollPosition = 1;
+        }
+
         // tell the scroller to reload now that we have the data
-        scroller.ReloadData(1);
+        scroller.ReloadData(scrollPosition);
+        
+        // we need to snap immediately but scroller asset got some limitation here, thats why need to use this workaround
+        EnhancedScroller.TweenType tween = scroller.snapTweenType;
+        scroller.snapTweenType = EnhancedScroller.TweenType.immediate;
+        scroller.Snap();
+        scroller.snapTweenType = tween;
     }
 
     private IEnumerator WaitForFrameRoutine()
@@ -368,14 +405,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         if (_trackerType == TrackerManager.TrackerType.CSU)
         {
             CSUData csuData =
-                TrackerManager.GetData(_data[_lastMiddleCellIndex].date, TrackerManager.TrackerType.CSU) as CSUData;
+                TrackerManager.GetData(_data[_lastActiveCellIndex].date, TrackerManager.TrackerType.CSU) as CSUData;
 
             // if data exists
             if (csuData != null)
             {
                 Texture2D[] textures = csuData.GetAllPhotos();
-                Debug.Log("Textures count to open: " + textures.Length);
-
                 photosScreen.Show(textures, csuData.GetDate());
             }
         }
@@ -383,6 +418,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void Dispose()
     {
+        _graphDatas.Clear();
         _data = null;
 
         // set up the scroller delegates
@@ -415,7 +451,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     {
         // Debug.Log($"Screen width: {Screen.width}, _rectTransform size delta: {_scrollerRectTransform.sizeDelta} and rect size: {_scrollerRectTransform.rect.size}");
         return _scrollerRectTransform.rect.width / _daysToShow;
-        // return _cellSize;
     }
 
     /// <summary>
@@ -440,34 +475,34 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
         // in this example, we just pass the data to our cell's view which will update its UI
         DateTime firstDate = _data[0].date;
-        GraphScruct data = _data[dataIndex];
+        GraphData graphData = _data[dataIndex];
 
         // define what data to provide
         if (_mode == AppManager.Mode.SAA)
         {
+            // Debug.Log($"data date: {data.date}, firstDate: {firstDate}");
             // show week text only for the 1st day of the week (Sunday)
-            if (data.date.DayOfWeek == DayOfWeek.Sunday)
+            if (graphData.date.DayOfWeek == DayOfWeek.Sunday)
             {
                 // check num of week
-                int numOfWeek = Mathf.FloorToInt(data.date.Subtract(firstDate).Days / 7f) + 1;
+                int numOfWeek = Mathf.FloorToInt(graphData.date.Subtract(firstDate).Days / 7f) + 1;
 
-                DateTime periodEndDate = data.date.AddDays(7);
+                DateTime periodEndDate = graphData.date.AddDays(7);
 
-                cellView.SetData(data, false, numOfWeek,
-                    new StringBuilder(data.date.FormatToDateMonth()).Append("-")
+                cellView.SetData(graphData, false, numOfWeek,
+                    new StringBuilder(graphData.date.FormatToDateMonth()).Append("-")
                         .Append(periodEndDate.FormatToDateMonth())
                         .ToString());
             }
             else
             {
-                cellView.SetData(data, false);
+                cellView.SetData(graphData, false);
             }
         }
         else
         {
-            cellView.SetData(data, true);
+            cellView.SetData(graphData, true);
         }
-
 
         // return the cell to the scroller
         return cellView;
@@ -479,17 +514,17 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void NextDay()
     {
-        if (_lastMiddleCellIndex + 4 < _data.Count)
+        if (_lastActiveCellIndex + 4 < _data.Count)
         {
-            _lastMiddleCellIndex++;
+            _lastActiveCellIndex++;
         }
     }
 
     public void PrevDay()
     {
-        if (_lastMiddleCellIndex - 4 >= 0)
+        if (_lastActiveCellIndex - 4 >= 0)
         {
-            _lastMiddleCellIndex--;
+            _lastActiveCellIndex--;
         }
     }
 

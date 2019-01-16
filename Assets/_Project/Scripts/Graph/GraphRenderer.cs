@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GraphRenderer : MonoBehaviour
 {
-    [SerializeField] protected bool _useLinesOnly;
+    [SerializeField] protected bool _createMesh;
     [SerializeField] protected Camera _camera;
     [SerializeField] protected Draw2D _drawer;
     [SerializeField] protected iTweenPath _iTweenPath;
@@ -37,12 +37,12 @@ public class GraphRenderer : MonoBehaviour
             RenderTextureFormat.ARGB32);
     }
 
-    public void UpdateGraph(Vector3[] scorePoints, bool useLinesOnly, bool useSmoothGraph,
+    public void UpdateGraph(Vector3[] scorePoints, bool createMesh, bool useSmoothGraph,
         int daysToShow, int maxValue)
     {
         SetupTexture();
         
-        _useLinesOnly = useLinesOnly;
+        _createMesh = createMesh;
         _useSmoothGraph = useSmoothGraph;
 
         // base points for mesh bottom left and bottom right points
@@ -52,6 +52,9 @@ public class GraphRenderer : MonoBehaviour
         // Debug.Log($"daysToShow: {daysToShow}, maxValue: {maxValue}");
         _daysToShow = daysToShow;
         _maxValue = maxValue;
+
+        // update line renderer thickness according to camera orthographic size
+        _lineRenderer.startWidth = _lineRenderer.endWidth = _camera.orthographicSize / 70f;
         
         UpdateGraph(scorePoints);
     }
@@ -85,19 +88,18 @@ public class GraphRenderer : MonoBehaviour
             points.AddRange(_graphPoints.ToList());
         }
 
-        if (_useLinesOnly)
+        // draw line in any case
+        _lineRenderer.positionCount = _graphPoints.Length;
+        _lineRenderer.SetPositions(_graphPoints);
+        
+        if (!_createMesh)
         {
             _meshFilter.gameObject.SetActive(false);
-
-            _lineRenderer.positionCount = _graphPoints.Length;
-            _lineRenderer.SetPositions(_graphPoints);
-
-            // CalculateLineMeshPoints(ref points);
-            // DrawMesh(points);
         }
         else
         {
             _meshFilter.gameObject.SetActive(true);
+            
             // update mesh
             _drawer.vertices = points;
             _drawer.MakeMesh();

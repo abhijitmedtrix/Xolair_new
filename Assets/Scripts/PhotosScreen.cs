@@ -10,26 +10,37 @@ public class PhotosScreen : MonoBehaviour
     [SerializeField] private GameObject _prevButton, _nextButton;
     [SerializeField] private Text _dateText;
     [SerializeField] private Text _pagesText;
-    
+
     private int _currentIndex = 0;
     private Texture2D[] _textures;
 
     public void Show(Texture2D[] textures, DateTime date)
     {
+        // show previous screen
+        ScreenManager.Instance.Set(30);
+
         _dateText.text = date.ToString("d MMM");
-        
+
         _textures = textures;
         _currentIndex = 0;
+
         ShowByIndex(_currentIndex);
     }
 
-    public void Hide()
+    public async void Hide()
     {
-        for (int i = 0; i < _textures.Length; i++)
+        if (_textures != null)
         {
-            Destroy(_textures[i]);
-            _textures = null;
+            for (int i = 0; i < _textures.Length; i++)
+            {
+                Destroy(_textures[i]);
+            }
         }
+
+        _textures = null;
+
+        // wait for memory cleanup to avoid ui transition lags
+        await Resources.UnloadUnusedAssets();
         
         // show previous screen
         ScreenManager.Instance.Back();

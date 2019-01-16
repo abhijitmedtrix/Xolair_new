@@ -7,11 +7,11 @@ public class GraphController : MonoBehaviour
     [SerializeField] protected GameObject _graphLabelPrefab;
     [SerializeField] protected RectTransform _labelsContainer;
     [SerializeField] protected RectTransform _thisRectTransform;
-    [SerializeField] protected List<Text> _labels;
     [SerializeField] protected Camera _camera;
     [SerializeField] protected GraphRenderer _graphRenderer;
     [SerializeField] protected RawImage _graphImage;
 
+    protected List<Text> _labels = new List<Text>();
     protected int _daysToShow;
     protected int _maxValue;
     protected Vector3[] _graphPoints;
@@ -25,7 +25,7 @@ public class GraphController : MonoBehaviour
         }
     }
 
-    public void Initialize(PatientJournalScreen.GraphScruct[] datas, bool useLinesOnly, bool useSmoothGraph,
+    public void Initialize(PatientJournalScreen.GraphData[] datas, bool createMesh, bool useSmoothGraph,
         int maxValue, int daysToShow, int numOfLabels)
     {
         _graphPoints = new Vector3[datas.Length];
@@ -49,7 +49,7 @@ public class GraphController : MonoBehaviour
         _camera.transform.localPosition = new Vector3(0, _camera.orthographicSize, -1);
 
         // setup GraphRenderer before assigning the texture
-        _graphRenderer.UpdateGraph(_graphPoints, useLinesOnly, useSmoothGraph, _daysToShow, _maxValue);
+        _graphRenderer.UpdateGraph(_graphPoints, createMesh, useSmoothGraph, _daysToShow, _maxValue);
 
         // set new texture 
         _camera.targetTexture = _graphRenderer.GetRenderTexture();

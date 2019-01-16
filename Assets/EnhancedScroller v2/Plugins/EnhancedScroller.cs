@@ -674,11 +674,11 @@ namespace EnhancedUI.EnhancedScroller
 
                 if (useSpacing)
                 {
-                    // if using spacing add spacing from one side
-                    cellSize += spacing;
+                    // if using spacing add spacing
+                    cellSize += (spacing * 2);
 
-                    // if this is not a bounday cell, then add spacing from the other side
-                    if (dataIndex > 0 && dataIndex < (NumberOfCells - 1)) cellSize += spacing;
+                    // if this is not a boundary cell, then add spacing from the other side
+                    //if (dataIndex > 0 && dataIndex < (NumberOfCells - 1)) cellSize += spacing;
                 }
 
                 // calculate the position based on the size of the cell and the offset within that cell
@@ -687,11 +687,18 @@ namespace EnhancedUI.EnhancedScroller
 
             if (scrollerOffset == 1f)
             {
-                cellOffsetPosition += padding.bottom;
+                if (scrollDirection == ScrollDirectionEnum.Vertical)
+                {
+                    cellOffsetPosition += padding.bottom;
+                }
+                else
+                {
+                    cellOffsetPosition += padding.right;
+                }
             }
 
             // cache the offset for quicker calculation
-            var offset = -(scrollerOffset * ScrollRectSize) + cellOffsetPosition;
+            var offset = -(scrollerOffset * ScrollRectSize); // + cellOffsetPosition;
 
             var newScrollPosition = 0f;
 
@@ -764,6 +771,8 @@ namespace EnhancedUI.EnhancedScroller
             // clamp the scroll position to a valid location
             newScrollPosition = Mathf.Clamp(newScrollPosition, 0,
                 GetScrollPositionForCellViewIndex(_cellViewSizeArray.Count - 1, CellViewPositionEnum.Before));
+
+            newScrollPosition += cellOffsetPosition;
 
             // if spacing is used, adjust the final position
             if (useSpacing)
@@ -1569,7 +1578,7 @@ namespace EnhancedUI.EnhancedScroller
             else
                 go.AddComponent<HorizontalLayoutGroup>();
             _container = go.GetComponent<RectTransform>();
-            
+
             // modification by Roman
             _container.SetParent(_scrollRect.viewport);
             _container.anchorMin = Vector2.zero;
@@ -1748,7 +1757,6 @@ namespace EnhancedUI.EnhancedScroller
             // call the handler if it exists
             if (scrollerScrolled != null) scrollerScrolled(this, val, _scrollPosition);
 
-
             // if the snapping is turned on, handle it
             if (snapping && !_snapJumping)
             {
@@ -1757,11 +1765,11 @@ namespace EnhancedUI.EnhancedScroller
                 {
                     // Make sure the scroller is not on the boundary if not looping
                     var normalized = NormalizedScrollPosition;
-                    if (loop || (!loop && normalized > 0 && normalized < 1.0f))
-                    {
-                        // Call the snap function
-                        Snap();
-                    }
+                    //if (loop || (!loop && normalized > 0 && normalized < 1.0f))
+                    //{
+                    // Call the snap function
+                    Snap();
+                    //}
                 }
             }
 
@@ -2335,7 +2343,7 @@ namespace EnhancedUI.EnhancedScroller
         /// </summary>
         /// <param name="center"></param>
         /// <returns></returns>
-        public int GetClosestCell(float center = 0.5f)
+        public int GetClosestCellIndex(float center = 0.5f)
         {
             // calculate the snap position
             var snapPosition = ScrollPosition + (ScrollRectSize * Mathf.Clamp01(center));
@@ -2345,8 +2353,22 @@ namespace EnhancedUI.EnhancedScroller
 
             // get the data index of the cell at the watch location
             index = index % NumberOfCells;
-            
+
             return index;
+        }
+
+        public EnhancedScrollerCellView GetClosestCellView(float center = 0.5f)
+        {
+            int cellIndex = GetClosestCellIndex();
+            for (int i = 0; i < _activeCellViews.Count; i++)
+            {
+                if (_activeCellViews[i].cellIndex == cellIndex)
+                {
+                    return _activeCellViews[i];
+                }
+            }
+
+            return null;
         }
 
         #endregion

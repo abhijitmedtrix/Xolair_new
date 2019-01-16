@@ -94,8 +94,8 @@ public class CSUTrackerScreen : MonoBehaviour
 
         _csuData = null;
 
-        // open CSU tracker menu
-        ScreenManager.Instance.Set(15);
+        // open CSU tracker menu dialog asking for another body part data fillup
+        ScreenManager.Instance.Set(24);
         
         _photosScrollController.Dispose();
     }
@@ -260,6 +260,9 @@ public class CSUTrackerScreen : MonoBehaviour
         _bodyPartsController.UpdateView(_option);
     }
 
+    /// <summary>
+    /// Method triggered by clicking "Take photo" in a step 3
+    /// </summary>
     public void StartCamera()
     {
         CameraManager.OnCameraComplete += CameraManagerOnOnCameraComplete;

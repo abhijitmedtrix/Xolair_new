@@ -223,7 +223,7 @@ namespace App.Data.CSU
                 // cleanup entire directory before saving new pictures
                 if (file.Directory.Exists)
                 {
-                    file.Directory.Delete();
+                    file.Directory.Delete(true);
                 }
 
                 file.Directory.Create();
@@ -237,29 +237,43 @@ namespace App.Data.CSU
         /// <returns>Num of photos in sub directories</returns>
         public int GetPhotosCount()
         {
-            string folderPath = Path.Combine(Helper.GetDataPath(), CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"));
-            FileInfo[] fileList = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
-            return fileList.Length;
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"));
+            if (Directory.Exists(folderPath))
+            {
+                FileInfo[] fileList = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
+                return fileList.Length;
+            }
+
+            return 0;
         }
 
         public Texture2D[] GetAllPhotos()
         {
-            string folderPath = Path.Combine(Helper.GetDataPath(), CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"));
-            FileInfo[] files = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
-            Texture2D[] textures = new Texture2D[files.Length];
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"));
 
-            for (int i = 0; i < files.Length; i++)
+            if (Directory.Exists(folderPath))
             {
-                textures[i] = new Texture2D(2, 2);
-                textures[i].LoadImage(File.ReadAllBytes(files[i].FullName));
+                FileInfo[] fileList = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
+                Texture2D[] textures = new Texture2D[fileList.Length];
+
+                for (int i = 0; i < fileList.Length; i++)
+                {
+                    textures[i] = new Texture2D(2, 2);
+                    textures[i].LoadImage(File.ReadAllBytes(fileList[i].FullName));
+                }
+
+                return textures;
             }
 
-            return textures;
+            return null;
         }
 
         public Texture2D[] GetPhotos(BodyPart bodyPart)
         {
-            string folderPath = Path.Combine(Helper.GetDataPath(), CSU_FOLDER, this.GetDate().ToString("dd-MM-yyyy"),
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"),
                 bodyPart.ToString().ToLower());
 
             DirectoryInfo directory = new DirectoryInfo(folderPath);
