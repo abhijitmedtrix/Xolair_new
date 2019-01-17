@@ -49,9 +49,11 @@ public class CameraScreen : MonoBehaviour
 
     public void Finish()
     {
-        CameraManager.StopCamera();
         _snapshotImage.gameObject.SetActive(false);
         
+        // show previous screen
         ScreenManager.Instance.Back();
+        
+        CameraManager.StopCamera();
     }
 }

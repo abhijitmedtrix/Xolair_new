@@ -20,7 +20,6 @@ public class MenuScreen : MonoBehaviour
             
             await Task.Delay(TimeSpan.FromSeconds(1));
 
-            ScreenManager.Instance.Set(3);
             _toggleGroup.SetAllTogglesOff();
             
             AppManager.Instance.SetMode(AppManager.Mode.CSU);
@@ -43,7 +42,6 @@ public class MenuScreen : MonoBehaviour
             
             await Task.Delay(TimeSpan.FromSeconds(1));
             
-            ScreenManager.Instance.Set(2);
             _toggleGroup.SetAllTogglesOff();
 
             AppManager.Instance.SetMode(AppManager.Mode.SAA);

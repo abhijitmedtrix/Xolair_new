@@ -70,8 +70,8 @@ namespace MaterialUI
             //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.Asthma;
             //}
             screens[index].transform.SetAsLastSibling();
-
             screens[index].Show(currentScreen);
+            
             lastScreen = currentScreen;
             currentScreen = screens[index];
         }

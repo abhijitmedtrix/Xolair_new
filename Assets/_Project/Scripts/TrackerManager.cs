@@ -493,7 +493,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         // find a 1st entry date
         DateTime firstDate = DateTime.MinValue;
-        Debug.Log("First log data: " + _logDataList[0].date);
+        // Debug.Log("First log data: " + _logDataList[0].date);
         
         for (int i = 0; i < _logDataList.Count; i++)
         {
@@ -508,8 +508,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         // if there is no entry at all
         if (firstDate == DateTime.MinValue)
         {
-            Debug.LogError("There is no dates with data to return");
-            return null;
+            Debug.LogWarning("There is no dates with data to return. Adding Today only");
+            firstDate = DateTime.Today.AddDays(-1);
         }
 
         // get total days count

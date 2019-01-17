@@ -257,7 +257,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     private TrackerManager.TrackerType DefineTrackerType(bool toggleIsOn)
     {
-        Debug.Log("toggleIsOn: " + toggleIsOn);
+        // Debug.Log("toggleIsOn: " + toggleIsOn);
 
         // define what to show
         if (_mode == AppManager.Mode.SAA)

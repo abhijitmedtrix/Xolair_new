@@ -37,7 +37,7 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
 
         // Debug.Log("singleItemWidth: "+singleItemWidth);
         
-        _cellHeigth = singleItemWidth / screenAspectRatio;
+        _cellHeigth = singleItemWidth * screenAspectRatio;
         // Debug.Log("Cell height: "+_cellHeigth);
     }
 
@@ -57,7 +57,7 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
     public int GetNumberOfCells(EnhancedScroller scroller)
     {
         // in this example, we just pass the number of our data elements
-        return Mathf.FloorToInt(_data.Count / cellViewPrefab.numOfItems);
+        return Mathf.CeilToInt((float)_data.Count / cellViewPrefab.numOfItems);
     }
 
     /// <summary>
@@ -124,11 +124,11 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
     {
         _data = datas;
 
-        // tell the scroller to reload now that we have the data
-        scroller.ReloadData();
-
         scroller.Delegate = this;
         scroller.scrollerScrolled = ScrollerScrolled;
+        
+        // tell the scroller to reload now that we have the data
+        scroller.ReloadData();
     }
     
     public void Dispose()
