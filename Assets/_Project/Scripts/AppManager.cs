@@ -1,6 +1,7 @@
 ﻿using System;
 using RogoDigital.Lipsync;
 using System.Collections.Generic;
+using MaterialUI;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -29,7 +30,6 @@ public class AppManager : MonoSingleton<AppManager>
 
     public static bool FirstTest, SecondTest;
     public static string User_name;
-    public static List<Texture2D> Images;
     public static string UserName, Gender, Age;
     public static string Password = "xolair";
     public static int AnswerIndx;
@@ -39,17 +39,19 @@ public class AppManager : MonoSingleton<AppManager>
 
     private void Start()
     {
+        // make sure login screen is displayed first
+        if (!Application.isEditor)
+        {
+            ScreenManager.Instance.Set(0);
+        }
+        
         // Debug.Log(UnityEngine.iOS.CalendarUnit.Year);
         FirstTest = false;
         SecondTest = false;
-        Images = new List<Texture2D>();
-        //  Debug.Log(DateTime.Today.DayOfYear);
         //PlayerPrefs.DeleteAll();
         currentinfo[2].text =
             currentinfo[0].text = DateTime.Today.ToString("MMM") + " " + DateTime.Today.Day.ToString();
         currentinfo[3].text = currentinfo[1].text = DateTime.Today.ToString("ddd");
-        var asthma = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma);
-        Debug.Log("asthma" + asthma.GetScore());
     }
 
     private void OnDisable()
@@ -67,6 +69,16 @@ public class AppManager : MonoSingleton<AppManager>
         CurrentMode = mode;
         OnModeChange?.Invoke(CurrentMode);
 
+        if (CurrentMode == Mode.SAA)
+        {
+            ScreenManager.Instance.Set(2);
+        }
+        else if (CurrentMode == Mode.CSU)
+        {
+            ScreenManager.Instance.Set(3);
+        }
+        
+        /*
         if (PlayerPrefs.HasKey("first"))
         {
             //avatar.GetComponent<LipSync>().Play(lipsync[UnityEngine.Random.Range(0, lipsync.Length - 1)]);
@@ -80,6 +92,7 @@ public class AppManager : MonoSingleton<AppManager>
             LipSyncData currentdat = Resources.Load<LipSyncData>("General_datafiles/" + "xen");
             avatar.GetComponent<LipSync>().Play(currentdat);
         }
+        */
     }
 
     #region Test

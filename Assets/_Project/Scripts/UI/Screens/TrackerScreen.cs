@@ -102,7 +102,11 @@ public class TrackerScreen : MonoBehaviour
 
     protected virtual void CompleteTracker()
     {
-        TrackerManager.UpdateEntry(DateTime.Today, _trackerData);
+        // save progress
+        QuestionBasedTrackerData originalData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU);
+
+        originalData.SetAnswers(_trackerData.GetAnswers());
+        TrackerManager.UpdateEntry(DateTime.Today, originalData);
 
         Debug.Log("Score: " + _trackerData.GetScore());
 

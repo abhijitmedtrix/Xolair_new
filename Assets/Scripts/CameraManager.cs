@@ -3,23 +3,26 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class CameraManager
+public class CameraManager : MonoSingleton<CameraManager>
 {
     private static List<Texture2D> _snapshots = new List<Texture2D>();
-    private static WebCamTexture _webCamTexture;
-
+    public static WebCamTexture webCamTexture;
     public static event Action OnCameraStart;
     public static event Action<List<Texture2D>> OnCameraComplete;
 
     public static void StartCamera(RawImage image)
     {
-        if (_webCamTexture == null)
+        if (webCamTexture == null)
         {
-            _webCamTexture = new WebCamTexture();
+            // webCamTexture = new WebCamTexture(Screen.width, Screen.height, 60);
+            webCamTexture = new WebCamTexture();
         }
 
-        _webCamTexture.Play();
-        image.texture = _webCamTexture;
+        webCamTexture.Play();
+        image.texture = webCamTexture;
+
+        Debug.Log(
+            $"Web texture initialized. Width: {webCamTexture.width}, Height: {webCamTexture.height}, req w: {webCamTexture.requestedWidth}, req h: {webCamTexture.requestedHeight}, rotated? {webCamTexture.videoRotationAngle}, flipped? {webCamTexture.videoVerticallyMirrored}");
 
         _snapshots.Clear();
 
@@ -28,13 +31,22 @@ public static class CameraManager
 
     public static Texture2D TakePhoto()
     {
-        Texture2D snapshot = new Texture2D(_webCamTexture.width, _webCamTexture.height);
-        snapshot.SetPixels(_webCamTexture.GetPixels());
-        snapshot.Apply();
+        // Texture2D snapshotTexture = new Texture2D(webCamTexture.requestedWidth, webCamTexture.requestedHeight,
+        Texture2D snapshotTexture = new Texture2D(webCamTexture.width, webCamTexture.height,
+            TextureFormat.RGB24, false);
+        snapshotTexture.anisoLevel = 9;
 
-        _snapshots.Add(snapshot);
+        // Camera cam = Camera.main;
+        Rect rect = new Rect(0, 0, Screen.width, Screen.height);
 
-        return snapshot;
+        // read pixels will read from the currently active render texture so make our offscreen 
+        // render texture active and then read the pixels
+        snapshotTexture.ReadPixels(rect, 0, 0);
+        snapshotTexture.Apply();
+
+        _snapshots.Add(snapshotTexture);
+
+        return snapshotTexture;
     }
 
     public static void RemoveLastSnapshot()
@@ -49,11 +61,11 @@ public static class CameraManager
 
     public static void StopCamera()
     {
-        _webCamTexture.Stop();
-        
+        webCamTexture.Stop();
+
         // clear the memory
         Resources.UnloadUnusedAssets();
-     
+
         OnCameraComplete?.Invoke(_snapshots);
     }
 }

@@ -10,7 +10,9 @@ public class AsthmaControlTrackerScreen : TrackerScreen
 
     public override void StartTracker()
     {
-        _trackerData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma) as AsthmaData;
+        // create new data, because now we don't need to modify existing data until it's been submitted by user in a last step
+        _trackerData = new AsthmaData(DateTime.Today);
+        
         ScreenManager.Instance.Set(5);
 
         base.StartTracker();

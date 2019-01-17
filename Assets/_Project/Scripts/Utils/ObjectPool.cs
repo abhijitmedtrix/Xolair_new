@@ -112,7 +112,7 @@ public class ObjectPool : MonoBehaviour
         if (instantiatedObject == null)
         {
             instantiatedObject = (GameObject) GameObject.Instantiate(original, position, rotation);
-            instantiatedObject.transform.SetParent(parent);
+            instantiatedObject.transform.SetParent(parent, false);
             // Map the newly instantiated instance ID to the original instance ID so when the object is returned it knows what pool to go to.
             m_InstantiatedGameObjects.Add(instantiatedObject.GetInstanceID(), originalInstanceID);
         }

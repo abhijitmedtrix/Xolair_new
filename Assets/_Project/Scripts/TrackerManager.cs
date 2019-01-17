@@ -182,13 +182,13 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     /// </summary>
     /// <param name="date">Date must be formatted to Date only</param>
     /// <returns>Return new data if doesn't exists and previously created otherwise</returns>
-    public static QuestionBasedTrackerData GetData(DateTime date, TrackerType type)
+    public static QuestionBasedTrackerData GetData(DateTime date, TrackerType type, bool generateNew = true)
     {
         LogData logData = GetLogData(date);
         // if there is not log data yet
         if (logData == null)
         {
-            return GenerateNewData(date, type);
+            return generateNew ? GenerateNewData(date, type) : null;
         }
         else
         {
@@ -224,7 +224,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                     break;
             }
 
-            return GenerateNewData(date, type);
+            return generateNew ? GenerateNewData(date, type) : null;
         }
     }
 
@@ -493,7 +493,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         // find a 1st entry date
         DateTime firstDate = DateTime.MinValue;
-        Debug.Log("First log data: " + _logDataList[0].date);
+        // Debug.Log("First log data: " + _logDataList[0].date);
         
         for (int i = 0; i < _logDataList.Count; i++)
         {
@@ -508,8 +508,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         // if there is no entry at all
         if (firstDate == DateTime.MinValue)
         {
-            Debug.LogError("There is no dates with data to return");
-            return null;
+            Debug.LogWarning("There is no dates with data to return. Adding Today only");
+            firstDate = DateTime.Today.AddDays(-1);
         }
 
         // get total days count
@@ -517,7 +517,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         
         // Debug.Log($"First date: {firstDate}, type requesting: {type}, Total days: {total.Days}");
         
-        for (int i = 0; i < total.Days; i++)
+        for (int i = 0; i < total.Days + 1; i++)
         {
             dates.Add(firstDate.Date);
             firstDate = firstDate.AddDays(1);
