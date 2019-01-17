@@ -9,4 +9,4 @@ Assets/StreamingAssets/logs/
 OtherResources/
 .vs/
 *.sln
-*.csproj
+*.csprojBuilds/
