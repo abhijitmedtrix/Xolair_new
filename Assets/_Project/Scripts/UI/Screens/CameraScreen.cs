@@ -1,4 +1,5 @@
-﻿using MaterialUI;
+﻿using System.Collections;
+using MaterialUI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +11,8 @@ public class CameraScreen : MonoBehaviour
     [SerializeField] protected AudioClip _shutterClip;
     [SerializeField] protected RectTransform _rawImageRT;
     [SerializeField] protected RectTransform _parentRT;
-
+    [SerializeField] protected GameObject[] _objectsToHideForPhoto;
+    
     public void StartCamera()
     {
         CameraManager.StartCamera(_cameraRawImage);
@@ -76,7 +78,25 @@ public class CameraScreen : MonoBehaviour
 
         // set snapshot texture
         _snapshotImage.gameObject.SetActive(true);
-        _snapshotImage.texture = CameraManager.TakePhoto();
+
+        StartCoroutine(TakeSnapshot());
+        // _snapshotImage.texture = CameraManager.TakePhoto();
+    }
+
+    private IEnumerator TakeSnapshot()
+    {
+        for (int i = 0; i < _objectsToHideForPhoto.Length; i++)
+        {
+            _objectsToHideForPhoto[i].SetActive(false);
+        }
+        
+        yield return new WaitForEndOfFrame();
+        
+        
+        for (int i = 0; i < _objectsToHideForPhoto.Length; i++)
+        {
+            _objectsToHideForPhoto[i].SetActive(true);
+        }
     }
 
     public void SavePhoto()
