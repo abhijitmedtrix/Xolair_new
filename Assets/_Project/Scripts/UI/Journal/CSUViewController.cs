@@ -7,7 +7,8 @@ public class CSUViewController : MonoBehaviour
 {
     [SerializeField] protected Text[] _hivesStats;
     [SerializeField] protected Text[] _itchesStats;
-
+    [SerializeField] protected CanvasGroup _canavsGroup;
+    
     protected List<Text[]> _stats = new List<Text[]>();
 
     private void Awake()
@@ -18,17 +19,31 @@ public class CSUViewController : MonoBehaviour
 
     public void UpdateData(CSUData data)
     {
-        for (int i = 0; i < data.questionDataList.Count; i++)
+        if (data == null)
         {
-            var bodyParts = EnumUtil.GetValues<BodyPart>();
-
-            int counter = 0;
-            foreach (BodyPart bodyPart in bodyParts)
+            // show empty fields
+            for (int i = 0; i < _hivesStats.Length; i++)
             {
-                Debug.Log("BodyPart: "+bodyPart);
-                _stats[i][counter].text = data.GetAnswerDescription(0, bodyPart);
-                counter++;
+                _hivesStats[i].text = _itchesStats[i].text = string.Empty;
             }
+
+            _canavsGroup.alpha = 0.5f;
+        }
+        else
+        {
+            for (int i = 0; i < data.questionDataList.Count; i++)
+            {
+                var bodyParts = EnumUtil.GetValues<BodyPart>();
+    
+                int counter = 0;
+                foreach (BodyPart bodyPart in bodyParts)
+                {
+                    // Debug.Log("BodyPart: "+bodyPart);
+                    _stats[i][counter].text = data.GetAnswerDescription(i, bodyPart);
+                    counter++;
+                }
+            }
+            _canavsGroup.alpha = 1f;
         }
     }
 }

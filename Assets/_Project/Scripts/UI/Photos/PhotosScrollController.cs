@@ -37,38 +37,14 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
 
         // Debug.Log("singleItemWidth: "+singleItemWidth);
         
-        _cellHeigth = singleItemWidth / screenAspectRatio;
+        _cellHeigth = singleItemWidth * screenAspectRatio;
         // Debug.Log("Cell height: "+_cellHeigth);
     }
 
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
         // Debug.Log($"_lastMiddleCellIndex: {_lastMiddleCellIndex}, closest cell: {scroller.GetClosestCell()}");
-        int focusedCellIndex = scroller.GetClosestCell();
-
-        // check is start and end cell items indexes are in a range of 7 days and value not equals to previously cached value
-        // if (_lastMiddleCellIndex != focusedCellIndex && focusedCellIndex - 3 >= 0 && focusedCellIndex + 3 < _data.Count)
-        // {
-        // _lastMiddleCellIndex = scroller.GetClosestCell();
-
-        // update date range
-        // SetDateRange(_lastMiddleCellIndex);
-        // }
-
-        // for debug only
-        /*
-        if (scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) != null)
-        {
-            CalendarScrollItemView itemView =
-                scroller.GetCellViewAtDataIndex(_lastMiddleCellIndex) as CalendarScrollItemView;
-            Debug.Log("Get closest point: " + _lastMiddleCellIndex
-                                            + " with data " + itemView.data.ToShortDateString());
-        }
-        else
-        {
-            Debug.Log("Get closest point: " + _lastMiddleCellIndex);
-        }
-        */
+        // int focusedCellIndex = scroller.GetClosestCell();
     }
 
     #region EnhancedScroller Handlers
@@ -81,7 +57,7 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
     public int GetNumberOfCells(EnhancedScroller scroller)
     {
         // in this example, we just pass the number of our data elements
-        return Mathf.FloorToInt(_data.Count / cellViewPrefab.numOfItems);
+        return Mathf.CeilToInt((float)_data.Count / cellViewPrefab.numOfItems);
     }
 
     /// <summary>
@@ -148,11 +124,11 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
     {
         _data = datas;
 
-        // tell the scroller to reload now that we have the data
-        scroller.ReloadData();
-
         scroller.Delegate = this;
         scroller.scrollerScrolled = ScrollerScrolled;
+        
+        // tell the scroller to reload now that we have the data
+        scroller.ReloadData();
     }
     
     public void Dispose()

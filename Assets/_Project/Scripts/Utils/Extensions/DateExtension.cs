@@ -12,6 +12,9 @@ public static class DateTimeExtensions
 
     public static string FormatToDateMonth(this DateTime dt)
     {
-        return dt.ToString("d MMM", CultureInfo.InvariantCulture);
+        return new StringBuilder(dt.ToString("dd")).Append(" ").Append(dt.ToString("MMM", CultureInfo.InvariantCulture).ToUpper())
+                .ToString();
+            // return new StringBuilder(dt.ToString("d")).Append(dt.ToString("MMM", CultureInfo.InvariantCulture).ToUpper())
+            // .ToString();
     }
 }

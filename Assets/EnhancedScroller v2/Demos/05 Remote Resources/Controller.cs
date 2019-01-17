@@ -30,51 +30,26 @@ namespace EnhancedScrollerDemos.RemoteResourcesDemo
         public EnhancedScrollerCellView cellViewPrefab;
 
         /// <summary>
-        /// The location of a file that contains a list of image urls in json format.
-        /// We could supply an array of image urls here, but this gives an extra example
-        /// of how to pull in remote data to load the image locations, then download the
-        /// individual images later.
+        /// An array of image urls to load
         /// </summary>
-        public string imageListURL;
+        public string[] imageURLList;
 
         void Start()
         {
             // set the scroller's cell view visbility changed delegate to a method in this controller
             scroller.cellViewVisibilityChanged = CellViewVisibilityChanged;
 
-            // start a coroutine to download a text file
-            // that contains image urls and sizes
-            StartCoroutine(LoadImageList());
-        }
-
-        /// <summary>
-        /// Download a text file with images and sizes in it,
-        /// then set up the scroller's data with those images.
-        /// You could supply your image urls directly, but this
-        /// gives an extra example of pulling in data.
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator LoadImageList()
-        {
-            // download the image list text file
-            WWW www = new WWW(imageListURL);
-            yield return null;
-            while (!www.isDone) { }
-
-            // parse the image list from json to an array of objects
-            var imageList = JsonUtility.FromJson<RemoteImageList>(www.text);
-
             // set up some simple data
             _data = new SmallList<Data>();
 
             // set up a list of images with their dimensions
-            for (var i = 0; i < imageList.images.Length; i++)
+            for (var i = 0; i < imageURLList.Length; i++)
             {
                 // add the image based on the image list text file
                 _data.Add(new Data()
                 {
-                    imageUrl = imageList.images[i].url,
-                    imageDimensions = new Vector2(imageList.images[i].size.x, imageList.images[i].size.y)
+                    imageUrl = imageURLList[i],
+                    imageDimensions = new Vector2(200f, 200f)
                 });
             }
 

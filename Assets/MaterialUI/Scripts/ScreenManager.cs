@@ -70,8 +70,8 @@ namespace MaterialUI
             //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.Asthma;
             //}
             screens[index].transform.SetAsLastSibling();
-
             screens[index].Show(currentScreen);
+            
             lastScreen = currentScreen;
             currentScreen = screens[index];
         }
@@ -90,6 +90,11 @@ namespace MaterialUI
 
         public void Back()
         {
+            int index = Array.IndexOf(screens, lastScreen);
+            Set(index);
+
+            // TODO - this doesn't work
+            return;
             lastScreen.ShowWithoutTransition();
             currentScreen.Hide();
             ScreenConfig temp = currentScreen;

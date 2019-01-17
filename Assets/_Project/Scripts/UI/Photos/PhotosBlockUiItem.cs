@@ -11,7 +11,7 @@ public class PhotosBlockUiItem : EnhancedScrollerCellView, IDisposable
     
     private void Awake()
     {
-        _items = GetComponentsInChildren<PhotosUiItem>();
+        _items = GetComponentsInChildren<PhotosUiItem>(true);
     }
 
     public void SetNumOnItems(int num)
