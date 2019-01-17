@@ -38,6 +38,7 @@ public class CameraScreen : MonoBehaviour
         _rawImageRT.localEulerAngles = new Vector3(0f, 0f, ccwNeeded);
 
         float videoRatio = (float) wct.width / (float) wct.height;
+        Debug.Log($"W: {wct.width}, H: {wct.height}, cwNeeded: {cwNeeded}, willBeRotated: {willBeRotated}, videoRatio: {videoRatio}, mirrored?: {wct.videoVerticallyMirrored}");
 
         if (willBeRotated)
         {
@@ -50,9 +51,6 @@ public class CameraScreen : MonoBehaviour
             _rawImageRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, _parentRT.rect.height);
         }
         
-        // you'll be using an AspectRatioFitter on the Image, so simply set it
-        // rawImageARF.aspectRatio = videoRatio;
-
         // alert, the ONLY way to mirror a RAW image, is, the uvRect.
         // changing the scale is completely broken.
         if (wct.videoVerticallyMirrored)
@@ -85,14 +83,17 @@ public class CameraScreen : MonoBehaviour
 
     private IEnumerator TakeSnapshot()
     {
+        // show only raw image to read screen pixels
         for (int i = 0; i < _objectsToHideForPhoto.Length; i++)
         {
             _objectsToHideForPhoto[i].SetActive(false);
         }
         
         yield return new WaitForEndOfFrame();
+
+        _snapshotImage.texture = CameraManager.TakePhoto();
         
-        
+        // enable objects
         for (int i = 0; i < _objectsToHideForPhoto.Length; i++)
         {
             _objectsToHideForPhoto[i].SetActive(true);
