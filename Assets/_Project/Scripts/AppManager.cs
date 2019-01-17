@@ -46,22 +46,10 @@ public class AppManager : MonoSingleton<AppManager>
         }
         
         // Debug.Log(UnityEngine.iOS.CalendarUnit.Year);
-        FirstTest = false;
-        SecondTest = false;
         //PlayerPrefs.DeleteAll();
         currentinfo[2].text =
             currentinfo[0].text = DateTime.Today.ToString("MMM") + " " + DateTime.Today.Day.ToString();
         currentinfo[3].text = currentinfo[1].text = DateTime.Today.ToString("ddd");
-    }
-
-    private void OnDisable()
-    {
-        if (FirstTest && SecondTest)
-        {
-            UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
-            notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
-            notif.alertBody = "PLEASE TAKE THE CSU TEST";
-        }
     }
 
     public void SetMode(Mode mode)

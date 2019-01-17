@@ -8,6 +8,7 @@ public class MenuScreen : MonoBehaviour
 {
     [SerializeField] private ToggleGroup _toggleGroup;
     [SerializeField] private Toggle[] _toggles;
+    [SerializeField] private float _toggleDelay = 0.5f;
         
     async public void OnCSUSelected(bool isOn)
     {
@@ -18,7 +19,7 @@ public class MenuScreen : MonoBehaviour
                 _toggles[i].interactable = false;
             }
             
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(_toggleDelay));
 
             _toggleGroup.SetAllTogglesOff();
             
@@ -40,7 +41,7 @@ public class MenuScreen : MonoBehaviour
                 _toggles[i].interactable = false;
             }
             
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(_toggleDelay));
             
             _toggleGroup.SetAllTogglesOff();
 

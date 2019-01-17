@@ -13,7 +13,7 @@ public class Calendar_OnClick : MonoBehaviour {
     int count;
     [SerializeField]private GameObject[] notfncard;
     [SerializeField]
-    private Calander_Manager calander_Manager;
+    private CalendarScreen calander_Manager;
     [SerializeField] private Scrollbar csu, uas, saa, acq,xolairshot;
 	void Start () {
         count = 1;
@@ -28,9 +28,9 @@ public class Calendar_OnClick : MonoBehaviour {
        // calander_Manager.Reset_reminder();
        // dat.Clear();
         highlight.transform.position = transform.position;
-        Calander_Manager.Reminder_Day = int.Parse(gameObject.tag);
+        CalendarScreen.Reminder_Day = int.Parse(gameObject.tag);
         // key = AppManager.Instance.CurrentMode + "," + Calander_Manager.Reminder_Day.ToString() + "/" + Calander_Manager.Reminder_Month.ToString() + "/" + Calander_Manager.Reminder_Year.ToString() +","+ count.ToString();
-        key = AppManager.Instance.CurrentMode + "," +gameObject.tag.ToString()+ "/" + Calander_Manager.Current_Month.ToString() + "/" + Calander_Manager.Current_Year.ToString()  ;
+        key = AppManager.Instance.CurrentMode + "," +gameObject.tag.ToString()+ "/" + CalendarScreen.Current_Month.ToString() + "/" + CalendarScreen.Current_Year.ToString()  ;
         Debug.Log(key);
         if(PlayerPrefs.HasKey(key))
         {
@@ -65,7 +65,7 @@ public class Calendar_OnClick : MonoBehaviour {
                 
 
             }
-            DateTime Today = new DateTime(Calander_Manager.Current_Year, Calander_Manager.Current_Month, Int32.Parse(gameObject.tag));
+            DateTime Today = new DateTime(CalendarScreen.Current_Year, CalendarScreen.Current_Month, Int32.Parse(gameObject.tag));
             switch(AppManager.Instance.CurrentMode)
             {
                 case AppManager.Mode.CSU:

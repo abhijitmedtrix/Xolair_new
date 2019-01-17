@@ -1,54 +1,76 @@
 ﻿using System;
-using UnityEngine.UI;
 using System.Collections.Generic;
+using NatCamU.Core;
 using UnityEngine;
 
 public class CameraManager : MonoSingleton<CameraManager>
 {
     private static List<Texture2D> _snapshots = new List<Texture2D>();
-    public static WebCamTexture webCamTexture;
-    public static event Action OnCameraStart;
+
+    public static event Action<Texture> OnCameraStart;
+    public static event Action<Texture2D> OnPhotoTaken;
     public static event Action<List<Texture2D>> OnCameraComplete;
 
-    public static void StartCamera(RawImage image)
+    public static void StartCamera()
     {
-        if (webCamTexture == null)
+        DeviceCamera camera = DeviceCamera.RearCamera;
+        if (camera == null)
         {
-            // webCamTexture = new WebCamTexture(Screen.width, Screen.height, 60);
-            webCamTexture = new WebCamTexture();
+            camera = DeviceCamera.FrontCamera;
+            if (camera == null)
+            {
+                Debug.LogWarning("No device camera found.");
+                return;
+            }
         }
+        
+        NatCam.StartPreview(camera, OnStart);
 
-        webCamTexture.Play();
-        image.texture = webCamTexture;
-
-        Debug.Log(
-            $"Web texture initialized. Width: {webCamTexture.width}, Height: {webCamTexture.height}, req w: {webCamTexture.requestedWidth}, req h: {webCamTexture.requestedHeight}, rotated? {webCamTexture.videoRotationAngle}, flipped? {webCamTexture.videoVerticallyMirrored}");
-
+        for (int i = 0; i < _snapshots.Count; i++)
+        {
+            if (_snapshots[i] != null)
+            {
+                Destroy(_snapshots[i]);
+            }
+        }
         _snapshots.Clear();
-
-        OnCameraStart?.Invoke();
     }
-
-    public static Texture2D TakePhoto()
+    
+    public static void StopCamera()
     {
-        // Texture2D snapshotTexture = new Texture2D(webCamTexture.requestedWidth, webCamTexture.requestedHeight,
-        Texture2D snapshotTexture = new Texture2D(webCamTexture.width, webCamTexture.height,
-            TextureFormat.RGB24, false);
-        snapshotTexture.anisoLevel = 9;
+        NatCam.StopPreview();
+        
+        // clear the memory
+        Resources.UnloadUnusedAssets();
 
-        // Camera cam = Camera.main;
-        Rect rect = new Rect(0, 0, Screen.width, Screen.height);
-
-        // read pixels will read from the currently active render texture so make our offscreen 
-        // render texture active and then read the pixels
-        snapshotTexture.ReadPixels(rect, 0, 0);
-        snapshotTexture.Apply();
-
-        _snapshots.Add(snapshotTexture);
-
-        return snapshotTexture;
+        OnCameraComplete?.Invoke(_snapshots);
+    }
+    
+    
+    
+    public static void TakePhoto()
+    {
+        NatCam.CapturePhoto(OnPhoto);
     }
 
+    private static void OnStart()
+    {
+        // Set flash to auto
+        NatCam.Camera.FlashMode = FlashMode.Auto;
+        
+        OnCameraStart?.Invoke(NatCam.Preview);
+    }
+    
+    private static void OnPhoto(Texture2D photo)
+    {
+        // Cache the photo
+        _snapshots.Add(photo);
+        
+        OnPhotoTaken?.Invoke(photo);
+    }
+
+    
+    
     public static void RemoveLastSnapshot()
     {
         if (_snapshots.Count > 0)
@@ -57,15 +79,5 @@ public class CameraManager : MonoSingleton<CameraManager>
             _snapshots.Remove(texture);
             GameObject.Destroy(texture);
         }
-    }
-
-    public static void StopCamera()
-    {
-        webCamTexture.Stop();
-
-        // clear the memory
-        Resources.UnloadUnusedAssets();
-
-        OnCameraComplete?.Invoke(_snapshots);
     }
 }

@@ -14,52 +14,50 @@ using UnityEngine.UI;
 
 namespace MaterialUI
 {
-	[ExecuteInEditMode]
+    [ExecuteInEditMode]
     public class SpriteSwapper : MonoBehaviour
-	{
-		public Sprite sprite1x;
+    {
+        public Sprite sprite1x;
         public Sprite sprite2x;
         public Sprite sprite4x;
-		
+
         private float scaleFactor;
-		
+
         private Image thisImage;
 
-		private MaterialUIScaler scaler;
+        private MaterialUIScaler scaler;
 
-	    void Update()
-	    {
-		    if (!thisImage)
-		    {
-			    thisImage = gameObject.GetComponent<Image>();
-              //  Debug.Log("call 1");
-		    }
+        void Update()
+        {
+            if (!thisImage)
+            {
+                thisImage = gameObject.GetComponent<Image>();
+                //  Debug.Log("call 1");
+            }
 
-		    if (!scaler)
-		    {
-              
-                if(scaler!=null)
+            if (!scaler)
+            {
+                if (scaler != null)
                 {
                     Debug.Log("call 2");
                     scaler = gameObject.GetComponentInParent<Canvas>().GetComponent<MaterialUIScaler>();
                 }
-
-		    }
-		    else
-		    {
+            }
+            else
+            {
                 //Debug.Log("call 3");
                 if (scaleFactor != scaler.scaleFactor)
-			    {
-					scaleFactor = scaler.scaleFactor;
+                {
+                    scaleFactor = scaler.scaleFactor;
 
-				    if (scaleFactor > 2f && sprite4x)
-					    thisImage.sprite = sprite4x;
-				    else if (scaleFactor > 1f && sprite2x)
-					    thisImage.sprite = sprite2x;
-				    else
-					    thisImage.sprite = sprite1x;
-			    }
-		    }
+                    if (scaleFactor > 2f && sprite4x)
+                        thisImage.sprite = sprite4x;
+                    else if (scaleFactor > 1f && sprite2x)
+                        thisImage.sprite = sprite2x;
+                    else
+                        thisImage.sprite = sprite1x;
+                }
+            }
         }
     }
 }

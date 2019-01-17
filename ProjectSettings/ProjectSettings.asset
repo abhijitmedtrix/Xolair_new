@@ -125,6 +125,7 @@ PlayerSettings:
   m_HolographicPauseOnTrackingLoss: 1
   xboxOneDisableKinectGpuReservation: 0
   xboxOneEnable7thCore: 0
+  isWsaHolographicRemotingEnabled: 0
   vrSettings:
     cardboard:
       depthFormat: 0
@@ -540,6 +541,7 @@ PlayerSettings:
   switchAllowsVideoCapturing: 1
   switchAllowsRuntimeAddOnContentInstall: 0
   switchDataLossConfirmation: 0
+  switchUserAccountLockEnabled: 0
   switchSupportedNpadStyles: 3
   switchNativeFsCacheSize: 32
   switchIsHoldTypeHorizontal: 0
@@ -685,7 +687,12 @@ PlayerSettings:
   webGLUseEmbeddedResources: 0
   webGLCompressionFormat: 1
   webGLLinkerTarget: 1
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    1: USES_NOTIFICATION_SERVICE
+    4: USES_NOTIFICATION_SERVICE;BAYATGAMES;BAYATGAMES_SAVEGAMEPRO;dUI_DoozyUI
+    7: USES_NOTIFICATION_SERVICE
+    14: USES_NOTIFICATION_SERVICE
+    25: USES_NOTIFICATION_SERVICE
   platformArchitecture: {}
   scriptingBackend: {}
   il2cppCompilerConfiguration: {}
