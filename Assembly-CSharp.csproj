@@ -72,9 +72,10 @@
     <Compile Include="Assets\_Project\Scripts\Components\StateChangeToggle.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\TimePanelController.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\TrackerProgressController.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\CalendarData.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\NotificationData.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\NotificationGroupData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\CalendarData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\NotificationData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\ReminderData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\WeeklyReminderData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\BaseTrackerData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\CSU\CSUData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\CSU\UASData.cs" />
@@ -84,7 +85,7 @@
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\SSA\SymptomData.cs" />
     <Compile Include="Assets\_Project\Scripts\Graph\GraphController.cs" />
     <Compile Include="Assets\_Project\Scripts\Graph\GraphRenderer.cs" />
-    <Compile Include="Assets\_Project\Scripts\NotificationManager.cs" />
+    <Compile Include="Assets\_Project\Scripts\ReminderManager.cs" />
     <Compile Include="Assets\_Project\Scripts\Test\displayscr.cs" />
     <Compile Include="Assets\_Project\Scripts\Test\Gazetest.cs" />
     <Compile Include="Assets\_Project\Scripts\Test\Test.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosBlockUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosScrollController.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosUiItem.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\ReminderUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\CameraScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\MenuScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\PatientJournalScreen.cs" />
@@ -620,7 +622,6 @@
     <Compile Include="Assets\Scripts\CSUFAQDISEASE.cs" />
     <Compile Include="Assets\Scripts\CSUFAQDRUG.cs" />
     <Compile Include="Assets\Scripts\CSUTrackerScreen.cs" />
-    <Compile Include="Assets\Scripts\enddate.cs" />
     <Compile Include="Assets\Scripts\ExpandCollapse.cs" />
     <Compile Include="Assets\Scripts\Fade.cs" />
     <Compile Include="Assets\Scripts\FAQ.cs" />
@@ -631,7 +632,6 @@
     <Compile Include="Assets\Scripts\PhotosScreen.cs" />
     <Compile Include="Assets\Scripts\ProfileEditor.cs" />
     <Compile Include="Assets\Scripts\PushNotification.cs" />
-    <Compile Include="Assets\Scripts\Reminder.cs" />
     <Compile Include="Assets\Scripts\singleton.cs" />
     <Compile Include="Assets\Scripts\SSA_inptxt.cs" />
     <Compile Include="Assets\Scripts\SSA_UI_OUT.cs" />
