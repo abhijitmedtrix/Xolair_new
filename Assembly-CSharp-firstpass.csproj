@@ -783,6 +783,9 @@
     <Reference Include="Opencoding.Console">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Opencoding/Console/DLLs/Opencoding.Console.dll</HintPath>
     </Reference>
+    <Reference Include="easyEasing">
+      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Plugins/ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -797,9 +800,6 @@
     </Reference>
     <Reference Include="UnityEngine.StandardEvents">
       <HintPath>/Users/Romaha/Library/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.13/UnityEngine.StandardEvents.dll</HintPath>
-    </Reference>
-    <Reference Include="easyEasing">
-      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>/Applications/Unity/Hub/Editor/2018.2.17f1/Unity.app/Contents/NetStandard/ref/2.0.0/netstandard.dll</HintPath>

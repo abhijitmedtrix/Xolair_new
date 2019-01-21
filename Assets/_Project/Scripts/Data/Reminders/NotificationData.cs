@@ -7,50 +7,139 @@ using VoxelBusters.NativePlugins;
 namespace App.Data.Reminders
 {
     [Serializable]
-    public enum NotificationStatus
+    public struct NotificationInfo
     {
-        Undefined,
-        Completed
+        public string id;
+        public DateTime fireDate;
+        public eNotificationRepeatInterval repeatInterval;
     }
-    
+
     [Serializable]
     public class NotificationData
     {
+        public bool isFortnight;
+
         /// <summary>
         /// The list of notifications id linked to current data
         /// </summary>
-        public List<string> idArray;
+        public List<string> idArray = new List<string>();
 
-        /// <summary>
-        /// this field can differ to <fireDate> because user can setup reminder in Monday for Wednesday
-        /// </summary>
-        public DateTime registrationDate;
+        public Dictionary<string, NotificationInfo> notificationsDict = new Dictionary<string, NotificationInfo>();
 
         /// <summary>
         /// Allow to calculate each date when the notification should execute 
         /// </summary>
         public eNotificationRepeatInterval repeatInterval;
 
-        // by default never end
-        public DateTime endDate = DateTime.MaxValue;
-        
         /// <summary>
         /// keep cache parent group id in case if we will need to edit reminder in a past dates, or if group data deleted and need to clean up all last history data
         /// </summary>
         public string parentGroupId;
 
-        /// <summary>
-        /// Title can be changed when reminder parent group data modified, but we need to cache it anyway just in case if parent group will be removed
-        /// </summary>
         public string title;
-        
-        public NotificationStatus status;
-        
+        public string message;
+
         /// <summary>
         /// the date and time when notification should execute 1st time
         /// </summary>
         public DateTime fireDate;
-        
+
+        public event Action OnDataUpdate;
+
+        /// <summary>
+        /// Check notification each time on AppStart, must be called in ReminderData.
+        /// </summary>
+        public bool IsOutdated()
+        {
+            if (repeatInterval == eNotificationRepeatInterval.NONE && fireDate.IsOlderDate(DateTime.Now))
+            {
+                return true;
+            }
+
+            // check, should it be rescheduled or not
+            if (isFortnight)
+            {
+                for (int i = 0; i < idArray.Count; i++)
+                {
+                    NotificationInfo info = notificationsDict[idArray[i]];
+
+                    // check is there some outdated notifications (in case if wasn't removed by ReminderManager
+                    if (info.fireDate.IsOlderDate(DateTime.Now))
+                    {
+                        // reschedule
+                        UnregisterNotification(info.id);
+
+                        SetNotification();
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public void SetNotification(DateTime fireDate, eNotificationRepeatInterval repeatInterval, string parentGroupId,
+            bool isFortnight, string title, string message = null)
+        {
+            this.isFortnight = isFortnight;
+            this.fireDate = fireDate;
+            this.repeatInterval = repeatInterval;
+            this.parentGroupId = parentGroupId;
+            this.title = title;
+            this.message = message;
+
+            SetNotification();
+        }
+
+        /// <summary>
+        /// Set notification using all local data.
+        /// </summary>
+        private void SetNotification()
+        {
+            TryFixInterval();
+
+            // when we reschedule or change existing notification, fireDate can be in a past already, so each time we need to find next date when notification should be called
+            DateTime nextFireDate = fireDate;
+
+            // get start date diff in secs
+            long startInSecs = this.fireDate.Subtract(DateTime.Now).Seconds;
+
+            // if fireDate is in a past (past will return always 0, not -value)
+            if (startInSecs <= 0)
+            {
+                nextFireDate = FindNextFireDate();
+                startInSecs = nextFireDate.Subtract(DateTime.Now).Seconds;
+            }
+
+            // schedule 2 notifications upfront for each week, so 4 totally
+            if (this.isFortnight)
+            {
+                long twoWeeksToSeconds = 7 * 24 * 60 * 60 * 2;
+                int notificationCount = notificationsDict.Count;
+
+                for (int i = notificationCount; i < 4; i++)
+                {
+                    RegisterNotification(startInSecs + twoWeeksToSeconds * (i + 1), repeatInterval);
+                }
+            }
+
+            RegisterNotification(startInSecs, this.repeatInterval);
+
+            OnDataUpdate?.Invoke();
+        }
+
+        private void RegisterNotification(long startInSecs, eNotificationRepeatInterval repeatInterval)
+        {
+            // CrossPlatformNotification class it too huge to save using GameSave asset, but we need just some short data
+            CrossPlatformNotification notification =
+                ReminderManager.Instance.CreateNotification(startInSecs, repeatInterval);
+
+            // cache notification
+            string id = ReminderManager.Instance.ScheduleLocalNotification(notification);
+            RegisterNotification(id);
+
+            Debug.Log($"Registering notification with fire date: {fireDate}, interval: {repeatInterval}, and id: {id}");
+        }
+
         public bool IsAssignedToDate(DateTime dateTime)
         {
             if (dateTime.IsSameDay(fireDate))
@@ -61,32 +150,213 @@ namespace App.Data.Reminders
             if (dateTime.IsLaterDate(fireDate))
             {
                 // check, does a day fit to requested day of week
+                switch (repeatInterval)
+                {
+                    case eNotificationRepeatInterval.NONE:
+
+                        break;
+
+                    case eNotificationRepeatInterval.DAY:
+                        return true;
+                        break;
+
+                    case eNotificationRepeatInterval.WEEK:
+                        if (dateTime.DayOfWeek == fireDate.DayOfWeek)
+                        {
+                            return true;
+                        }
+
+                        break;
+
+                    case eNotificationRepeatInterval.MONTH:
+                        if (dateTime.Day == fireDate.Day)
+                        {
+                            return true;
+                        }
+
+                        break;
+
+                    case eNotificationRepeatInterval.YEAR:
+                        return dateTime.Day == fireDate.Day && dateTime.Month == fireDate.Month;
+                        break;
+                }
             }
 
             return false;
         }
 
-        public void AddDayOfWeek(DayOfWeek dayOfWeek, eNotificationRepeatInterval interval, int repeatAfter)
+        public void RegisterNotification(string id)
         {
-            
+            if (!notificationsDict.ContainsKey(id) && !idArray.Contains(id))
+            {
+                notificationsDict.Add(id,
+                    new NotificationInfo {id = id, fireDate = fireDate, repeatInterval = repeatInterval});
+                idArray.Add(id);
+            }
+            else
+            {
+                throw new Exception($"Notification with id <{id}> already registered and added to dict");
+            }
         }
 
-        public void ChangeRepeatInterval(eNotificationRepeatInterval interval)
+        public void UnregisterNotification(string id)
         {
-            // proper way to change struct value
-            // fireDate = fireDate.Date + dateTime.TimeOfDay;
+            if (notificationsDict.ContainsKey(id) && idArray.Contains(id))
+            {
+                notificationsDict.Remove(id);
+                idArray.Remove(id);
+            }
+            else
+            {
+                Debug.LogWarning($"No such notification with id <{id}> in dict");
+            }
+
+
+            // and remove from notification service
+            ReminderManager.Instance.CancelLocalNotification(id);
+        }
+
+        public void ChangeRepeatInterval(eNotificationRepeatInterval repeatInterval, bool isFortnight = false)
+        {
+            if (this.repeatInterval == repeatInterval)
+            {
+                Debug.LogWarning("Trying to change notification with a same repeat interval! Return.");
+                return;
+            }
+
+            this.repeatInterval = repeatInterval;
+            TryFixInterval();
+
+            RemoveAllNotifications();
+            SetNotification();
+
+            OnDataUpdate?.Invoke();
+        }
+
+        public void ChangeDate(DateTime dateTime)
+        {
+            if (fireDate.Equals(dateTime))
+            {
+                Debug.LogWarning("Trying to change notification with a same date and time! Return.");
+                return;
+            }
+
+            fireDate = dateTime;
+
+            RemoveAllNotifications();
+            SetNotification();
         }
 
         public void ChangeTime(DateTime dateTime)
         {
+            if (fireDate.TimeOfDay == dateTime.TimeOfDay)
+            {
+                Debug.LogWarning("Trying to change notification time with a same time! Return.");
+                return;
+            }
+
             // proper way to change struct value
             fireDate = fireDate.Date + dateTime.TimeOfDay;
-        }
-    }
 
-    public static class NotificationDataConstants
-    {
-        public const int MAX_WEEKS_REPEAT = 52;
-        public const int MAX_MONTHS_REPEAT = 11;
+            RemoveAllNotifications();
+            SetNotification();
+        }
+
+        public void ChangeTitle(string title)
+        {
+            if (this.title.Equals(title))
+            {
+                Debug.LogWarning("Trying to change notification with a same title! Return.");
+                return;
+            }
+
+            this.title = title;
+
+            RemoveAllNotifications();
+            SetNotification();
+        }
+
+        public void ChangeMessage(string message)
+        {
+            if (this.message.Equals(message))
+            {
+                Debug.LogWarning("Trying to change notification with a same message! Return.");
+                return;
+            }
+
+            this.message = message;
+
+            RemoveAllNotifications();
+            SetNotification();
+        }
+
+        public void Reset()
+        {
+            RemoveAllNotifications();
+        }
+
+        private void RemoveAllNotifications()
+        {
+            for (int i = 0; i < idArray.Count; i++)
+            {
+                UnregisterNotification(idArray[i]);
+            }
+
+            idArray.Clear();
+            notificationsDict.Clear();
+        }
+
+        private DateTime FindNextFireDate()
+        {
+            DateTime nextFireDate = DateTime.MaxValue;
+            ReminderManager.TimeDifference timeDifference =
+                ReminderManager.GetDateTimeDifference(DateTime.Now, fireDate);
+
+            // check, does a day fit to requested day of week
+            switch (repeatInterval)
+            {
+                case eNotificationRepeatInterval.NONE:
+                    throw new Exception(
+                        "Shouldn't be the case when searching for next day for non-repeatable notification");
+                    break;
+
+                case eNotificationRepeatInterval.DAY:
+                    nextFireDate = DateTime.Today.Tomorrow() + fireDate.TimeOfDay;
+                    break;
+
+                case eNotificationRepeatInterval.WEEK:
+                    int weeksToAdd = Mathf.CeilToInt(timeDifference.days / 7f);
+                    nextFireDate = fireDate.AddDays(weeksToAdd * 7);
+                    break;
+
+                case eNotificationRepeatInterval.MONTH:
+                    nextFireDate = fireDate.AddMonths(1 + timeDifference.months);
+                    break;
+
+                case eNotificationRepeatInterval.YEAR:
+                    nextFireDate = fireDate.AddYears(1 + timeDifference.years);
+                    break;
+            }
+
+            return nextFireDate;
+        }
+
+        private void TryFixInterval()
+        {
+            if (isFortnight)
+            {
+                if (this.repeatInterval != eNotificationRepeatInterval.NONE)
+                {
+                    Debug.LogWarning(
+                        $"Repeat interval for FORTNIGHT repetition must be NONE, but it's <{this.repeatInterval}>");
+                    this.repeatInterval = eNotificationRepeatInterval.NONE;
+                }
+            }
+        }
+
+        public bool HasNotificationWithId(string id)
+        {
+            return idArray.Contains(id);
+        }
     }
 }

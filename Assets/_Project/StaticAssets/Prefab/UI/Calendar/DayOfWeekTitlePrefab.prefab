@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 11420788}
   - component: {fileID: 11491246}
   m_Layer: 5
-  m_Name: Button
+  m_Name: DayOfWeekTitlePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -109,7 +109,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 62634ccb872344720b033b32c33689b9, type: 3}
-    m_FontSize: 32
+    m_FontSize: 30
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 3
@@ -140,7 +140,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 329d3153d788191428560703a62ffdaa, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -159,8 +159,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 741907ce464c54845ade90e636b2c6c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiItem: {fileID: 0}
-  button: {fileID: 0}
+  _remindersIcons: []
+  _selectedBgImage: {fileID: 0}
+  _remindersIconsContainer: {fileID: 0}
+  _selectedSprite: {fileID: 0}
+  image: {fileID: 11482048}
+  text: {fileID: 11454944}
+  button: {fileID: 11420788}
+  state: 0
+  reminders: []
 --- !u!222 &22250760
 CanvasRenderer:
   m_ObjectHideFlags: 1

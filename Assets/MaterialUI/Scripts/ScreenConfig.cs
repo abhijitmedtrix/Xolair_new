@@ -183,6 +183,9 @@ namespace MaterialUI
 
 		public void Hide()
 		{
+			Debug.Log("Hide started in "+gameObject.name, gameObject);
+			OnHideStarted?.Invoke();
+			
 			if (transitionOutType == TransitionType.RippleMask)
 			{
 				thisScreenSize = new Vector2(theRectTransform.rect.width, theRectTransform.rect.height);
@@ -221,8 +224,6 @@ namespace MaterialUI
 
 			animStartTime = Time.realtimeSinceStartup;
 			state = 2;
-			
-			OnHideStarted?.Invoke();
 		}
 
 		void Update()

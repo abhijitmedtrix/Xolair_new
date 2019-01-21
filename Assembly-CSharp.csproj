@@ -71,11 +71,11 @@
     <Compile Include="Assets\_Project\Scripts\Components\ModeToggle.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\StateChangeToggle.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\TimePanelController.cs" />
+    <Compile Include="Assets\_Project\Scripts\Components\ToggleSlider.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\TrackerProgressController.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\Reminders\CalendarData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\Reminders\NotificationData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\Reminders\ReminderData.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\Reminders\WeeklyReminderData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\BaseTrackerData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\CSU\CSUData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\CSU\UASData.cs" />
@@ -101,10 +101,12 @@
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosBlockUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosScrollController.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosUiItem.cs" />
-    <Compile Include="Assets\_Project\Scripts\UI\ReminderUiItem.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Reminder\DetailedReminderUiItem.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Reminder\ReminderUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\CameraScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\MenuScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\PatientJournalScreen.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Screens\ReminderScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\TrackerScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\Curver.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\DisableSleep.cs" />
@@ -112,7 +114,6 @@
     <Compile Include="Assets\_Project\Scripts\Utils\Extensions\DateExtension.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\Extensions\UIEventSyncExtensions.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\Helper.cs" />
-    <Compile Include="Assets\_Project\Scripts\Utils\IDisposable.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\IInitiable.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\MonoSingleton.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\ObjectPool.cs" />
@@ -590,7 +591,6 @@
     <Compile Include="Assets\Pixelplacement\iTweenPath\iTweenPath.cs" />
     <Compile Include="Assets\Profile_Onclick.cs" />
     <Compile Include="Assets\Question_Onclick.cs" />
-    <Compile Include="Assets\Reminder_OnClick.cs" />
     <Compile Include="Assets\Rogo Digital\LipSync Pro\BlendSystems\AdvancedBlendshapeBlendSystem.cs" />
     <Compile Include="Assets\Rogo Digital\LipSync Pro\BlendSystems\BlendshapeBlendSystem.cs" />
     <Compile Include="Assets\Rogo Digital\LipSync Pro\BlendSystems\BlendshapeManager.cs" />
@@ -623,7 +623,6 @@
     <Compile Include="Assets\Rogo Digital\LipSync Pro\Components\LipSync.cs" />
     <Compile Include="Assets\Scripts\AsthmaControlTrackerScreen.cs" />
     <Compile Include="Assets\Scripts\AudioManager.cs" />
-    <Compile Include="Assets\Scripts\Calendar_OnClick.cs" />
     <Compile Include="Assets\Scripts\CalendarScreen.cs" />
     <Compile Include="Assets\Scripts\CameraManager.cs" />
     <Compile Include="Assets\Scripts\clickscr.cs" />
@@ -1376,6 +1375,9 @@
     <Reference Include="Opencoding.Console">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Opencoding/Console/DLLs/Opencoding.Console.dll</HintPath>
     </Reference>
+    <Reference Include="easyEasing">
+      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Plugins/ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -1390,9 +1392,6 @@
     </Reference>
     <Reference Include="UnityEngine.StandardEvents">
       <HintPath>/Users/Romaha/Library/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.13/UnityEngine.StandardEvents.dll</HintPath>
-    </Reference>
-    <Reference Include="easyEasing">
-      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>/Applications/Unity/Hub/Editor/2018.2.17f1/Unity.app/Contents/NetStandard/ref/2.0.0/netstandard.dll</HintPath>

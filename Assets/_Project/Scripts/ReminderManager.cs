@@ -1,25 +1,39 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using App.Data.Reminders;
 using BayatGames.SaveGamePro;
+using Opencoding.CommandHandlerSystem;
+using QuickEngine.Extensions;
 using UnityEngine;
 using VoxelBusters.NativePlugins;
 
 public class ReminderManager : MonoSingleton<ReminderManager>
 {
-    private List<ReminderData> _actualReminderGroups = new List<ReminderData>();
-
-    // private List<ReminderData> _actualNotifications = new List<ReminderData>();
-    // private List<NotificationData> _historyReminders = new List<NotificationData>();
-
-    private const string _ACTUAL_REMINDERS_FILE_PATH = "notifications.dat";
-    // private const string _HISTORY_REMINDERS_FILE_PATH = "notificationsHistory.dat";
-
-    #region Unity Methods
-
-    private void Awake()
+    public struct TimeDifference
     {
+        public int years;
+        public int months;
+        public int days;
+        public int hours;
+        public int minutes;
+        public int seconds;
+    }
+
+    private List<ReminderData> _reminders = new List<ReminderData>();
+    private const string _ACTUAL_REMINDERS_FILE_PATH = "notifications.dat";
+    private const string _DEFAULT_REMINDERS_ADDED_KEY = "defaultRemindersAdded";
+    private const string _DEFAULT_SAA_ST_KEY = "SAA_ST";
+    private const string _DEFAULT_SAA_ACT_KEY = "SAA_ACT";
+
+    public static event Action<List<ReminderData>> OnRemindersUpdate;
+
+    protected void Awake()
+    {
+        CommandHandlers.RegisterCommandHandlers(this);
+
         // Subscribe to save and load events.
         SaveGame.OnSaved += SaveGame_OnSaved;
         SaveGame.OnLoaded += SaveGame_OnLoaded;
@@ -27,63 +41,46 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     protected void Start()
     {
+        Debug.Log("Start in ReminderManager");
         RegisterNotificationTypes(NotificationType.Sound | NotificationType.Badge | NotificationType.Alert);
+        AppManager.OnModeChange += OnAppModeChanged;
 
         // parse all notifications to data for best control
         if (SaveGame.Exists(_ACTUAL_REMINDERS_FILE_PATH))
         {
-            _actualReminderGroups = SaveGame.Load<List<ReminderData>>(_ACTUAL_REMINDERS_FILE_PATH);
+            _reminders = SaveGame.Load<List<ReminderData>>(_ACTUAL_REMINDERS_FILE_PATH);
         }
 
-        /*
-        // parse all notifications to data for best control
-        if (SaveGame.Exists(_HISTORY_REMINDERS_FILE_PATH))
+        if (!PlayerPrefs.HasKey(_DEFAULT_REMINDERS_ADDED_KEY))
         {
-            _historyReminders = SaveGame.Load<List<NotificationData>>(_HISTORY_REMINDERS_FILE_PATH);
+            // add default Symptom reminder
+            ReminderData reminderData = new ReminderData(_DEFAULT_SAA_ST_KEY, DateTime.Today.Tomorrow(),
+                DateTime.MaxValue,
+                RepeatInterval.FORTNIGHT,
+                "Complete symptom tracker test");
+            reminderData.isDefault = true;
+            reminderData.SetupReminder();
+            AddReminder(reminderData);
+
+            // add default Asthma test reminder
+            reminderData = new ReminderData(_DEFAULT_SAA_ACT_KEY, DateTime.Today.Tomorrow(), DateTime.MaxValue,
+                RepeatInterval.WEEK,
+                "Take asthma control test");
+            reminderData.isDefault = true;
+            reminderData.SetupReminder();
+
+            AddReminder(reminderData);
+
+            PlayerPrefs.SetInt(_DEFAULT_REMINDERS_ADDED_KEY, 1);
+
+            SaveProgress(false);
         }
 
-        // set yesterday by default because there is no way how actual reminder can 
-        DateTime lastHistoryData = DateTime.Today.AddDays(-1);
-
-        // find last history data
-        if (_historyReminders.Count > 0)
+        for (int i = 0; i < _reminders.Count; i++)
         {
-            lastHistoryData = _historyReminders[0].fireDate;
+            _reminders[i].CheckReminderData();
+            _reminders[i].OnDataUpdate += OnReminderDataUpdate;
         }
-
-        // if value is not > 0, that means nothing to check
-        int daysToCheck = DateTime.Today.Subtract(lastHistoryData).Days;
-
-        // checking actual notification try to find some which can be replaced to
-        List<NotificationData> oldReminders = new List<NotificationData>();
-        for (int i = 0; i < daysToCheck; i++)
-        {
-            DateTime dt = lastHistoryData.AddDays(i + 1);
-            oldReminders.AddRange(GetRemindersByDate(dt));
-        }
-        
-        // now convert actual reminders to old (history) reminders
-        
-        // and remove reminder data from the group
-        
-        // save changes if was done
-        if (oldReminders.Count > 0)
-        {
-            
-        }
-        */
-    }
-
-    private List<NotificationData> GetRemindersByDate(DateTime dateTime)
-    {
-        List<NotificationData> list = new List<NotificationData>();
-        
-        for (int i = 0; i < _actualReminderGroups.Count; i++)
-        {
-            list.AddRange(_actualReminderGroups[i].GetRemindersByDate(dateTime));
-        }
-
-        return list;
     }
 
     protected void OnEnable()
@@ -100,36 +97,35 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         NotificationService.DidReceiveLocalNotificationEvent -= DidReceiveLocalNotificationEvent;
     }
 
-    #endregion
 
     #region API Methods
 
-    private void RegisterNotificationTypes(NotificationType notificationTypes)
+    public void RegisterNotificationTypes(NotificationType notificationTypes)
     {
         NPBinding.NotificationService.RegisterNotificationTypes(notificationTypes);
     }
 
-    private NotificationType EnabledNotificationTypes()
+    public NotificationType EnabledNotificationTypes()
     {
         return NPBinding.NotificationService.EnabledNotificationTypes();
     }
 
-    private string ScheduleLocalNotification(CrossPlatformNotification notification)
+    public string ScheduleLocalNotification(CrossPlatformNotification notification)
     {
         return NPBinding.NotificationService.ScheduleLocalNotification(notification);
     }
 
-    private void CancelLocalNotification(string notificationID)
+    public void CancelLocalNotification(string notificationID)
     {
         NPBinding.NotificationService.CancelLocalNotification(notificationID);
     }
 
-    private void CancelAllLocalNotifications()
+    public void CancelAllLocalNotifications()
     {
         NPBinding.NotificationService.CancelAllLocalNotification();
     }
 
-    private void ClearNotifications()
+    public void ClearNotifications()
     {
         NPBinding.NotificationService.ClearNotifications();
     }
@@ -141,12 +137,28 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     private void DidLaunchWithLocalNotificationEvent(CrossPlatformNotification notification)
     {
-        Debug.Log("Application did launch with local notification.");
+        Debug.Log(
+            $"Application did launch with local notification with id: {notification.GetNotificationID()}, fire date: {notification.FireDate}, interval: {notification.RepeatInterval}");
+
+        // try to find ReminderData associated with current notification and check, should we update data or not (for example for 1 time notifications what must be removed from the NotificationData)
     }
 
     private void DidReceiveLocalNotificationEvent(CrossPlatformNotification notification)
     {
-        Debug.Log("Application received local notification.");
+        Debug.Log(
+            $"Application received local notification with id: {notification.GetNotificationID()}, fire date: {notification.FireDate}, interval: {notification.RepeatInterval}");
+
+        // try to find ReminderData associated with current notification and check, should we update data or not (for example for 1 time notifications what must be removed from the NotificationData)
+        // Also we must keep tracking of past reminders events to show it in a past dates
+
+        ReminderData data = GetReminderByNotificationId(notification.GetNotificationID());
+        if (data != null)
+        {
+            Debug.Log($"This notification is a part of reminder by id: {data.id} and title: {data.title}");
+            data.AddToHistory(notification.FireDate);
+        }
+
+        SaveProgress(false);
     }
 
     #endregion
@@ -160,7 +172,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     /// <param name="identifier">Identifier.</param>
     /// <param name="value">Value.</param>
     /// <param name="settings">Settings.</param>
-    void SaveGame_OnSaved(string identifier, object value, SaveGameSettings settings)
+    private void SaveGame_OnSaved(string identifier, object value, SaveGameSettings settings)
     {
         Debug.LogFormat("{0} Saved Successfully", identifier);
     }
@@ -173,20 +185,125 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     /// <param name="type">Type.</param>
     /// <param name="defaultValue">Default value.</param>
     /// <param name="settings">Settings.</param>
-    void SaveGame_OnLoaded(string identifier, object result, Type type, object defaultValue, SaveGameSettings settings)
+    private void SaveGame_OnLoaded(string identifier, object result, Type type, object defaultValue,
+        SaveGameSettings settings)
     {
         Debug.LogFormat("{0} Loaded Successfully", identifier);
     }
 
     #endregion
 
-
-    public List<NotificationData> GetAllNotifications(DateTime date)
+    private void OnReminderDataUpdate(ReminderData reminderData)
     {
-        // try to find all notifications for particular date
+        // save each time some important changes been made. NOTE - make sure event is not triggered without true need.
+        SaveProgress(false);
+    }
 
+    private void OnAppModeChanged(AppManager.Mode mode)
+    {
+        List<ReminderData> defaultReminders =
+            _reminders.FindAll(x => x.id == _DEFAULT_SAA_ST_KEY || x.id == _DEFAULT_SAA_ACT_KEY);
 
-        return null;
+        for (int i = 0; i < defaultReminders.Count; i++)
+        {
+            defaultReminders[i].SetActive(mode == AppManager.Mode.SAA);
+        }
+    }
+
+    [CommandHandler(Description = "Remove all reminders")]
+    public void RemoveAllReminders()
+    {
+        for (int i = 0; i < _reminders.Count; i++)
+        {
+            _reminders[i].Reset();
+            _reminders.RemoveAt(i);
+        }
+
+        _reminders.Clear();
+        SaveGame.Delete(_ACTUAL_REMINDERS_FILE_PATH);
+        PlayerPrefs.DeleteKey(_DEFAULT_REMINDERS_ADDED_KEY);
+
+        OnRemindersUpdate?.Invoke(GetAllReminders());
+    }
+
+    public void AddReminder(ReminderData data)
+    {
+        _reminders.Add(data);
+
+        SaveProgress(true);
+    }
+
+    /// <summary>
+    /// Deleting reminder means it still will be cached in to show in calendar history, but will not be visible in ReminderScreen and can't be restored. At least for now.
+    /// </summary>
+    /// <param name="data"></param>
+    public void DeleteReminder(string id)
+    {
+        ReminderData data = _reminders.Find(x => x.id == id);
+        if (data == null)
+        {
+            Debug.LogWarning("Can't find reminder by id: " + id);
+        }
+        else
+        {
+            data.Delete();
+
+            SaveProgress(true);
+        }
+    }
+
+    public void SaveProgress(bool triggerEvent)
+    {
+        SaveGame.Save(_ACTUAL_REMINDERS_FILE_PATH, _reminders);
+        if (triggerEvent)
+        {
+            OnRemindersUpdate?.Invoke(GetAllReminders());
+        }
+    }
+
+    public List<ReminderData> GetAllReminders(bool includeInactive = true, bool includeDeleted = false)
+    {
+        if (includeInactive)
+        {
+            if (includeDeleted)
+            {
+                return _reminders;
+            }
+            else
+            {
+                return _reminders.FindAll(x => !x.isDeleted);
+            }
+        }
+        else
+        {
+            if (includeDeleted)
+            {
+                return _reminders.FindAll(x => x.isActive);
+            }
+            else
+            {
+                return _reminders.FindAll(x => x.isActive && !x.isDeleted);
+            }
+        }
+    }
+
+    public List<ReminderData> GetRemindersByDate(DateTime dateTime)
+    {
+        return _reminders.Where(x => x.HasNotificationByDate(dateTime)).ToList();
+    }
+
+    public ReminderData GetReminderByNotificationId(string id)
+    {
+        return _reminders.Find(x => x.HasNotificationWithId(id));
+    }
+
+    public ReminderData CreateSimpleTemplateReminder()
+    {
+        // make pretty time like 12:00am
+        DateTime nowFixed = DateTime.Today.Date +
+                            DateTime.ParseExact("03:00 PM", "hh:mm tt", CultureInfo.InvariantCulture).TimeOfDay;
+        return new ReminderData(Guid.NewGuid().ToString(), nowFixed, DateTime.MaxValue,
+            RepeatInterval.ONCE, "");
     }
 
     public CrossPlatformNotification CreateNotification(long fireAfterSec, eNotificationRepeatInterval repeatInterval)
@@ -209,7 +326,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
         CrossPlatformNotification notification = new CrossPlatformNotification();
         notification.AlertBody = "alert body"; //On Android, this is considered as ContentText
-        notification.FireDate = System.DateTime.Now.AddSeconds(fireAfterSec);
+        notification.FireDate = DateTime.Now.AddSeconds(fireAfterSec);
         notification.RepeatInterval = repeatInterval;
         notification.SoundName =
             "Notification.mp3"; //Keep the files in Assets/PluginResources/Android or iOS or Common folder.
@@ -218,5 +335,72 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         notification.AndroidProperties = _androidProperties;
 
         return notification;
+    }
+
+    public static TimeDifference GetDateTimeDifference(DateTime dateA, DateTime dateB)
+    {
+        int days;
+        int months;
+        int years;
+
+        int fird = dateA.Day;
+        int lasd = dateB.Day;
+
+        int firm = dateA.Month;
+        int lasm = dateB.Month;
+
+        if (fird >= lasd)
+        {
+            days = fird - lasd;
+            if (firm >= lasm)
+            {
+                months = firm - lasm;
+                years = dateA.Year - dateB.Year;
+            }
+            else
+            {
+                months = (firm + 12) - lasm;
+                years = dateA.AddYears(-1).Year - dateB.Year;
+            }
+        }
+        else
+        {
+            days = (fird + 30) - lasd;
+            if ((firm - 1) >= lasm)
+            {
+                months = (firm - 1) - lasm;
+                years = dateA.Year - dateB.Year;
+            }
+            else
+            {
+                months = (firm - 1 + 12) - lasm;
+                years = dateA.AddYears(-1).Year - dateB.Year;
+            }
+        }
+
+        if (days < 0)
+        {
+            days = 0 - days;
+        }
+
+        if (months < 0)
+        {
+            months = 0 - months;
+        }
+
+        TimeSpan ts = dateA.Subtract(dateB);
+
+        TimeDifference td = new TimeDifference
+        {
+            years = years,
+            months = months,
+            days = days,
+            hours = ts.Hours,
+            minutes = ts.Minutes,
+            seconds = ts.Seconds
+        };
+        Debug.Log($"Years: {years}, Months: {months}, Days: {days}");
+
+        return td;
     }
 }

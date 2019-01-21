@@ -5,7 +5,6 @@ using QuickEngine.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Toggle))]
 public class CalendarUiItem : MonoBehaviour
 {
     [SerializeField] protected Text _text;
@@ -21,11 +20,6 @@ public class CalendarUiItem : MonoBehaviour
 
     private void Awake()
     {
-        if (toggle == null)
-        {
-            toggle = GetComponent<Toggle>();
-        }
-
         toggle.onValueChanged.AddListener(OnToggled);
     }
 

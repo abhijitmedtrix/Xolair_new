@@ -410,6 +410,9 @@
     <Reference Include="Google.VersionHandlerImpl_v1.2.61.0">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/PlayServicesResolver/Editor/Google.VersionHandlerImpl_v1.2.61.0.dll</HintPath>
     </Reference>
+    <Reference Include="easyEasing">
+      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Plugins/ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -436,9 +439,6 @@
     </Reference>
     <Reference Include="UnityEngine.StandardEvents">
       <HintPath>/Users/Romaha/Library/Unity/cache/packages/packages.unity.com/com.unity.standardevents@1.0.13/UnityEngine.StandardEvents.dll</HintPath>
-    </Reference>
-    <Reference Include="easyEasing">
-      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>/Applications/Unity/Hub/Editor/2018.2.17f1/Unity.app/Contents/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll</HintPath>
