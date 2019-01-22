@@ -7,7 +7,7 @@ public class FAQViewSAA : MonoBehaviour
     [SerializeField] private GameObject contentDrug, contentDisease;
    // [SerializeField] private MaterialUI.ScreenManager screenManager;
     [SerializeField]private Text[] Title;
-    [SerializeField] private bool toggle;
+    //[SerializeField] private bool toggle;
     private static List<FAQDrugSAA> faqdrugDat;
     private static List<FAQDiseaseSAA> faqdiseaseDat;
     private List<int> questionNum = new List<int>();
