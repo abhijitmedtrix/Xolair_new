@@ -391,6 +391,9 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         if (!_asthmaJsonObjectList.Contains(data))
         {
             _asthmaJsonObjectList.Add(data);
+            
+            // each time new test passed - reschedule reminder
+            ReminderManager.Instance.ActivateAsthmaControlTestDefaultReminder(day.Date + DateTime.Now.TimeOfDay);
         }
 
         if (_trackerDictionary.ContainsKey(day))
@@ -419,6 +422,9 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         if (!_symptomJsonObjectList.Contains(data))
         {
             _symptomJsonObjectList.Add(data);
+            
+            // each time new test passed - reschedule reminder
+            ReminderManager.Instance.ActivateSymptomTrackerDefaultReminder(day.Date + DateTime.Now.TimeOfDay);
         }
 
         if (_trackerDictionary.ContainsKey(day))
@@ -581,6 +587,15 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         }
 
         return 0;
+    }
+
+    public static QuestionBasedTrackerData GetLastSymptomData()
+    {
+        return _symptomJsonObjectList.Count > 0 ? _symptomJsonObjectList[_symptomJsonObjectList.Count - 1] : null;
+    }
+    public static QuestionBasedTrackerData GetLastAsthmaData()
+    {
+        return _asthmaJsonObjectList.Count > 0 ? _asthmaJsonObjectList[_asthmaJsonObjectList.Count - 1] : null;
     }
 
     #endregion

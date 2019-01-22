@@ -103,7 +103,10 @@ namespace MaterialUI
 
 		[SerializeField] private Vector2 thisScreenSize;
 
-		private ScreenConfig hideScreen;
+		/// <summary>
+		/// That's previous screen which triggered screen change.
+		/// </summary>
+		public ScreenConfig previousScreen;
 
 		public Action OnShowStarted;
 		public Action OnShowCompleted;
@@ -124,7 +127,7 @@ namespace MaterialUI
 
 		public void Show(ScreenConfig screenToHide)
 		{
-			hideScreen = screenToHide;
+			previousScreen = screenToHide;
 			Show();
 		}
 
@@ -296,10 +299,10 @@ namespace MaterialUI
 						}
 					}
 
-					if (hideScreen && hideScreen != this)
+					if (previousScreen && previousScreen != this)
 					{
-						hideScreen.HideWithoutTransition();
-						hideScreen = null;
+						previousScreen.HideWithoutTransition();
+						previousScreen = null;
 					}
 
 					state = 0;

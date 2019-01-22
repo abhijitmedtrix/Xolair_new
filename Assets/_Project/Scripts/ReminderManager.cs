@@ -63,6 +63,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.FORTNIGHT,
                 "Complete symptom tracker test");
             reminderData.isDefault = true;
+            reminderData.isActive = TrackerManager.GetLastSymptomData() != null;
             reminderData.SetupReminder();
             AddReminder(reminderData);
 
@@ -71,6 +72,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.WEEK,
                 "Take asthma control test");
             reminderData.isDefault = true;
+            reminderData.isActive = TrackerManager.GetLastAsthmaData() != null;
             reminderData.SetupReminder();
 
             AddReminder(reminderData);
@@ -85,6 +87,20 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             _reminders[i].OnDataUpdate += OnReminderDataUpdate;
             _reminders[i].CheckReminderData();
         }
+    }
+
+    public void ActivateSymptomTrackerDefaultReminder(DateTime testCompleteDateTime)
+    {
+        ReminderData data =  _reminders.Find(x => x.id == _DEFAULT_SAA_ST_KEY);
+        data.fireDate = testCompleteDateTime;
+        data.SetActive(true);
+    }
+    
+    public void ActivateAsthmaControlTestDefaultReminder(DateTime testCompleteDateTime)
+    {
+        ReminderData data =  _reminders.Find(x => x.id == _DEFAULT_SAA_ACT_KEY);
+        data.fireDate = testCompleteDateTime;
+        data.SetActive(true);
     }
 
     protected void OnEnable()
@@ -170,7 +186,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         
         // show popup notifications
         UIManager.NotificationManager.ShowNotification(
-            "TwoOptionsUINotification",
+            "TwoOptionsIconUINotification",
             -1,
             false,
             "",
@@ -280,8 +296,6 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     public void SaveProgress(bool triggerEvent)
     {
-        Debug.Log("Saving progress by SaveGame asset");
-        
         SaveGame.Save(_ACTUAL_REMINDERS_FILE_PATH, _reminders);
         if (triggerEvent)
         {
@@ -414,7 +428,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             minutes = ts.Minutes,
             seconds = ts.Seconds
         };
-        Debug.Log($"Years: {years}, Months: {months}, Days: {days}, Hours: {ts.Hours}, Minutes: {ts.Minutes}, Seconds: {ts.Seconds}");
+        // Debug.Log($"Years: {years}, Months: {months}, Days: {days}, Hours: {ts.Hours}, Minutes: {ts.Minutes}, Seconds: {ts.Seconds}");
 
         return td;
     }

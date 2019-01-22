@@ -87,6 +87,18 @@ namespace MaterialUI
                 }
             }
         }
+        
+        public void Set(ScreenConfig screen)
+        {
+            for (int i = 0; i < screens.Length; i++)
+            {
+                if (screens[i] == screen)
+                {
+                    Set(i);
+                    return;
+                }
+            }
+        }
 
         public void Back()
         {

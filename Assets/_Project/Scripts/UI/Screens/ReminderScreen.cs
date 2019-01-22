@@ -40,6 +40,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private ReminderData _tempReminderData;
     private List<ReminderData> _data;
     private ReminderUiItem _selectedItem;
+    private ReminderData _defaultSelection;
 
     public EnhancedScroller scroller;
     public EnhancedScrollerCellView cellViewPrefab;
@@ -68,22 +69,34 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void Start()
     {
         // listen reminders update event to update scroller
-        
+
         // TODO - it's very bad practice to keep listener active all the time. Ideally it shoud be added OnShowStarted, and removed OnHideStarted, but current UI Screen manager doesn't trigger screen hide, it just overlay with a new scren...
         ReminderManager.OnRemindersUpdate += SetScroller;
-        
+
         _calendar.cellClickedDelegate = CellClickedDelegate;
     }
 
     private void ShowStarted()
     {
+        _customReminderScreen.gameObject.SetActive(false);
         _tempNewReminderData.fireDate = DateTime.Today.Date + _tempNewReminderData.fireDate.TimeOfDay;
-        
+
         // initialize all reminders
         SetScroller(ReminderManager.Instance.GetAllReminders());
 
-        // each type screen opened set New state by default
-        SetState(State.New);
+        // of there is such reminder
+        int index = _data.IndexOf(_defaultSelection);
+        if (index > -1)
+        {
+            scroller.JumpToDataIndex(index);
+            _selectedItem = scroller.GetCellViewAtDataIndex(index) as ReminderUiItem;
+            SetState(State.Edit);
+        }
+        else
+        {
+            // set New state by default
+            SetState(State.New);
+        }
     }
 
     private void SetState(State state)
@@ -124,6 +137,15 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _saveButton.gameObject.SetActive(!string.IsNullOrEmpty(_tempReminderData.title));
     }
 
+    /// <summary>
+    /// Method to make a default selection 
+    /// </summary>
+    /// <param name="reminderData"></param>
+    public void SetSelection(ReminderData reminderData)
+    {
+        _defaultSelection = reminderData;
+    }
+
     public void SetScroller(List<ReminderData> data)
     {
         // set up the scroller delegates
@@ -137,9 +159,10 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void SetDefaultDate(DateTime date)
     {
-        _tempNewReminderData.fireDate = date.Date + _tempNewReminderData.fireDate.TimeOfDay;
+        _tempReminderData.fireDate = date.Date + _tempReminderData.fireDate.TimeOfDay;
+        UpdateView();
     }
-    
+
     public void SetData(List<ReminderData> datas)
     {
         _data = datas;
@@ -204,14 +227,14 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void SaveReminder()
     {
         // check some critical values set by user before saving
-        
+
         // we can't set new notification without repetition in a past
         if (_tempReminderData.repeatInterval == RepeatInterval.ONCE &&
             _tempReminderData.fireDate.IsOlderDate(DateTime.Now))
         {
             // show error
             UIManager.NotificationManager.ShowNotification(
-                "OneOptionUINotification",
+                "OneOptionTitleUINotification",
                 -1,
                 false,
                 "Sorry!",
@@ -222,13 +245,13 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
             );
             return;
         }
-        
-        
+
+
         if (this.state == State.New)
         {
             _tempReminderData.SetupReminder();
             ReminderManager.Instance.AddReminder(_tempReminderData);
-            
+
             // update variables and create new reminder
             _tempReminderData = _tempNewReminderData = ReminderManager.Instance.CreateSimpleTemplateReminder();
         }
@@ -238,7 +261,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
             if (!_selectedItem.data.Equals(_tempReminderData))
             {
                 UIManager.NotificationManager.ShowNotification(
-                    "TwoOptionsUINotification",
+                    "TwoOptionsTitleUINotification",
                     -1,
                     false,
                     "Save changes?",
@@ -253,7 +276,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
                         {
                             _selectedItem.data.CopyData(_tempReminderData);
                             _selectedItem.data.SetupReminder();
-                            
+
                             _tempReminderData = null;
                             // deselect all toggles
                             _toggleGroup.SetAllTogglesOff();
@@ -267,7 +290,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
             else
             {
                 _tempReminderData = null;
-                
+
                 // deselect all toggles
                 _toggleGroup.SetAllTogglesOff();
 
@@ -284,7 +307,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void DeleteReminder()
     {
         UIManager.NotificationManager.ShowNotification(
-            "TwoOptionsUINotification",
+            "TwoOptionsTitleUINotification",
             -1,
             false,
             "Delete?",
@@ -333,9 +356,10 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             // load current reminder data to setup
             _customReminderScreen.SetReminderData(_tempReminderData);
-            
+
             // open reminder customize screen
-            ScreenManager.Instance.Set(14);
+            _customReminderScreen.gameObject.SetActive(true);
+            // ScreenManager.Instance.Set(14);
         }
         // Cancel option
         else if (index == repeatOptionsNames.Length - 1)
@@ -348,7 +372,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
             UpdateView();
         }
     }
-    
+
     private void ItemOnToggled(ReminderUiItem item, bool isOn)
     {
         if (isOn)
@@ -367,7 +391,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     {
         ControlCalendarPopup(false);
     }
-    
+
     public void ControlCalendarPopup(bool enable)
     {
         _calendarPopup.SetActive(enable);
@@ -386,6 +410,20 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 UpdateView();
             }
         }
+    }
+
+    public void Back()
+    {
+        _defaultSelection = null;
+        _selectedItem = null;
+        _tempReminderData = null;
+        ScreenManager.Instance.Back();
+    }
+
+    public void HideCustomReminderScreen()
+    {
+        _customReminderScreen.gameObject.SetActive(false);
+        UpdateView();
     }
 
     #region EnhancedScroller Handlers

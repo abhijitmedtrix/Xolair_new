@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using App.Data.Reminders;
 using MaterialUI;
@@ -26,7 +27,8 @@ public class CustomReminderScreen : MonoBehaviour
         "Every year"
     };
 
-    [SerializeField] private ScreenConfig _screenConfig;
+    [SerializeField] protected ScreenConfig _screenConfig;
+    [SerializeField] protected ReminderScreen _reminderScreen;
     [SerializeField] protected StateChangeToggle[] _daysOfWeekToggles;
     [SerializeField] protected Toggle[] _endsOnToggles;
     [SerializeField] protected ToggleGroup _endsOnToggleGroup;
@@ -36,12 +38,14 @@ public class CustomReminderScreen : MonoBehaviour
     [SerializeField] protected GameObject _calendarPopup;
     [SerializeField] protected InputField _numOfRepeatsInputField;
     [SerializeField] protected Text _endsOnText, _repeatIntervalText, _fireDateText;
-
+    
     private DatePickState _datePickState;
     private ReminderData _originalReminderData;
     private ReminderData _tempReminderData;
     private Rect _nativePopupRect;
     private List<DayOfWeek> _selectedDays = new List<DayOfWeek>();
+
+    private const string _DATE_FORMAT = "ddd, MMM d, yyyy";
 
     private void Awake()
     {
@@ -73,13 +77,20 @@ public class CustomReminderScreen : MonoBehaviour
         {
             _selectedDays.Clear();
         }
+
+        // can't be selected ONCE
+        if (_tempReminderData.repeatInterval == RepeatInterval.ONCE)
+        {
+            _tempReminderData.repeatInterval = RepeatInterval.WEEK;
+        }
+
+        // manually call method, because of workaround with placing screen into the screen
+        ShowStarted();
     }
 
     private void ShowStarted()
     {
         // reset all previous ui settings
-
-
         _datePickState = DatePickState.None;
 
         // deselect days
@@ -101,6 +112,8 @@ public class CustomReminderScreen : MonoBehaviour
         // disable by default
         _daysOfWeekContainer.SetActive(false);
         _calendarDateContainer.SetActive(false);
+
+        Debug.Log("_tempReminderData.fireDate: " + _tempReminderData.fireDate);
 
         if (_tempReminderData.repeatInterval == RepeatInterval.DAY)
         {
@@ -126,25 +139,39 @@ public class CustomReminderScreen : MonoBehaviour
         else if (_tempReminderData.repeatInterval == RepeatInterval.MONTH)
         {
             _calendarDateContainer.SetActive(true);
-            _fireDateText.text = _tempReminderData.fireDate.ToString("ddd, MMM d, yyyy");
+            _fireDateText.text = _tempReminderData.fireDate.ToString(_DATE_FORMAT);
         }
         else if (_tempReminderData.repeatInterval == RepeatInterval.YEAR)
         {
             _calendarDateContainer.SetActive(true);
-            _fireDateText.text = _tempReminderData.fireDate.ToString("ddd, MMM d, yyyy");
+            _fireDateText.text = _tempReminderData.fireDate.ToString(_DATE_FORMAT);
         }
 
         _repeatIntervalText.text = _tempReminderData.repeatInterval.ToString().ToTitleCase();
 
-
+        Debug.Log("End date: " + _tempReminderData.endDate);
+        // if <never> option selected
         if (_tempReminderData.endDate == DateTime.MaxValue)
         {
             _endsOnToggles[0].SetValue(true);
+
+            // just show next days as an example
+            _endsOnText.text = _tempReminderData.fireDate.AddDays(1).ToString(_DATE_FORMAT);
         }
         else
         {
             _endsOnToggles[1].SetValue(true);
-            _endsOnText.text = _tempReminderData.endDate.ToString("ddd, MMM d, yyyy");
+
+            // make sure that end date it not older then fire date
+            DateTime parsedDateTime = DateTime.ParseExact(_endsOnText.text, _DATE_FORMAT, CultureInfo.InvariantCulture);
+            if (parsedDateTime.IsOlderDate(_tempReminderData.fireDate))
+            {
+                _endsOnText.text = _tempReminderData.fireDate.AddDays(1).ToString(_DATE_FORMAT);
+            }
+            else
+            {
+                _endsOnText.text = _tempReminderData.endDate.ToString(_DATE_FORMAT);
+            }
         }
     }
 
@@ -157,6 +184,10 @@ public class CustomReminderScreen : MonoBehaviour
     public void PickEndDate()
     {
         _datePickState = DatePickState.EndDate;
+
+        // if user clicked on a <pick end date> option by input field, activate toggle automatically
+        _endsOnToggles[1].SetValue(true);
+
         ControlCalendarPopup(true);
     }
 
@@ -191,7 +222,7 @@ public class CustomReminderScreen : MonoBehaviour
     private void OnDayOfWeekToggled(StateChangeToggle toggle, bool isOn)
     {
         int index = Array.IndexOf(_daysOfWeekToggles, toggle);
-        Debug.Log($"Day by index {index} toggled to: {isOn}");
+        // Debug.Log($"Day by index {index} toggled to: {isOn}");
 
         DayOfWeek dayOfWeek = (DayOfWeek) index;
 
@@ -282,10 +313,10 @@ public class CustomReminderScreen : MonoBehaviour
             }
 
             UpdateView();
-        }
 
-        // reset state
-        _datePickState = DatePickState.None;
+            // reset state
+            _datePickState = DatePickState.None;
+        }
     }
 
     public void Save()
@@ -306,6 +337,10 @@ public class CustomReminderScreen : MonoBehaviour
         else if (_endsOnToggles[1].isOn)
         {
             // this value already been recorded after calendar picked
+            _tempReminderData.endDate =
+                DateTime.ParseExact(_endsOnText.text, _DATE_FORMAT, CultureInfo.InvariantCulture);
+            Debug.Log("Parsed end date: " +
+                      DateTime.ParseExact(_endsOnText.text, _DATE_FORMAT, CultureInfo.InvariantCulture));
         }
         else if (_endsOnToggles[2].isOn)
         {
@@ -340,7 +375,6 @@ public class CustomReminderScreen : MonoBehaviour
 
     public void Back()
     {
-        // currently back is open Reminder screen again
-        ScreenManager.Instance.Set(10);
+        _reminderScreen.HideCustomReminderScreen();
     }
 }

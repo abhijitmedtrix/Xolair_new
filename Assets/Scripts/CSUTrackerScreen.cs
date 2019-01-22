@@ -205,7 +205,7 @@ public class CSUTrackerScreen : MonoBehaviour
             _bodyPartToggles.Single(x => x.bodyPart == _selectedBodyPart).SetValue(true);
 
             UIManager.NotificationManager.ShowNotification(
-                "TwoOptionsUINotification",
+                "TwoOptionsTitleUINotification",
                 -1,
                 false,
                 "Are you sure?",

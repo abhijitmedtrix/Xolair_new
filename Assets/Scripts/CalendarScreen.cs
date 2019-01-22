@@ -69,7 +69,7 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void SetScrollData(List<ReminderData> data)
     {
-        Debug.Log("SetScrollData. Found data count: "+data.Count);
+        // Debug.Log("SetScrollData. Found data count: "+data.Count);
         _data = data;
         scroller.ReloadData();
     }
@@ -78,12 +78,14 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
     {
         ScreenManager.Instance.Set(10);
         
-        // show reminder screen with predefined (selected date). IMPORTANT to call it after screen set to let OnShowStart event reset default date value
-        _reminderScreen.SetDefaultDate(_calendar.focusedDate.Date);
+        // important to call this after show reminder screen to allow change tempReminderData fireDate
+        _reminderScreen.SetDefaultDate(_calendar.selectedDate.Date);
     }
     
     private void OnReminderItemClicked(DetailedReminderUiItem item)
     {
+        _reminderScreen.SetSelection(item.data);
+        
         // open Reminder screen
         ScreenManager.Instance.Set(10);
     }
