@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using App.Data.Reminders;
+using DoozyUI;
 using EnhancedUI.EnhancedScroller;
 using MaterialUI;
 using QuickEngine.Extensions;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -31,6 +33,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     [SerializeField] private Text _repeatText, _dateText, _timeText;
     [SerializeField] private Calendar _calendar;
     [SerializeField] private GameObject _calendarPopup;
+    [SerializeField] private CustomReminderScreen _customReminderScreen;
 
     private Rect _nativePopupRect;
     private ReminderData _tempNewReminderData;
@@ -187,7 +190,8 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             // set some random interval
             // RepeatIntervalPicked((long) Random.Range(0, repeatOptionsNames.Length - 1));
-            RepeatIntervalPicked((long) 0);
+            // RepeatIntervalPicked((long) 0);
+            RepeatIntervalPicked((long) 6);
         }
         else
         {
@@ -205,11 +209,16 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         if (_tempReminderData.repeatInterval == RepeatInterval.ONCE &&
             _tempReminderData.fireDate.IsOlderDate(DateTime.Now))
         {
-            // show error 
-            DialogWindow.Show("Sorry!",
+            // show error
+            UIManager.NotificationManager.ShowNotification(
+                "OneOptionUINotification",
+                -1,
+                false,
+                "Sorry!",
                 "It's impossible to setup new reminder without repetition in a past, please check you scheduled time",
-                new string[] {"Thanks"},
-                new Action[] {null}
+                null,
+                new string[] {"Ok"},
+                new string[] {"Thanks!"}
             );
             return;
         }
@@ -228,11 +237,18 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
             // check, did user change something at all or not
             if (!_selectedItem.data.Equals(_tempReminderData))
             {
-                // ask him, is he sure to save changes
-                DialogWindow.Show("Save changes?", "Are you sure you wish to save changes?",
-                    new string[] {"Yes", "No"},
-                    new Action[]
+                UIManager.NotificationManager.ShowNotification(
+                    "TwoOptionsUINotification",
+                    -1,
+                    false,
+                    "Save changes?",
+                    "Are you sure you wish to save changes?",
+                    null,
+                    new string[] {"No", "Yes"},
+                    new string[] {"No", "Yes"},
+                    new UnityAction[]
                     {
+                        null,
                         () =>
                         {
                             _selectedItem.data.CopyData(_tempReminderData);
@@ -244,8 +260,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
                             // switch to new reminder
                             SetState(State.New);
-                        },
-                        null
+                        }
                     }
                 );
             }
@@ -268,10 +283,18 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void DeleteReminder()
     {
-        DialogWindow.Show("Delete?", "You can't restore reminder after it's deleted. Are you sure you wish to proceed?",
-            new string[] {"Yes", "No"},
-            new Action[]
+        UIManager.NotificationManager.ShowNotification(
+            "TwoOptionsUINotification",
+            -1,
+            false,
+            "Delete?",
+            "You can't restore reminder after it's deleted. Are you sure you wish to proceed?",
+            null,
+            new string[] {"No", "Yes"},
+            new string[] {"No", "Yes"},
+            new UnityAction[]
             {
+                null,
                 () =>
                 {
                     ReminderManager.Instance.DeleteReminder(_tempReminderData.id);
@@ -282,8 +305,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
                     // switch to new reminder
                     SetState(State.New);
-                },
-                null
+                }
             }
         );
     }
@@ -309,6 +331,9 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // Custom... option
         if (index == repeatOptionsNames.Length - 2)
         {
+            // load current reminder data to setup
+            _customReminderScreen.SetReminderData(_tempReminderData);
+            
             // open reminder customize screen
             ScreenManager.Instance.Set(14);
         }

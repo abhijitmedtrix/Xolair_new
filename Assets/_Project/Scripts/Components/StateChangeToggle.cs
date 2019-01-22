@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -10,6 +11,7 @@ public class StateChangeToggle : MonoBehaviour
     [SerializeField] protected GameObject[] _activeImages, _inactiveImages;
     
     public Toggle toggle;
+    public Action<StateChangeToggle, bool> OnToggleChange;
 
     protected virtual void Awake()
     {
@@ -48,5 +50,7 @@ public class StateChangeToggle : MonoBehaviour
     protected virtual void OnToggled(bool isOn)
     {
         UpdateView();
+        
+        OnToggleChange?.Invoke(this, isOn);
     }
 }

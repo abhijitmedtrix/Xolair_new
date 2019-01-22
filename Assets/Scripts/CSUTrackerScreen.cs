@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using App.Data;
+using DoozyUI;
 using MaterialUI;
+using UnityEngine.Events;
 
 public class CSUTrackerScreen : MonoBehaviour
 {
@@ -202,15 +204,21 @@ public class CSUTrackerScreen : MonoBehaviour
             _toggleGroup.SetAllTogglesOff();
             _bodyPartToggles.Single(x => x.bodyPart == _selectedBodyPart).SetValue(true);
 
-            DialogWindow.Show(
+            UIManager.NotificationManager.ShowNotification(
+                "TwoOptionsUINotification",
+                -1,
+                false,
                 "Are you sure?",
                 "Current progress will be lost if you change a body part",
-                new string[] {"Change", "Stay"},
-                new Action[]
+                null,
+                new string[] {"No", "Yes"},
+                new string[] {"Stay", "Change"},
+                new UnityAction[]
                 {
-                    StartTracker,
-                    null
-                });
+                    null,
+                    StartTracker
+                }
+                );
         }
         else
         {

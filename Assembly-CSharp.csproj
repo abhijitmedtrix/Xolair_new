@@ -104,6 +104,7 @@
     <Compile Include="Assets\_Project\Scripts\UI\Reminder\DetailedReminderUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Reminder\ReminderUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\CameraScreen.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Screens\CustomReminderScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\MenuScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\PatientJournalScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\ReminderScreen.cs" />

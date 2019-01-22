@@ -5,13 +5,17 @@ using System.Globalization;
 using System.Linq;
 using App.Data.Reminders;
 using BayatGames.SaveGamePro;
+using DoozyUI;
 using Opencoding.CommandHandlerSystem;
 using QuickEngine.Extensions;
 using UnityEngine;
+using UnityEngine.Events;
 using VoxelBusters.NativePlugins;
 
 public class ReminderManager : MonoSingleton<ReminderManager>
 {
+    [SerializeField] protected Sprite _clockIcon;
+    
     public struct TimeDifference
     {
         public int years;
@@ -156,8 +160,31 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             Debug.Log($"This notification is a part of reminder by id: {data.id} and title: {data.title}");
             data.AddToHistory(notification.FireDate);
         }
+        else
+        {
+            Debug.LogWarning("There is no reminder data found for current notification!");            
+            return;
+        }
 
         SaveProgress(false);
+        
+        // show popup notifications
+        UIManager.NotificationManager.ShowNotification(
+            "TwoOptionsUINotification",
+            -1,
+            false,
+            "",
+            "Take asthma control test",
+            _clockIcon,
+            new string[] {"No", "Yes"},
+            new string[] {"Not completed", "Completed"},
+            new UnityAction[]
+            {
+                null,
+                () => data.SetDone(true)
+            },
+            () => SaveProgress(false)
+        );
     }
 
     #endregion
@@ -192,6 +219,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     #endregion
 
+    
     private void OnReminderDataUpdate(ReminderData reminderData)
     {
         // save each time some important changes been made. NOTE - make sure event is not triggered without true need.
@@ -252,6 +280,8 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     public void SaveProgress(bool triggerEvent)
     {
+        Debug.Log("Saving progress by SaveGame asset");
+        
         SaveGame.Save(_ACTUAL_REMINDERS_FILE_PATH, _reminders);
         if (triggerEvent)
         {
