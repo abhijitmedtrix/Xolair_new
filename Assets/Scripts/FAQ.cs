@@ -1,8 +1,8 @@
 ﻿
 using System.Collections.Generic;
-namespace faQ
+namespace FAQ
 {
-    public class FAQ
+    public class Faq
     {
         //public FAQ(string question, string answer)
         //{
