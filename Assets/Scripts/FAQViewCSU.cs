@@ -5,9 +5,9 @@ using UnityEngine;
 public class FAQViewCSU : MonoBehaviour 
 {
     [SerializeField] private GameObject contentDrug,contentDisease;
-    [SerializeField] private MaterialUI.ScreenManager screenManager;
+    //[SerializeField] private MaterialUI.ScreenManager screenManager;
     [SerializeField] private Text[] Title;
-    [SerializeField] private bool toggle;
+   // [SerializeField] private bool toggle;
     private static List<FAQDDrugCSU> faqdrugDat;
     private static List<FAQDiseaseCSU> faqdiseaseDat;
     private List<int> questionNum=new List<int>();
