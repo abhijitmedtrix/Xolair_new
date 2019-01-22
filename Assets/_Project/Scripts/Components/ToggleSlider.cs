@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -36,7 +35,10 @@ public class ToggleSlider : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     public void SetActive(bool active)
     {
         _slider.SetValue(active ? 1 : 0);
+
         UpdateView();
+
+        OnToggleChange?.Invoke(_isAcive);
     }
 
     /// <summary>
@@ -49,7 +51,7 @@ public class ToggleSlider : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
         // tint in/out all objects
         Color col = enable ? Color.white : Color.grey;
-        
+
         for (int i = 0; i < _imagesToTint.Length; i++)
         {
             _imagesToTint[i].color = col;
@@ -58,7 +60,10 @@ public class ToggleSlider : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     private void SliderValueChanged(float value)
     {
+        // Debug.Log("SliderValueChanged: " + value);
+
         _sliderValueChanged = true;
+
         UpdateView();
 
         OnToggleChange?.Invoke(_isAcive);

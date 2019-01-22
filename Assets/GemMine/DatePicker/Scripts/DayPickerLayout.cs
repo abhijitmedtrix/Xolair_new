@@ -52,7 +52,7 @@ public class DayPickerLayout : DatePickerLayout
                 state = PickerCell.CellState.Active;
             }
 
-            List<ReminderData> reminders = ReminderManager.Instance.GetRemindersByDate(firstEntry);
+            List<ReminderData> reminders = ReminderManager.Instance.GetRemindersByDate(firstEntry, true);
             cell.SetDate(firstEntry, state, reminders);
 
             firstEntry = firstEntry.AddDays(1);

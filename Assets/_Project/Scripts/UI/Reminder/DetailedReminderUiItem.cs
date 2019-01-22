@@ -11,10 +11,10 @@ public class DetailedReminderUiItem : EnhancedScrollerCellView, IDisposable
     [SerializeField] protected Image _bgImage;
     [SerializeField] protected Button _button;
     [SerializeField] protected ToggleSlider _toggleSlider;
+    [SerializeField] private Color _inactiveColor;
+    [SerializeField] private Color _deletedColor;
 
     private string _initialDateTextFormat;
-    private Color _inactiveColor;
-    private Color _deletedColor;
 
     public OnReminderItemClicked onReminderItemClicked;
 
@@ -30,6 +30,8 @@ public class DetailedReminderUiItem : EnhancedScrollerCellView, IDisposable
 
     public void SetData(ReminderData data, DateTime currentData)
     {
+        Debug.Log($"Set data for detailed reminder. Title: {data.title}, Data: {currentData}");
+        
         Dispose();
 
         this.data = data;

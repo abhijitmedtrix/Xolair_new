@@ -13,6 +13,7 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
     [SerializeField] private Calendar _calendar;
     [SerializeField] private ReminderScreen _reminderScreen;
     [SerializeField] private Button _addReminderButton;
+    private DateTime _lastSelectedDate;
     private List<ReminderData> _data;
 
     public EnhancedScroller scroller;
@@ -26,18 +27,20 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void Start()
     {
         _calendar.cellClickedDelegate = CellClickedDelegate;
+        _lastSelectedDate = DateTime.Today;
     }
 
     private void ShowStarted()
     {
-        SetCalendar(DateTime.Now.Date);
+        SetCalendar(_lastSelectedDate);
         
         // set up the scroller delegates
         scroller.Delegate = this;
         scroller.scrollerScrolled = ScrollerScrolled;
         scroller.cellViewInstantiated = CellViewInstantiated;
 
-        SetScrollData(ReminderManager.Instance.GetRemindersByDate(_calendar.focusedDate.Date));
+        // set 
+        SetScrollData(ReminderManager.Instance.GetRemindersByDate(_calendar.focusedDate.Date, true));
     }
 
     private void SetCalendar(DateTime date)
@@ -57,13 +60,16 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             _addReminderButton.gameObject.SetActive(true);
         }
+
+        // cache last selected date to open calendar keeping last progress
+        _lastSelectedDate = cell.dateTime.Date;
         
         SetScrollData(cell.reminders);
     }
 
     public void SetScrollData(List<ReminderData> data)
     {
-        Debug.Log("Found data count: "+data.Count);
+        Debug.Log("SetScrollData. Found data count: "+data.Count);
         _data = data;
         scroller.ReloadData();
     }
@@ -139,7 +145,7 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
         cellView.name = "Cell " + dataIndex.ToString();
 
         // update data and view
-        cellView.SetData(_data[dataIndex], _calendar.focusedDate.Date);
+        cellView.SetData(_data[dataIndex], _lastSelectedDate);
 
         // return the cell to the scroller
         return cellView;
