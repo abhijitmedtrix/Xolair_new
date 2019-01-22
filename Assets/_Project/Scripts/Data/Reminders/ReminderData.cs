@@ -59,7 +59,7 @@ namespace App.Data.Reminders
         public DayOfWeek[] daysOfWeek;
 
         public event Action<ReminderData> OnDataUpdate;
-        
+
         public ReminderData(ReminderData targetData)
         {
             this.registrationDate = targetData.registrationDate;
@@ -81,6 +81,9 @@ namespace App.Data.Reminders
             this.daysOfWeek = daysOfWeek;
         }
 
+        /// <summary>
+        /// Important to call to save Reminder changes and write data.
+        /// </summary>
         public void SetupReminder()
         {
             NotificationData data;
@@ -99,7 +102,7 @@ namespace App.Data.Reminders
                     notificationRepeatInterval = eNotificationRepeatInterval.WEEK;
                     break;
                 case RepeatInterval.FORTNIGHT:
-                    notificationRepeatInterval = eNotificationRepeatInterval.WEEK;
+                    notificationRepeatInterval = eNotificationRepeatInterval.NONE;
                     break;
                 case RepeatInterval.MONTH:
                     notificationRepeatInterval = eNotificationRepeatInterval.MONTH;
@@ -131,6 +134,7 @@ namespace App.Data.Reminders
                 data = new NotificationData();
                 data.SetNotification(fireDate, notificationRepeatInterval, id,
                     this.repeatInterval == RepeatInterval.FORTNIGHT, title, message);
+
                 // cache it
                 notifications.Add(data);
             }
@@ -140,10 +144,9 @@ namespace App.Data.Reminders
 
         public void CheckReminderData()
         {
-            Debug.Log("notifications count in loaded reminder: "+notifications.Count);
-            
-            // check, is there any updates for completedDates
+            Debug.Log($"Reminder with title {title} has been loaded. Notifications count: {notifications.Count}");
 
+            // check, is there any updates for completedDates
             // set yesterday by default 
             DateTime lastCompletedDate = DateTime.Today.AddDays(-1);
 
@@ -158,24 +161,34 @@ namespace App.Data.Reminders
                 if (HasNotificationByDate(dateTime))
                 {
                     // inform user
-                    // TODO - need to clarify, do we need to show it at all or not
+                    // TODO - not needed for now
                 }
             }
 
-            // also check for outdated notification and remove/reschedule some if needed
-            for (int i = 0; i < notifications.Count; i++)
+            // probably not needed because that can be triggered from ReminderManager in OnLocalNotificationReceived callback and now we need it only for tests in editor
+            if (Application.isEditor)
             {
-                // if some of notifications become outdated
-                if (notifications[i].IsOutdated())
+                // also check for outdated notification and reschedule some if needed
+                for (int i = 0; i < notifications.Count; i++)
                 {
-                    // TODO - need to check, does DidReceiveLocalNotificationEvent event runs before ReminderManager start or not. If yes we don't need to write history here, that will be done in that callback. Otherwise need to modify method to detect all possible past notification starting from the last App launch, to avoid writing too long history data each time or creating duplicates 
-                    // notifications.Remove(notifications[i]);
-                    // AddToHistory(notifications[i].fireDate.Date);
+                    // try to find outdated notifications to add to history
+                    List<NotificationInfo> infos = notifications[i].GetPassedNotifications();
+                    if (infos != null)
+                    {
+                        for (int j = 0; j < infos.Count; j++)
+                        {
+                            AddToHistory(infos[j].fireDate);
+                        }
+                    }
                 }
+
+                ValidateNotifications();
+
+                OnDataUpdate?.Invoke(this);
             }
         }
-        
-        
+
+
         #region Individual data change
 
         public void ChangeDaysOfWeek(DayOfWeek[] daysOfWeek)
@@ -269,41 +282,8 @@ namespace App.Data.Reminders
             SetupReminder();
         }
 
-        #endregion
-        
-
-        public void AddToHistory(DateTime dateTime)
-        {
-            historyDates.Add(dateTime);
-            NotificationData notData = GetNotificationByDate(dateTime.Date);
-            if (notData != null && notifications.Contains(notData))
-            {
-                notifications.Remove(notData);
-            }
-        }
-
-        public void Reset()
-        {
-            RemoveAllNotifications();
-        }
-
-        public bool HasNotificationByDate(DateTime dateTime)
-        {
-            return GetNotificationByDate(dateTime) != null;
-        }
-
-        public NotificationData GetNotificationByDate(DateTime dateTime)
-        {
-            return notifications.Find(x => x.IsAssignedToDate(dateTime));
-        }
-
-        public bool HasNotificationWithId(string notificationId)
-        {
-            return notifications.Find(x => x.HasNotificationWithId(notificationId)) != null;
-        }
-
         /// <summary>
-        /// Toggle reminder activity.
+        /// Toggle reminder active state.
         /// </summary>
         /// <param name="active"></param>
         public void SetActive(bool active)
@@ -329,6 +309,75 @@ namespace App.Data.Reminders
         public void SetDone(bool done)
         {
             isDone = done;
+        }
+
+        #endregion
+
+
+        public void AddToHistory(DateTime dateTime)
+        {
+            // add entry to th history
+            historyDates.Add(dateTime);
+
+            ValidateNotifications();
+
+            OnDataUpdate?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Loop over all notifications and make sure each of them is actual/valid, otherwise remove it. 
+        /// </summary>
+        private void ValidateNotifications()
+        {
+            // because of notification list will be modified runtime, create it's copy temporary
+            NotificationData[] tempArr = notifications.ToArray();
+            
+            for (int i = 0; i < tempArr.Length; i++)
+            {
+                // if any notification is passed and can't be rescheduled
+                if (!tempArr[i].IsValid())
+                {
+                    notifications.Remove(tempArr[i]);
+                }
+            }
+
+            // if there is no active notification anymore
+            if (notifications.Count <= 0)
+            {
+                // deactivate
+                SetActive(false);
+            }
+        }
+
+        public void Reset()
+        {
+            RemoveAllNotifications();
+        }
+
+        public bool HasNotificationByDate(DateTime dateTime, bool includePast = false)
+        {
+            if (includePast)
+            {
+                for (int i = 0; i < historyDates.Count; i++)
+                {
+                    if (historyDates[i].IsSameDay(dateTime))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return GetNotificationByDate(dateTime) != null;
+        }
+
+        public NotificationData GetNotificationByDate(DateTime dateTime)
+        {
+            return notifications.FirstOrDefault(x => x.IsAssignedToDate(dateTime));
+        }
+
+        public bool HasNotificationWithId(string notificationId)
+        {
+            return notifications.Find(x => x.HasNotificationWithId(notificationId)) != null;
         }
 
         public void Delete()
@@ -363,7 +412,7 @@ namespace App.Data.Reminders
             this.repeatInterval = targetData.repeatInterval;
             this.daysOfWeek = targetData.daysOfWeek;
         }
-        
+
         public override bool Equals(object obj)
         {
             ReminderData compareTo = obj as ReminderData;
@@ -389,9 +438,10 @@ namespace App.Data.Reminders
                    &&
                    this.repeatInterval == compareTo.repeatInterval
                    &&
-                   (this.daysOfWeek == compareTo.daysOfWeek 
-                   || 
-                   this.daysOfWeek.Length == compareTo.daysOfWeek.Length && this.daysOfWeek.SequenceEqual(compareTo.daysOfWeek));
+                   (this.daysOfWeek == compareTo.daysOfWeek
+                    ||
+                    this.daysOfWeek.Length == compareTo.daysOfWeek.Length &&
+                    this.daysOfWeek.SequenceEqual(compareTo.daysOfWeek));
         }
     }
 }

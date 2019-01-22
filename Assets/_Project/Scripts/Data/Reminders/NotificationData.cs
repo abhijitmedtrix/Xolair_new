@@ -46,14 +46,39 @@ namespace App.Data.Reminders
 
         public event Action OnDataUpdate;
 
+
+        /// <summary>
+        /// This methods used only within UnityEditor for test, when we need to track passed notifications, but can't receive DidReceiveNotification callback from ReminderManager
+        /// </summary>
+        /// <returns></returns>
+        public List<NotificationInfo> GetPassedNotifications()
+        {
+            List<NotificationInfo> nInfos = null;
+            for (int i = 0; i < idArray.Count; i++)
+            {
+                NotificationInfo info = notificationsDict[idArray[i]];
+                if (info.fireDate.IsOlderDate(DateTime.Now))
+                {
+                    if (nInfos == null)
+                    {
+                        nInfos = new List<NotificationInfo>();
+                    }
+
+                    nInfos.Add(info);
+                }
+            }
+
+            return nInfos;
+        }
+
         /// <summary>
         /// Check notification each time on AppStart, must be called in ReminderData.
         /// </summary>
-        public bool IsOutdated()
+        public bool IsValid()
         {
             if (repeatInterval == eNotificationRepeatInterval.NONE && fireDate.IsOlderDate(DateTime.Now))
             {
-                return true;
+                return false;
             }
 
             // check, should it be rescheduled or not
@@ -74,7 +99,7 @@ namespace App.Data.Reminders
                 }
             }
 
-            return false;
+            return true;
         }
 
         public void SetNotification(DateTime fireDate, eNotificationRepeatInterval repeatInterval, string parentGroupId,
@@ -121,23 +146,12 @@ namespace App.Data.Reminders
                     RegisterNotification(startInSecs + twoWeeksToSeconds * (i + 1), repeatInterval);
                 }
             }
-
-            RegisterNotification(startInSecs, this.repeatInterval);
+            else
+            {
+                RegisterNotification(startInSecs, this.repeatInterval);
+            }
 
             OnDataUpdate?.Invoke();
-        }
-
-        private void RegisterNotification(long startInSecs, eNotificationRepeatInterval repeatInterval)
-        {
-            // CrossPlatformNotification class it too huge to save using GameSave asset, but we need just some short data
-            CrossPlatformNotification notification =
-                ReminderManager.Instance.CreateNotification(startInSecs, repeatInterval);
-
-            // cache notification
-            string id = ReminderManager.Instance.ScheduleLocalNotification(notification);
-            RegisterNotification(id);
-
-            Debug.Log($"Registering notification with fire date: {fireDate}, interval: {repeatInterval}, and id: {id}");
         }
 
         public bool IsAssignedToDate(DateTime dateTime)
@@ -185,13 +199,22 @@ namespace App.Data.Reminders
             return false;
         }
 
-        public void RegisterNotification(string id)
+        private void RegisterNotification(long startInSecs, eNotificationRepeatInterval repeatInterval)
         {
+            // CrossPlatformNotification class it too huge to save using GameSave asset, but we need just some short data
+            CrossPlatformNotification notification =
+                ReminderManager.Instance.CreateNotification(title, startInSecs, repeatInterval);
+
+            // cache notification
+            string id = ReminderManager.Instance.ScheduleLocalNotification(notification);
+
             if (!notificationsDict.ContainsKey(id) && !idArray.Contains(id))
             {
                 notificationsDict.Add(id,
                     new NotificationInfo {id = id, fireDate = fireDate, repeatInterval = repeatInterval});
                 idArray.Add(id);
+                Debug.Log(
+                    $"Registering notification with fire date: {fireDate}, interval: {repeatInterval}, and id: {id}");
             }
             else
             {
@@ -201,10 +224,16 @@ namespace App.Data.Reminders
 
         public void UnregisterNotification(string id)
         {
+            // Debug.Log($"Trying to UnregisterNotification with id: {id}, while array length is: {idArray.Count}, and dict length: {notificationsDict.Count}");
             if (notificationsDict.ContainsKey(id) && idArray.Contains(id))
             {
+                NotificationInfo info = notificationsDict[id];
+                
                 notificationsDict.Remove(id);
                 idArray.Remove(id);
+                
+                Debug.Log(
+                    $"Unregistering notification with fire date: {info.fireDate}, interval: {info.repeatInterval}, and id: {id}");
             }
             else
             {
@@ -233,7 +262,7 @@ namespace App.Data.Reminders
             OnDataUpdate?.Invoke();
         }
 
-        public void ChangeDate(DateTime dateTime)
+        public void ChangeFireDate(DateTime dateTime)
         {
             if (fireDate.Equals(dateTime))
             {
@@ -241,7 +270,7 @@ namespace App.Data.Reminders
                 return;
             }
 
-            fireDate = dateTime;
+            fireDate = dateTime.Date + fireDate.TimeOfDay;
 
             RemoveAllNotifications();
             SetNotification();
@@ -297,11 +326,13 @@ namespace App.Data.Reminders
 
         private void RemoveAllNotifications()
         {
-            for (int i = 0; i < idArray.Count; i++)
+            var tempArr = idArray.ToArray();
+            for (int i = 0; i < tempArr.Length; i++)
             {
-                UnregisterNotification(idArray[i]);
+                UnregisterNotification(tempArr[i]);
             }
 
+            tempArr = null;
             idArray.Clear();
             notificationsDict.Clear();
         }
@@ -316,8 +347,18 @@ namespace App.Data.Reminders
             switch (repeatInterval)
             {
                 case eNotificationRepeatInterval.NONE:
-                    throw new Exception(
-                        "Shouldn't be the case when searching for next day for non-repeatable notification");
+                    if (isFortnight)
+                    {
+                        // 2 weeks = 14 days
+                        int doubleWeeksAdd = Mathf.CeilToInt(timeDifference.days / 14f);
+                        nextFireDate = fireDate.AddDays(doubleWeeksAdd * 14f);
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            "Shouldn't be the case when searching for next day for non-repeatable notification");
+                    }
+
                     break;
 
                 case eNotificationRepeatInterval.DAY:

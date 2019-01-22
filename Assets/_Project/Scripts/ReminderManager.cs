@@ -78,8 +78,8 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
         for (int i = 0; i < _reminders.Count; i++)
         {
-            _reminders[i].CheckReminderData();
             _reminders[i].OnDataUpdate += OnReminderDataUpdate;
+            _reminders[i].CheckReminderData();
         }
     }
 
@@ -150,7 +150,6 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
         // try to find ReminderData associated with current notification and check, should we update data or not (for example for 1 time notifications what must be removed from the NotificationData)
         // Also we must keep tracking of past reminders events to show it in a past dates
-
         ReminderData data = GetReminderByNotificationId(notification.GetNotificationID());
         if (data != null)
         {
@@ -216,7 +215,6 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         for (int i = 0; i < _reminders.Count; i++)
         {
             _reminders[i].Reset();
-            _reminders.RemoveAt(i);
         }
 
         _reminders.Clear();
@@ -265,31 +263,17 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     {
         if (includeInactive)
         {
-            if (includeDeleted)
-            {
-                return _reminders;
-            }
-            else
-            {
-                return _reminders.FindAll(x => !x.isDeleted);
-            }
+            return includeDeleted ? _reminders : _reminders.FindAll(x => !x.isDeleted);
         }
-        else
-        {
-            if (includeDeleted)
-            {
-                return _reminders.FindAll(x => x.isActive);
-            }
-            else
-            {
-                return _reminders.FindAll(x => x.isActive && !x.isDeleted);
-            }
-        }
+
+        return includeDeleted
+            ? _reminders.FindAll(x => x.isActive)
+            : _reminders.FindAll(x => x.isActive && !x.isDeleted);
     }
 
-    public List<ReminderData> GetRemindersByDate(DateTime dateTime)
+    public List<ReminderData> GetRemindersByDate(DateTime dateTime, bool includePast)
     {
-        return _reminders.Where(x => x.HasNotificationByDate(dateTime)).ToList();
+        return _reminders.Where(x => x.HasNotificationByDate(dateTime, includePast)).ToList();
     }
 
     public ReminderData GetReminderByNotificationId(string id)
@@ -306,26 +290,27 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             RepeatInterval.ONCE, "");
     }
 
-    public CrossPlatformNotification CreateNotification(long fireAfterSec, eNotificationRepeatInterval repeatInterval)
+    public CrossPlatformNotification CreateNotification(string title, long fireAfterSec,
+        eNotificationRepeatInterval repeatInterval)
     {
         // User info
         IDictionary userInfo = new Dictionary<string, string>();
-        userInfo["data"] = "custom data";
+        // userInfo["data"] = "custom data";
 
         CrossPlatformNotification.iOSSpecificProperties _iosProperties =
             new CrossPlatformNotification.iOSSpecificProperties();
-        _iosProperties.HasAction = true;
-        _iosProperties.AlertAction = "alert action";
+        _iosProperties.HasAction = false;
+        _iosProperties.AlertAction = null;
 
         CrossPlatformNotification.AndroidSpecificProperties _androidProperties =
             new CrossPlatformNotification.AndroidSpecificProperties();
-        _androidProperties.ContentTitle = "content title";
-        _androidProperties.TickerText = "ticker ticks over here";
+        _androidProperties.ContentTitle = title;
+        _androidProperties.TickerText = title;
         _androidProperties.LargeIcon =
-            "NativePlugins.png"; //Keep the files in Assets/PluginResources/Android or Common folder.
+            "App-Icon.png"; //Keep the files in Assets/PluginResources/Android or Common folder.
 
         CrossPlatformNotification notification = new CrossPlatformNotification();
-        notification.AlertBody = "alert body"; //On Android, this is considered as ContentText
+        notification.AlertBody = title; //On Android, this is considered as ContentText
         notification.FireDate = DateTime.Now.AddSeconds(fireAfterSec);
         notification.RepeatInterval = repeatInterval;
         notification.SoundName =
@@ -399,7 +384,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             minutes = ts.Minutes,
             seconds = ts.Seconds
         };
-        Debug.Log($"Years: {years}, Months: {months}, Days: {days}");
+        Debug.Log($"Years: {years}, Months: {months}, Days: {days}, Hours: {ts.Hours}, Minutes: {ts.Minutes}, Seconds: {ts.Seconds}");
 
         return td;
     }

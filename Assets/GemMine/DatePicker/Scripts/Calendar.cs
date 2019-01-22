@@ -105,7 +105,7 @@ public class Calendar : MonoBehaviour
         selectedDate = new DateTime(focusedDate.Year, focusedDate.Month, cell.dateTime.Day);
         focusedDate = selectedDate;
         
-        // Debug.Log($"selectedDate: {selectedDate}");
+        Debug.Log($"selectedDate: {selectedDate}");
         cellClickedDelegate?.Invoke(cell);
     }
     

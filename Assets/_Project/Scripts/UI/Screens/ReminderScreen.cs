@@ -52,7 +52,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void Awake()
     {
         _screenConfig.OnShowStarted += ShowStarted;
-        _toggleSlider.OnToggleChange += ToggleSliderOnToggleChanged;
+        _toggleSlider.OnToggleChange += OnReminderToggleSliderValueChanged;
         _titleInputField.onEndEdit.AddListener(OnTitleChanged);
 
         _tempNewReminderData = ReminderManager.Instance.CreateSimpleTemplateReminder();
@@ -252,6 +252,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
             else
             {
                 _tempReminderData = null;
+                
                 // deselect all toggles
                 _toggleGroup.SetAllTogglesOff();
 
@@ -287,8 +288,9 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         );
     }
 
-    private void ToggleSliderOnToggleChanged(bool isOn)
+    private void OnReminderToggleSliderValueChanged(bool isOn)
     {
+        // _tempReminderData.isActive = isOn;
         _tempReminderData.SetActive(isOn);
     }
 
@@ -301,18 +303,17 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void RepeatIntervalPicked(long value)
     {
         int index = (int) value;
-        var myEnumMemberCount = Enum.GetNames(typeof(RepeatInterval)).Length;
 
-        Debug.Log($"Option picked: {value}, it's: {repeatOptionsNames[index]} myEnumMemberCount: {myEnumMemberCount}");
+        Debug.Log($"Option picked: {value}, it's: {repeatOptionsNames[index]}");
 
         // Custom... option
-        if (index == myEnumMemberCount - 2)
+        if (index == repeatOptionsNames.Length - 2)
         {
             // open reminder customize screen
             ScreenManager.Instance.Set(14);
         }
         // Cancel option
-        else if (index == myEnumMemberCount - 1)
+        else if (index == repeatOptionsNames.Length - 1)
         {
             // do nothing for now
         }

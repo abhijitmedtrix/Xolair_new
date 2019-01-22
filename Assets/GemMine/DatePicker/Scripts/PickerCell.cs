@@ -65,6 +65,7 @@ public class PickerCell : MonoBehaviour
             _selectedBgImage.enabled = true;
         }
         
+        // show all notification even passed or deleted
         for (int i = 0; i < _remindersIcons.Length; i++)
         {
             _remindersIcons[i].SetActive(i < this.reminders.Count);
