@@ -7,7 +7,7 @@ namespace BayatGames.SaveGamePro.Serialization.Formatters.Json
 	/// <summary>
 	/// Json writer.
 	/// </summary>
-	public abstract class JsonWriter : IDisposable, ISaveGameWriter, System.IDisposable
+	public abstract class JsonWriter : IDisposable, ISaveGameWriter
 	{
 		
 		#region Fields

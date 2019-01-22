@@ -15,7 +15,7 @@ namespace BayatGames.SaveGamePro.Serialization.Formatters.Binary
     /// <summary>
     /// Binary object reader.
     /// </summary>
-    public class BinaryObjectReader : IDisposable, ISaveGameReader, System.IDisposable
+    public class BinaryObjectReader : IDisposable, ISaveGameReader
     {
 
         #region Fields

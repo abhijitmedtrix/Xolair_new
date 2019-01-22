@@ -26,7 +26,7 @@ MonoBehaviour:
   PauseGameWhenOpen: 0
   ShowRecentCommands: 1
   DefaultToEmailAddress: 
-  EditorScaleFactor: 1
+  EditorScaleFactor: 2.5
   MobileScaleFactorPortrait: 1
   MobileScaleFactorLandscape: 1
   StandaloneScaleFactor: 1

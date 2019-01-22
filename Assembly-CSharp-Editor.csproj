@@ -483,6 +483,9 @@
     <Reference Include="Google.VersionHandlerImpl_v1.2.61.0">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/PlayServicesResolver/Editor/Google.VersionHandlerImpl_v1.2.61.0.dll</HintPath>
     </Reference>
+    <Reference Include="easyEasing">
+      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Plugins/ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -497,9 +500,6 @@
     </Reference>
     <Reference Include="websocket-sharp">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Watson/Plugins/websocket-sharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.Advertisements">
-      <HintPath>/Users/Romaha/Library/Unity/cache/packages/packages.unity.com/com.unity.ads@2.0.8/Editor/UnityEditor.Advertisements.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Analytics">
       <HintPath>/Users/Romaha/Library/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.16/UnityEngine.Analytics.dll</HintPath>

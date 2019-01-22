@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class PhotosUiItem : MonoBehaviour, IDisposable
+public class PhotosUiItem : MonoBehaviour, System.IDisposable
 {
     [SerializeField] protected RawImage _image;
     [SerializeField] protected Toggle _toggle;

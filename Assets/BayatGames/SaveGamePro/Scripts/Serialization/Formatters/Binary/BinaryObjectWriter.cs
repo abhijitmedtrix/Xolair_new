@@ -16,7 +16,7 @@ namespace BayatGames.SaveGamePro.Serialization.Formatters.Binary
     /// <summary>
     /// Binary object writer.
     /// </summary>
-    public class BinaryObjectWriter : IDisposable, ISaveGameWriter, System.IDisposable
+    public class BinaryObjectWriter : IDisposable, ISaveGameWriter
     {
 
         #region Fields

@@ -71,10 +71,11 @@
     <Compile Include="Assets\_Project\Scripts\Components\ModeToggle.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\StateChangeToggle.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\TimePanelController.cs" />
+    <Compile Include="Assets\_Project\Scripts\Components\ToggleSlider.cs" />
     <Compile Include="Assets\_Project\Scripts\Components\TrackerProgressController.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\CalendarData.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\NotificationData.cs" />
-    <Compile Include="Assets\_Project\Scripts\Data\NotificationGroupData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\CalendarData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\NotificationData.cs" />
+    <Compile Include="Assets\_Project\Scripts\Data\Reminders\ReminderData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\BaseTrackerData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\CSU\CSUData.cs" />
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\CSU\UASData.cs" />
@@ -84,7 +85,7 @@
     <Compile Include="Assets\_Project\Scripts\Data\TrackerData\SSA\SymptomData.cs" />
     <Compile Include="Assets\_Project\Scripts\Graph\GraphController.cs" />
     <Compile Include="Assets\_Project\Scripts\Graph\GraphRenderer.cs" />
-    <Compile Include="Assets\_Project\Scripts\NotificationManager.cs" />
+    <Compile Include="Assets\_Project\Scripts\ReminderManager.cs" />
     <Compile Include="Assets\_Project\Scripts\Test\displayscr.cs" />
     <Compile Include="Assets\_Project\Scripts\Test\Gazetest.cs" />
     <Compile Include="Assets\_Project\Scripts\Test\Test.cs" />
@@ -100,9 +101,12 @@
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosBlockUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosScrollController.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Photos\PhotosUiItem.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Reminder\DetailedReminderUiItem.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Reminder\ReminderUiItem.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\CameraScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\MenuScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\PatientJournalScreen.cs" />
+    <Compile Include="Assets\_Project\Scripts\UI\Screens\ReminderScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\UI\Screens\TrackerScreen.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\Curver.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\DisableSleep.cs" />
@@ -110,7 +114,6 @@
     <Compile Include="Assets\_Project\Scripts\Utils\Extensions\DateExtension.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\Extensions\UIEventSyncExtensions.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\Helper.cs" />
-    <Compile Include="Assets\_Project\Scripts\Utils\IDisposable.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\IInitiable.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\MonoSingleton.cs" />
     <Compile Include="Assets\_Project\Scripts\Utils\ObjectPool.cs" />
@@ -502,6 +505,15 @@
     <Compile Include="Assets\EnhancedScroller v2\Plugins\SmallList.cs" />
     <Compile Include="Assets\EnhancedScroller v2\Plugins\SnapController.cs" />
     <Compile Include="Assets\FlipbookGames\Common\Scripts\FG_GameObjectGUIDs.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\CalendarEditor.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\Calendar.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\DatePickerLayout.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\DayPickerLayout.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\MonthPickerLayout.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\PickerCell.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\PickerTweens.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\WeekDayLayout.cs" />
+    <Compile Include="Assets\GemMine\DatePicker\Scripts\YearPickerLayout.cs" />
     <Compile Include="Assets\GradientMaker\Scripts\GradientMaker.cs" />
     <Compile Include="Assets\JSON\JSONObject.cs" />
     <Compile Include="Assets\JSON\JSONTemplates.cs" />
@@ -579,7 +591,6 @@
     <Compile Include="Assets\Pixelplacement\iTweenPath\iTweenPath.cs" />
     <Compile Include="Assets\Profile_Onclick.cs" />
     <Compile Include="Assets\Question_Onclick.cs" />
-    <Compile Include="Assets\Reminder_OnClick.cs" />
     <Compile Include="Assets\Rogo Digital\LipSync Pro\BlendSystems\AdvancedBlendshapeBlendSystem.cs" />
     <Compile Include="Assets\Rogo Digital\LipSync Pro\BlendSystems\BlendshapeBlendSystem.cs" />
     <Compile Include="Assets\Rogo Digital\LipSync Pro\BlendSystems\BlendshapeManager.cs" />
@@ -612,7 +623,6 @@
     <Compile Include="Assets\Rogo Digital\LipSync Pro\Components\LipSync.cs" />
     <Compile Include="Assets\Scripts\AsthmaControlTrackerScreen.cs" />
     <Compile Include="Assets\Scripts\AudioManager.cs" />
-    <Compile Include="Assets\Scripts\Calendar_OnClick.cs" />
     <Compile Include="Assets\Scripts\CalendarScreen.cs" />
     <Compile Include="Assets\Scripts\CameraManager.cs" />
     <Compile Include="Assets\Scripts\clickscr.cs" />
@@ -620,7 +630,6 @@
     <Compile Include="Assets\Scripts\CSUFAQDISEASE.cs" />
     <Compile Include="Assets\Scripts\CSUFAQDRUG.cs" />
     <Compile Include="Assets\Scripts\CSUTrackerScreen.cs" />
-    <Compile Include="Assets\Scripts\enddate.cs" />
     <Compile Include="Assets\Scripts\ExpandCollapse.cs" />
     <Compile Include="Assets\Scripts\Fade.cs" />
     <Compile Include="Assets\Scripts\FAQ.cs" />
@@ -631,7 +640,6 @@
     <Compile Include="Assets\Scripts\PhotosScreen.cs" />
     <Compile Include="Assets\Scripts\ProfileEditor.cs" />
     <Compile Include="Assets\Scripts\PushNotification.cs" />
-    <Compile Include="Assets\Scripts\Reminder.cs" />
     <Compile Include="Assets\Scripts\singleton.cs" />
     <Compile Include="Assets\Scripts\SSA_inptxt.cs" />
     <Compile Include="Assets\Scripts\SSA_UI_OUT.cs" />
@@ -642,6 +650,8 @@
     <Compile Include="Assets\Scripts\WebViewHandler.cs" />
     <Compile Include="Assets\Scripts\WebViewTestScene.cs" />
     <Compile Include="Assets\TestLocationService.cs" />
+    <Compile Include="Assets\TestScene\TestSceneNewUiScript.cs" />
+    <Compile Include="Assets\TestScene\TestSceneScript.cs" />
     <Compile Include="Assets\unity-ui-extensions\Examples\ComboBox\ComboBoxChanged.cs" />
     <Compile Include="Assets\unity-ui-extensions\Examples\Cooldown\CooldownEffect_Image.cs" />
     <Compile Include="Assets\unity-ui-extensions\Examples\Cooldown\CooldownEffect_SAUIM.cs" />
@@ -1125,6 +1135,7 @@
     <None Include="Assets\unity-ui-extensions\Shaders\UI Particle Multiply.shader" />
     <None Include="Assets\unity-ui-extensions\Shaders\UI Particle Alpha Blend.shader" />
     <None Include="Assets\EnhancedScroller v2\Tutorials\readme.txt" />
+    <None Include="Assets\GemMine\DatePicker\Fonts\Apache License.txt" />
     <None Include="Assets\MaterialUI\Fonts\NOTICE.txt" />
     <None Include="Assets\unity-ui-extensions\Shaders\UIImageCrop.shader" />
     <None Include="Assets\Watson\Examples\ServiceExamples\TestData\theJabberwocky-utf8.txt" />
@@ -1363,6 +1374,9 @@
     </Reference>
     <Reference Include="Opencoding.Console">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Opencoding/Console/DLLs/Opencoding.Console.dll</HintPath>
+    </Reference>
+    <Reference Include="easyEasing">
+      <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/GemMine/DatePicker/Plugins/easyEasing.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>/Users/Romaha/Documents/Projects/2018/Xolair_new/Assets/Plugins/ICSharpCode.SharpZipLib.dll</HintPath>

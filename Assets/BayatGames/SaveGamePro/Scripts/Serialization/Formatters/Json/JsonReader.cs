@@ -9,7 +9,7 @@ namespace BayatGames.SaveGamePro.Serialization.Formatters.Json
 	/// <summary>
 	/// Json reader.
 	/// </summary>
-	public abstract class JsonReader : IDisposable, ISaveGameReader, System.IDisposable
+	public abstract class JsonReader : IDisposable, ISaveGameReader
 	{
 
 		#region Fields
