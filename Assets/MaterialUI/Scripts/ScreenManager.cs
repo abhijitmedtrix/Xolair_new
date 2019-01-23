@@ -22,7 +22,7 @@ namespace MaterialUI
         [HideInInspector] public ScreenConfig lastScreen;
         [SerializeField] private GameObject avatar;
         [SerializeField] private GameObject graphrenderer;
-
+        [SerializeField] private GameObject avatrCam;
         // private Animator animator;
         [SerializeField] private AudioSource audioSource;
 
@@ -50,7 +50,14 @@ namespace MaterialUI
                 audioSource.Stop();
                 //avatar.transform.position = Vector3.one * 1000;
             }
-
+            if(index==2||index==3)
+            {
+                avatrCam.SetActive(true);
+            }
+            else
+            {
+                avatrCam.SetActive(false);
+            }
             //if(index==3&&!Choice)
             //{
             //    patientJournalScreen._TrackerType = TrackerManager.TrackerType.CSU;

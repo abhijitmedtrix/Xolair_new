@@ -152,7 +152,7 @@ public class FAQViewSAA : MonoBehaviour
         }
         else
         {
-            contentDrug.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" + faqdrugDat[indx].Question + "\n\n" + faqdrugDat[indx].Answer + "\n\n";
+            contentDrug.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" +faqdrugDat[indx].Question + "\n\n" + "<color=black>" + faqdrugDat[indx].Answer + "</color>" + "\n\n";
             questionNum.Add(indx);
         }
 
@@ -171,7 +171,7 @@ public class FAQViewSAA : MonoBehaviour
         }
         else
         {
-            contentDisease.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" + faqdiseaseDat[indx].Question + "\n\n" + faqdiseaseDat[indx].Answer + "\n\n";
+            contentDisease.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" + faqdiseaseDat[indx].Question + "\n\n" + "<color=black>" + faqdiseaseDat[indx].Answer + "</color>" + "\n\n";
             questionNum.Add(indx);
         }
 

@@ -9,7 +9,7 @@ public class FAQViewCSU : MonoBehaviour
     [SerializeField] private Text[] Title;
    // [SerializeField] private bool toggle;
     private static List<FAQDDrugCSU> faqdrugDat;
-    private static List<FAQDiseaseCSU> faqdiseaseDat;
+    private static List<FAQDiseaseCSU> faqdiseaseDat=new List<FAQDiseaseCSU>();
     private List<int> questionNum=new List<int>();
 
     public  void  Drug(string mode)
@@ -45,12 +45,12 @@ public class FAQViewCSU : MonoBehaviour
                 }
             case "useofXolair":
                 {
-                    setextDrug(FAQDDrugCSU.treatment.Count, FAQDDrugCSU.useofXolair);
+                    setextDrug(FAQDDrugCSU.useofXolair.Count, FAQDDrugCSU.useofXolair);
                     break;
                 }
             case "contraIndications":
                 {
-                    setextDrug(FAQDDrugCSU.treatment.Count, FAQDDrugCSU.contraIndications);
+                    setextDrug(FAQDDrugCSU.contraIndications.Count, FAQDDrugCSU.contraIndications);
                     break;
                 }
             case "drugInteraction":
@@ -103,9 +103,11 @@ public class FAQViewCSU : MonoBehaviour
     }
     private void setextDrug(int length, List<FAQDDrugCSU> data)
     {
+        Debug.Log(length);
         faqdrugDat = data;
         for (int i = 0; i < length;i++)
         {
+            Debug.Log(i);
             //content.transform.setactive(true);
             contentDrug.transform.GetChild(i).gameObject.SetActive(true);
             contentDrug.transform.GetChild(i).GetComponent<Text>().text = "\n\n"+data[i].Question+"\n\n";
@@ -152,7 +154,7 @@ public class FAQViewCSU : MonoBehaviour
         }
             else
         {
-            contentDrug.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" + faqdrugDat[indx].Question + "\n\n" + faqdrugDat[indx].Answer + "\n\n";
+            contentDrug.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" +faqdrugDat[indx].Question + "\n\n" + "<color=black>" + faqdrugDat[indx].Answer+"</color>" + "\n\n";
             questionNum.Add(indx);
         }
        
@@ -171,7 +173,7 @@ public class FAQViewCSU : MonoBehaviour
         }
         else
         {
-            contentDisease.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" + faqdiseaseDat[indx].Question + "\n\n" + faqdiseaseDat[indx].Answer + "\n\n";
+            contentDisease.transform.GetChild(indx).GetComponent<Text>().text = "\n\n" + faqdiseaseDat[indx].Question + "\n\n" + "<color=black>" + faqdiseaseDat[indx].Answer + "</color>" + "\n\n";
             questionNum.Add(indx);
         }
 
