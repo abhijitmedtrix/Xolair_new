@@ -238,7 +238,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 -1,
                 false,
                 "Sorry!",
-                "It's impossible to setup new reminder without repetition in a past, please check you scheduled time",
+                "Reminders can only be set for a future date and time.",
                 null,
                 new string[] {"Ok"},
                 new string[] {"Thanks!"}

@@ -47,8 +47,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     {
         Debug.Log("Start in ReminderManager");
         RegisterNotificationTypes(NotificationType.Sound | NotificationType.Badge | NotificationType.Alert);
-        AppManager.OnModeChange += OnAppModeChanged;
-
+        
         // parse all notifications to data for best control
         if (SaveGame.Exists(_ACTUAL_REMINDERS_FILE_PATH))
         {
@@ -242,17 +241,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         SaveProgress(false);
     }
 
-    private void OnAppModeChanged(AppManager.Mode mode)
-    {
-        List<ReminderData> defaultReminders =
-            _reminders.FindAll(x => x.id == _DEFAULT_SAA_ST_KEY || x.id == _DEFAULT_SAA_ACT_KEY);
-
-        for (int i = 0; i < defaultReminders.Count; i++)
-        {
-            defaultReminders[i].SetActive(mode == AppManager.Mode.SAA);
-        }
-    }
-
+    
     [CommandHandler(Description = "Remove all reminders")]
     public void RemoveAllReminders()
     {

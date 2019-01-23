@@ -14,14 +14,17 @@ public class PhotosBlockUiItem : EnhancedScrollerCellView, IDisposable
         _items = GetComponentsInChildren<PhotosUiItem>(true);
     }
 
+    /// <summary>
+    /// Called once in a prefab instance after screen width check
+    /// </summary>
+    /// <param name="num"></param>
     public void SetNumOnItems(int num)
     {
         if (num == 2)
         {
-            _items[2].gameObject.SetActive(false);
+            Destroy(_items[2].gameObject);
             Array.Resize(ref _items, 2);
-            
-            Debug.Log("Array length: "+_items.Length);
+            // Debug.Log("Array length: "+_items.Length);
         }
     }
 

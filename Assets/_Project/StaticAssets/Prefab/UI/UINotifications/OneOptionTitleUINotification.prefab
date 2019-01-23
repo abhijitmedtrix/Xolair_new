@@ -201,7 +201,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementCategory: Uncategorized
-  elementName: OneOptionTitleUINotification (-2530162)
+  elementName: OneOptionTitleUINotification (-367330)
   LANDSCAPE: 1
   PORTRAIT: 1
   startHidden: 1
@@ -1774,7 +1774,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Take asthma control test
+  m_Text: Reminders can only be set for a future date and time.
 --- !u!114 &114369317845829836
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1787,7 +1787,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementCategory: Uncategorized
-  elementName: OneOptionTitleUINotification (-2530162)
+  elementName: OneOptionTitleUINotification (-367330)
   LANDSCAPE: 1
   PORTRAIT: 1
   startHidden: 1
@@ -2201,7 +2201,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Are you sure?
+  m_Text: Sorry!
 --- !u!114 &114763394411298360
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2394,7 +2394,7 @@ RectTransform:
   m_AnchorMin: {x: 0.08263357, y: 0.7087941}
   m_AnchorMax: {x: 0.9173664, y: 0.8861392}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -22.456}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!224 &224139117955353980
 RectTransform:
@@ -2415,7 +2415,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1026, y: 742}
+  m_SizeDelta: {x: 900, y: 490}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224165810514648716
 RectTransform:
@@ -2564,8 +2564,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.08263356, y: 0.27064312}
   m_AnchorMax: {x: 0.9173663, y: 0.75102085}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.000091552734}
+  m_SizeDelta: {x: 0, y: -0.00018311}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &225669951977423630
 CanvasGroup:

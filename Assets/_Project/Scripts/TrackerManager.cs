@@ -7,6 +7,8 @@ using UnityEngine;
 using App.Data;
 using App.Data.SSA;
 using App.Data.CSU;
+using Opencoding.CommandHandlerSystem;
+using QuickEngine.Extensions;
 using Random = UnityEngine.Random;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -162,6 +164,11 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         }
     }
 
+    private void Start()
+    {
+        CommandHandlers.RegisterCommandHandlers(this);
+    }
+
     /// <summary>
     /// Request particular day entry.
     /// </summary>
@@ -256,7 +263,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         if (_trackerDictionary.ContainsKey(date))
         {
             LogData logData = _trackerDictionary[date];
-            
+
             switch (type)
             {
                 case TrackerType.Asthma:
@@ -304,11 +311,11 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         }
 
         data.date = day;
-        
+
         _trackerDictionary.Add(day, data);
         _logDataList.Add(data);
     }
-    
+
     public static void UpdateEntry(DateTime day, QuestionBasedTrackerData data)
     {
         if (data is CSUData)
@@ -391,7 +398,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         if (!_asthmaJsonObjectList.Contains(data))
         {
             _asthmaJsonObjectList.Add(data);
-            
+
             // each time new test passed - reschedule reminder
             ReminderManager.Instance.ActivateAsthmaControlTestDefaultReminder(day.Date + DateTime.Now.TimeOfDay);
         }
@@ -422,7 +429,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         if (!_symptomJsonObjectList.Contains(data))
         {
             _symptomJsonObjectList.Add(data);
-            
+
             // each time new test passed - reschedule reminder
             ReminderManager.Instance.ActivateSymptomTrackerDefaultReminder(day.Date + DateTime.Now.TimeOfDay);
         }
@@ -487,7 +494,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         return dates;
     }
-    
+
     /// <summary>
     /// Grab all existing data by type
     /// </summary>
@@ -500,7 +507,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         // find a 1st entry date
         DateTime firstDate = DateTime.MinValue;
         // Debug.Log("First log data: " + _logDataList[0].date);
-        
+
         for (int i = 0; i < _logDataList.Count; i++)
         {
             QuestionBasedTrackerData data = _logDataList[i].TryGetData(type);
@@ -512,17 +519,17 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         }
 
         // if there is no entry at all
-        if (firstDate == DateTime.MinValue)
+        if (firstDate == DateTime.MinValue || firstDate.IsSameDay(DateTime.Today))
         {
-            Debug.LogWarning("There is no dates with data to return. Adding Today only");
+            Debug.LogWarning("There is no dates with data to return. Adding Yesterday to Today to make 2 Dates");
             firstDate = DateTime.Today.AddDays(-1);
         }
 
         // get total days count
         TimeSpan total = DateTime.Today.Subtract(firstDate);
-        
+
         // Debug.Log($"First date: {firstDate}, type requesting: {type}, Total days: {total.Days}");
-        
+
         for (int i = 0; i < total.Days + 1; i++)
         {
             dates.Add(firstDate.Date);
@@ -593,6 +600,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     {
         return _symptomJsonObjectList.Count > 0 ? _symptomJsonObjectList[_symptomJsonObjectList.Count - 1] : null;
     }
+
     public static QuestionBasedTrackerData GetLastAsthmaData()
     {
         return _asthmaJsonObjectList.Count > 0 ? _asthmaJsonObjectList[_asthmaJsonObjectList.Count - 1] : null;
@@ -605,6 +613,32 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     /// Method for testing purposes when we need to fill some random data for particular period
     /// </summary>
     [MenuItem("Tools/Generate random log data")]
+    public static void FillTestDataEditor()
+    {
+        FillTestData();
+    }
+
+    [MenuItem("Tools/Delete all logs")]
+    public static void DeleteLogsEditor()
+    {
+        DeleteLogs();
+    }
+#endif
+
+
+    [CommandHandler(Description = "Fill logs with the data")]
+    public void FillTestDataInternal()
+    {
+        FillTestData();
+    }
+
+    [CommandHandler(Description = "Delete logs")]
+    public void DeleteLogsInternal()
+    {
+        DeleteLogs();
+    }
+
+
     public static void FillTestData()
     {
         // Debug.Log("call");
@@ -612,6 +646,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         Texture2D[] textures = Resources.LoadAll<Texture2D>("RandomTextures");
 
         int days = Random.Range(15, 30);
+        // int days = 1;
         // stay today date empty to use
         DateTime date = DateTime.Now.AddDays(-days).Date;
         Debug.Log("Fixed start date: " + date.ToString("dd/MM/yyyy"));
@@ -703,7 +738,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         Debug.LogWarning($"Random log data generated for {days} days");
     }
 
-    [MenuItem("Tools/Delete all logs")]
     public static void DeleteLogs()
     {
         string dir = Path.Combine(Helper.GetDataPath(), LOGS_FOLDER);
@@ -712,7 +746,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             Directory.Delete(dir, true);
         }
     }
-#endif
 
     public static string GetPath(TrackerType type)
     {

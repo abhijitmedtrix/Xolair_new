@@ -11,11 +11,13 @@ public class GraphController : MonoBehaviour
     [SerializeField] protected GraphRenderer _graphRenderer;
     [SerializeField] protected RawImage _graphImage;
 
+    protected int _validPointsCounter;
     protected List<Text> _labels = new List<Text>();
     protected int _daysToShow;
     protected int _maxValue;
-    protected Vector3[] _graphPoints;
-    protected float _totalWidth => _graphPoints.Length;
+    // protected Vector3[] _graphPoints;
+    protected List<Vector3> _graphPoints = new List<Vector3>();
+    protected float _totalWidth;
 
     private void Awake()
     {
@@ -28,13 +30,22 @@ public class GraphController : MonoBehaviour
     public void Initialize(PatientJournalScreen.GraphData[] datas, bool createMesh, bool useSmoothGraph,
         int maxValue, int daysToShow, int numOfLabels)
     {
-        _graphPoints = new Vector3[datas.Length];
+        _graphPoints.Clear();
+        _totalWidth = datas.Length;
+        
+        // _graphPoints = new Vector3[datas.Length];
 
         // format datas to Vector3[]
+        // _validPointsCounter = 0;
         for (int i = 0; i < datas.Length; i++)
         {
-            _graphPoints[i] = new Vector3(i, datas[i].interpolatedScore, 0);
+            if (!datas[i].dontUseInGraph)
+            {
+                _graphPoints.Add(new Vector3(i, datas[i].interpolatedScore, 0));
+                // _validPointsCounter++;
+            }
         }
+        if (_graphPoints.Count < 2) return;
 
         _daysToShow = daysToShow;
         _maxValue = maxValue;
@@ -96,6 +107,9 @@ public class GraphController : MonoBehaviour
 
     public void UpdateCameraView(float sliderValue)
     {
+        // we need at least 2 real data points to render
+        if (_graphPoints.Count < 2) return;
+
         Vector3 localPos = _camera.transform.localPosition;
         localPos.x = _totalWidth * sliderValue;
         _camera.transform.localPosition = localPos;

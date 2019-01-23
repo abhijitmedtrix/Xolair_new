@@ -484,7 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementCategory: Uncategorized
-  elementName: TwoOptionsTItleUINotification (-2613728)
+  elementName: TwoOptionsTitleUINotification (-367202)
   LANDSCAPE: 1
   PORTRAIT: 1
   startHidden: 1
@@ -3277,7 +3277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementCategory: Uncategorized
-  elementName: TwoOptionsTItleUINotification (-2613728)
+  elementName: TwoOptionsTitleUINotification (-367202)
   LANDSCAPE: 1
   PORTRAIT: 1
   startHidden: 1
@@ -3878,7 +3878,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1026, y: 742}
+  m_SizeDelta: {x: 900, y: 490}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224829080101277228
 RectTransform:

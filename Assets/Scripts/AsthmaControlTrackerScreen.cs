@@ -5,8 +5,10 @@ using MaterialUI;
 
 public class AsthmaControlTrackerScreen : TrackerScreen
 {
-    [Header("Notification mess...")] [SerializeField]
-    protected GameObject _objectToShow;
+    private void Start()
+    {
+        _trackerType = TrackerManager.TrackerType.Asthma;
+    }
 
     public override void StartTracker()
     {
@@ -29,11 +31,6 @@ public class AsthmaControlTrackerScreen : TrackerScreen
                 if (!AppManager.Saanotfn.Contains("PLEASE VISIT A PHYSICIAN"))
                 {
                     AppManager.Saanotfn.Add("PLEASE VISIT A PHYSICIAN");
-                }
-
-                if (_objectToShow != null)
-                {
-                    _objectToShow.SetActive(true);
                 }
             }
         }

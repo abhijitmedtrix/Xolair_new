@@ -13,6 +13,7 @@ public class SymptomTrackerScreen : TrackerScreen
     private void Start()
     {
         _progressController.OnBackClicked += SetPreviousQuestion;
+        _trackerType = TrackerManager.TrackerType.Symptom;
     }
 
     public override void StartTracker()

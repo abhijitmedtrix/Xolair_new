@@ -65,7 +65,7 @@ public class CSUTrackerScreen : MonoBehaviour
 
         // create new data, because now we don't need to modify existing data until it's been submitted by user in a last step
         _csuData = new CSUData(DateTime.Today);
-        
+
         _csuData.ResetQuestionIndex();
 
         // enable screen
@@ -82,7 +82,7 @@ public class CSUTrackerScreen : MonoBehaviour
         CSUData originalData =
             TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU) as CSUData;
         originalData.ChangeBodyPart(_selectedBodyPart);
-        
+
         originalData.SetAnswers(_csuData.GetAnswers());
 
         // save all photos
@@ -98,7 +98,7 @@ public class CSUTrackerScreen : MonoBehaviour
 
         // open CSU tracker menu dialog asking for another body part data fillup
         ScreenManager.Instance.Set(24);
-        
+
         _photosScrollController.Dispose();
     }
 
@@ -113,7 +113,7 @@ public class CSUTrackerScreen : MonoBehaviour
                     Debug.LogWarning("Body part must be selected");
                     return;
                 }
-                
+
                 _currentStep = Step.Questions;
 
                 _bodyPartsController.SetBodyPart(_selectedBodyPart);
@@ -124,13 +124,9 @@ public class CSUTrackerScreen : MonoBehaviour
 
             case Step.Questions:
                 // if that wasn't a last question
-                if (_csuData.GetCurrentQuestionIndex() < _csuData.questionDataList.Count - 1)
+                if (!NextQuestion())
                 {
-                    // show next
-                    NextQuestion();
-                }
-                else
-                {
+                    // show next step
                     _currentStep = Step.Photo;
                 }
 
@@ -148,21 +144,22 @@ public class CSUTrackerScreen : MonoBehaviour
         ShowContent();
     }
 
-    private void NextQuestion()
+    private bool NextQuestion()
     {
         var question = _csuData.GetQuestion();
         _csuData.SetAnswer(question, _option);
-
         try
         {
             QuestionBasedTrackerData.QuestionData nextQuestion = _csuData.SetAnswer(question, _option);
             InitiateQuestion(nextQuestion);
+            return true;
         }
         catch (Exception ex)
         {
             Debug.LogWarning(
                 "Exception caught trying to get new question. Seems there is no more questions for this data. Ex: " +
                 ex.Message);
+            return false;
         }
     }
 
@@ -203,7 +200,6 @@ public class CSUTrackerScreen : MonoBehaviour
             // set toggle back to last selection
             _toggleGroup.SetAllTogglesOff();
             _bodyPartToggles.Single(x => x.bodyPart == _selectedBodyPart).SetValue(true);
-
             UIManager.NotificationManager.ShowNotification(
                 "TwoOptionsTitleUINotification",
                 -1,
@@ -218,7 +214,7 @@ public class CSUTrackerScreen : MonoBehaviour
                     null,
                     StartTracker
                 }
-                );
+            );
         }
         else
         {
@@ -230,7 +226,6 @@ public class CSUTrackerScreen : MonoBehaviour
     private void ShowContent()
     {
         HideAllContent();
-
         if (_currentStep == Step.BodyPartSelection)
         {
             _step1Content.SetActive(true);
@@ -264,7 +259,6 @@ public class CSUTrackerScreen : MonoBehaviour
     public void OnSliderValueChange(float value)
     {
         _option = Mathf.FloorToInt(value);
-
         _bodyPartsController.UpdateView(_option);
     }
 
@@ -279,7 +273,6 @@ public class CSUTrackerScreen : MonoBehaviour
     private void CameraManagerOnOnCameraComplete(List<Texture2D> photos)
     {
         CameraManager.OnCameraComplete -= CameraManagerOnOnCameraComplete;
-
         if (photos == null || photos.Count == 0)
         {
             CompleteTracker();

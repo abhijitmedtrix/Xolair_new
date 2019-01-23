@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using App.Data;
 using App.Data.CSU;
@@ -25,6 +26,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         public DateTime date;
         public float interpolatedScore;
         public float maxScore;
+        public bool dontUseInGraph;
 
         public void UpdateScore(float score)
         {
@@ -100,12 +102,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     private void OnShowStarted()
     {
-        // initialize only if it's a new tracker type or 1st screen open 
-        // if (_trackerType == DefineTrackerType(_typeToggle.isOn) && _initialized)
-        // {
-        // return;
-        // }
-
         _trackerType = DefineTrackerType(_typeToggle.isOn);
         Initialize();
     }
@@ -185,6 +181,9 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         List<GraphData> listWithData = new List<GraphData>();
         List<GraphData> interpolationList = new List<GraphData>();
 
+
+        int firstDataEntryIndex = -1;
+        int lastDataEntryIndex = -1;
         GraphData graphData;
         for (int i = 0; i < fullDateRange.Count; i++)
         {
@@ -196,6 +195,11 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             // if some entry exist at this date that GraphStruct will be 1 of 2 interpolation side values
             if (data != null)
             {
+                if (firstDataEntryIndex < 0)
+                {
+                    firstDataEntryIndex = i;
+                }
+                
                 listWithData.Add(graphData);
                 graphData.UpdateScore(data.GetScore());
 
@@ -210,14 +214,31 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
                     interpolationList.Clear();
                 }
+
+                lastDataEntryIndex = i;
             }
-            else
+            else if (firstDataEntryIndex > -1)
             {
                 // add to interpolation list which will be used later to fill up middle values for dates, without data
                 interpolationList.Add(graphData);
             }
+            else
+            {
+                graphData.dontUseInGraph = true;
+            }
 
             _graphDatas.Add(graphData);
+        }
+        
+        // if last real data index doesn't equals to total count, that means some last entries doesn't have a real data filled by user. Flag it to skip in graph renderer
+        if (lastDataEntryIndex < _graphDatas.Count - 1)
+        {
+            int startIndex = lastDataEntryIndex > -1 ? lastDataEntryIndex + 1 : 0;
+            
+            for (int i = lastDataEntryIndex + 1; i < _graphDatas.Count; i++)
+            {
+                _graphDatas[i].dontUseInGraph = true;
+            }
         }
 
         // set up the scroller delegates
@@ -234,6 +255,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         if (_trackerType != TrackerManager.TrackerType.CSU)
         {
             // update graph mesh, labels and other data
+            // _graphController.Initialize(_graphDatas.Where(x => !x.dontUseInGraph).ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
             _graphController.Initialize(_graphDatas.ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
                 _daysToShow, numOfLabels);
 
@@ -329,7 +351,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // for CSU
         if (_trackerType == TrackerManager.TrackerType.CSU)
         {
-            Debug.Log("data: " + data);
+            // Debug.Log("data: " + data);
 
             // hide by default
             _photoHint.UpdateValue(null);

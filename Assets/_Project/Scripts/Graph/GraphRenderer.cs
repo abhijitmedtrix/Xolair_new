@@ -17,7 +17,7 @@ public class GraphRenderer : MonoBehaviour
     protected int _maxValue;
     protected int _daysToShow;
 
-    protected Vector3[] _graphPoints;
+    protected List<Vector3> _graphPoints;
     protected Vector3[] _basePoints = new Vector3[2];
     protected Vector3[] _smoothedPoints = new Vector3[100];
 
@@ -37,7 +37,7 @@ public class GraphRenderer : MonoBehaviour
             RenderTextureFormat.ARGB32);
     }
 
-    public void UpdateGraph(Vector3[] scorePoints, bool createMesh, bool useSmoothGraph,
+    public void UpdateGraph(List<Vector3> scorePoints, bool createMesh, bool useSmoothGraph,
         int daysToShow, int maxValue)
     {
         SetupTexture();
@@ -46,7 +46,7 @@ public class GraphRenderer : MonoBehaviour
         _useSmoothGraph = useSmoothGraph;
 
         // base points for mesh bottom left and bottom right points
-        _basePoints[0] = new Vector3(scorePoints[scorePoints.Length - 1].x, -0.0001f, 0);
+        _basePoints[0] = new Vector3(scorePoints[scorePoints.Count - 1].x, -0.0001f, 0);
         _basePoints[1] = new Vector3(0, -0.0001f, 0);
 
         // Debug.Log($"daysToShow: {daysToShow}, maxValue: {maxValue}");
@@ -59,7 +59,7 @@ public class GraphRenderer : MonoBehaviour
         UpdateGraph(scorePoints);
     }
 
-    public void UpdateGraph(Vector3[] scorePoints)
+    public void UpdateGraph(List<Vector3> scorePoints)
     {
         _graphPoints = scorePoints;
 
@@ -69,7 +69,7 @@ public class GraphRenderer : MonoBehaviour
         {
             for (int i = 0; i < _smoothedPoints.Length; i++)
             {
-                _smoothedPoints[i] = iTween.PointOnPath(_graphPoints, 1f / _smoothedPoints.Length * i);
+                _smoothedPoints[i] = iTween.PointOnPath(_graphPoints.ToArray(), 1f / _smoothedPoints.Length * i);
                 // _smoothedPoints[i] = _iTweenPath.PathGetPoint(1f / 50 * i);
 
                 // using smooth graph we cant allow any y value < 0 otherwise graph mesh will not be drawn
@@ -89,8 +89,8 @@ public class GraphRenderer : MonoBehaviour
         }
 
         // draw line in any case
-        _lineRenderer.positionCount = _graphPoints.Length;
-        _lineRenderer.SetPositions(_graphPoints);
+        _lineRenderer.positionCount = _graphPoints.Count;
+        _lineRenderer.SetPositions(_graphPoints.ToArray());
         
         if (!_createMesh)
         {
@@ -113,7 +113,7 @@ public class GraphRenderer : MonoBehaviour
 
     public Vector3 GetLastDayPointViewportPosition()
     {
-        Vector3 point = _graphPoints[_graphPoints.Length - 1];
+        Vector3 point = _graphPoints[_graphPoints.Count - 1];
         if (point.y <= 0) point.y = 0;
 
         // return (Vector3)RectTransformUtility.WorldToScreenPoint(_camera, point);
@@ -133,7 +133,7 @@ public class GraphRenderer : MonoBehaviour
             }
             */
 
-            for (int i = 0; i < _graphPoints.Length; i++)
+            for (int i = 0; i < _graphPoints.Count; i++)
             {
                 Gizmos.color = Color.blue;
                 Gizmos.DrawSphere(_graphPoints[i], 0.075f);

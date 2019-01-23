@@ -11,12 +11,14 @@ public class TrackerScreen : MonoBehaviour
     [SerializeField] protected Text _questionText;
     [SerializeField] protected GameObject _submitButton;
     [SerializeField] protected TrackerProgressController _progressController;
-    
-    [Header("Answers references")]
-    [SerializeField] protected Transform _answersContainer;
+
+    [Header("Answers references")] [SerializeField]
+    protected Transform _answersContainer;
+
     [SerializeField] protected ToggleGroup _toggleGroup;
     [SerializeField] protected OptionToggle _answerOptionPrefab;
 
+    protected TrackerManager.TrackerType _trackerType;
     protected QuestionBasedTrackerData _trackerData;
     protected List<OptionToggle> _optionsTogglesList = new List<OptionToggle>();
 
@@ -29,7 +31,7 @@ public class TrackerScreen : MonoBehaviour
     {
         // hide score panel
         _scorePanel.SetActive(false);
-        
+
         // reset question index and show 1st question
         _trackerData.ResetQuestionIndex();
         InitiateQuestion(_trackerData.GetQuestion());
@@ -103,7 +105,7 @@ public class TrackerScreen : MonoBehaviour
     protected virtual void CompleteTracker()
     {
         // save progress
-        QuestionBasedTrackerData originalData = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU);
+        QuestionBasedTrackerData originalData = TrackerManager.GetData(DateTime.Today, _trackerType);
 
         originalData.SetAnswers(_trackerData.GetAnswers());
         TrackerManager.UpdateEntry(DateTime.Today, originalData);

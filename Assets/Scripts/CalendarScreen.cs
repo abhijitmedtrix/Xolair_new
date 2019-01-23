@@ -90,6 +90,18 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
         ScreenManager.Instance.Set(10);
     }
 
+    public void Back()
+    {
+        if (AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
+        {
+            ScreenManager.Instance.Set(2);
+        }
+        else if (AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
+        {
+            ScreenManager.Instance.Set(3);
+        }
+    }
+
     #region EnhancedScroller Handlers
 
     private void CellViewInstantiated(EnhancedScroller enhancedScroller, EnhancedScrollerCellView cellview)

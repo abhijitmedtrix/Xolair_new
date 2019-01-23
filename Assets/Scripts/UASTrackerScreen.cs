@@ -8,6 +8,7 @@ public class UASTrackerScreen : TrackerScreen
     private void Start()
     {
         _progressController.OnBackClicked += SetPreviousQuestion;
+        _trackerType = TrackerManager.TrackerType.UAS;
     }
 
     public override void StartTracker()
