@@ -45,10 +45,13 @@ public class GraphController : MonoBehaviour
                 // _validPointsCounter++;
             }
         }
+        
+        _maxValue = maxValue;
+        UpdateLabels(_maxValue, numOfLabels);
+        
         if (_graphPoints.Count < 2) return;
 
         _daysToShow = daysToShow;
-        _maxValue = maxValue;
 
         // orthographic size must fit to max value
         _camera.orthographicSize = _maxValue / 2f;
@@ -65,8 +68,6 @@ public class GraphController : MonoBehaviour
         // set new texture 
         _camera.targetTexture = _graphRenderer.GetRenderTexture();
         _graphImage.texture = _graphRenderer.GetRenderTexture();
-
-        UpdateLabels(_maxValue, numOfLabels);
     }
 
     private void UpdateLabels(float maxValue, int numOfLabels)

@@ -103,7 +103,6 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     {
         this.state = state;
 
-        _saveButton.gameObject.SetActive(false);
         _editButton.gameObject.SetActive(false);
         _deleteButton.gameObject.SetActive(false);
 
@@ -132,9 +131,6 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _timeText.text = _tempReminderData.fireDate.ToString("hh:mm tt", CultureInfo.InvariantCulture);
         _titleInputField.text = _tempReminderData.title;
         _repeatText.text = repeatOptionsNames[(int) _tempReminderData.repeatInterval];
-
-        // show save button only if title field is not empty
-        _saveButton.gameObject.SetActive(!string.IsNullOrEmpty(_tempReminderData.title));
     }
 
     /// <summary>
@@ -227,6 +223,8 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void SaveReminder()
     {
         // check some critical values set by user before saving
+        if (string.IsNullOrEmpty(_tempReminderData.title)) return;
+
 
         // we can't set new notification without repetition in a past
         if (_tempReminderData.repeatInterval == RepeatInterval.ONCE &&

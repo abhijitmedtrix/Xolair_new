@@ -244,6 +244,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // set up the scroller delegates
         scroller.Delegate = this;
         scroller.scrollerScrolled = ScrollerScrolled;
+        scroller.scrollerSnapped = ScrollerSnapped;
 
         // set scroller data
         SetData(_graphDatas);
@@ -312,6 +313,11 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         Initialize();
     }
 
+    private void ScrollerSnapped(EnhancedScroller enhancedScroller, int cellindex, int dataindex, EnhancedScrollerCellView cellview)
+    {
+        // Debug.Log($"ScrollerSnapped. DataIndex: {dataindex}, cellIndex: {cellview}");
+    }
+    
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
         int currentActiveCellIndex = scroller.GetClosestCellIndex();
@@ -409,11 +415,14 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // tell the scroller to reload now that we have the data
         scroller.ReloadData(scrollPosition);
         
-        // we need to snap immediately but scroller asset got some limitation here, thats why need to use this workaround
+        // we need to snap immediately but scroller asset got some limitation here, that's why need to use this workaround
         EnhancedScroller.TweenType tween = scroller.snapTweenType;
         scroller.snapTweenType = EnhancedScroller.TweenType.immediate;
         scroller.Snap();
         scroller.snapTweenType = tween;
+
+        // simulate scrolling callback after forced position setup to set correct focus and update ui. ScrollPosition parameter can be any value, it doesn't used anyway
+        ScrollerScrolled(scroller, new Vector2(scrollPosition, 0), 1);
     }
 
     private IEnumerator WaitForFrameRoutine()
