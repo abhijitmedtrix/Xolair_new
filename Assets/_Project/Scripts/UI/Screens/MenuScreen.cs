@@ -23,7 +23,7 @@ public class MenuScreen : MonoBehaviour
 
             _toggleGroup.SetAllTogglesOff();
             
-            AppManager.Instance.SetMode(AppManager.Mode.CSU);
+            AppManager.Instance.SetMode(AppMode.CSU);
             
             for (int i = 0; i < _toggles.Length; i++)
             {
@@ -45,7 +45,7 @@ public class MenuScreen : MonoBehaviour
             
             _toggleGroup.SetAllTogglesOff();
 
-            AppManager.Instance.SetMode(AppManager.Mode.SAA);
+            AppManager.Instance.SetMode(AppMode.SAA);
             
             for (int i = 0; i < _toggles.Length; i++)
             {

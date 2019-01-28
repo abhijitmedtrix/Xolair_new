@@ -214,20 +214,43 @@ namespace App.Data.CSU
                 this.GetDate().ToString("dd-MM-yyyy"),
                 _activeBodyPart.ToString().ToLower());
 
+            // cleanup entire directory before saving new pictures
+            DirectoryInfo dir = new DirectoryInfo(folderPath);
+            if (dir.Exists)
+            {
+                dir.Delete(true);
+            }
+
             for (int i = 0; i < textures.Length; i++)
             {
                 string filePath = Path.Combine(folderPath, i + ".png");
-
                 FileInfo file = new FileInfo(Path.Combine(folderPath, i + ".png"));
-
-                // cleanup entire directory before saving new pictures
-                if (file.Directory.Exists)
-                {
-                    file.Directory.Delete(true);
-                }
 
                 file.Directory.Create();
                 File.WriteAllBytes(file.FullName, textures[i].EncodeToPNG());
+            }
+        }
+
+        public void SavePhotos(List<string> texturesPaths)
+        {
+            string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
+                this.GetDate().ToString("dd-MM-yyyy"),
+                _activeBodyPart.ToString().ToLower());
+
+            // cleanup entire directory before saving new pictures
+            DirectoryInfo dir = new DirectoryInfo(folderPath);
+            if (dir.Exists)
+            {
+                dir.Delete(true);
+            }
+
+            for (int i = 0; i < texturesPaths.Count; i++)
+            {
+                string filePath = Path.Combine(folderPath, i + ".png");
+                FileInfo file = new FileInfo(Path.Combine(folderPath, i + ".png"));
+
+                file.Directory.Create();
+                File.Move(texturesPaths[i], file.FullName);
             }
         }
 

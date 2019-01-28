@@ -13,11 +13,15 @@ public class PhotosUiItem : MonoBehaviour, System.IDisposable
     {
         _fitter.aspectRatio = aspect;
     }
-    
+
     public void SetData(Texture2D texture)
     {
+        // toggle off by default
+        _toggle.SetValue(false);
+
         if (texture != null)
         {
+            Debug.Log($"Texture w: {texture.width}, h: {texture.height}");
             _image.texture = texture;
             _image.enabled = true;
         }

@@ -9,7 +9,6 @@ using QuickEngine.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
 {
@@ -82,7 +81,7 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _tempNewReminderData.fireDate = DateTime.Today.Date + _tempNewReminderData.fireDate.TimeOfDay;
 
         // initialize all reminders
-        SetScroller(ReminderManager.Instance.GetAllReminders());
+        SetScroller(ReminderManager.Instance.GetAllReminders(AppManager.Instance.currentAppMode));
 
         // of there is such reminder
         int index = _data.IndexOf(_defaultSelection);

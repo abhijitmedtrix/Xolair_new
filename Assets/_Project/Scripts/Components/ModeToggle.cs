@@ -14,16 +14,16 @@ public class ModeToggle : StateChangeToggle
         AppManager.OnModeChange -= OnModeChange;
     }
 
-    private void OnModeChange(AppManager.Mode mode)
+    private void OnModeChange(AppMode appMode)
     {
         // left position (inactive) is for CSU and right position (active) is for SAA
-        SetValue(mode == AppManager.Mode.SAA);
+        SetValue(appMode == AppMode.SAA);
     }
     
     protected override void OnToggled(bool isOn)
     {
         base.OnToggled(isOn);
         
-        AppManager.Instance.SetMode(isOn ? AppManager.Mode.SAA : AppManager.Mode.CSU);
+        AppManager.Instance.SetMode(isOn ? AppMode.SAA : AppMode.CSU);
     }
 }

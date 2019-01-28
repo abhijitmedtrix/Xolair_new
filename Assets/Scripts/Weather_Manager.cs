@@ -35,7 +35,7 @@ public class Weather_Manager : MonoBehaviour
 
     public void startservice()
     {
-        if (AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
+        if (AppManager.Instance.currentAppMode == AppMode.SAA)
         {
             if (!datastored)
             {
@@ -78,7 +78,7 @@ public class Weather_Manager : MonoBehaviour
                 screenManager.Set(9);
             }
         }
-        else if (AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
+        else if (AppManager.Instance.currentAppMode == AppMode.CSU)
         {
             if (!datastored)
             {

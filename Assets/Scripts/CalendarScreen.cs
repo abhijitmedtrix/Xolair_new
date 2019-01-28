@@ -92,11 +92,11 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     public void Back()
     {
-        if (AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
+        if (AppManager.Instance.currentAppMode == AppMode.SAA)
         {
             ScreenManager.Instance.Set(2);
         }
-        else if (AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
+        else if (AppManager.Instance.currentAppMode == AppMode.CSU)
         {
             ScreenManager.Instance.Set(3);
         }

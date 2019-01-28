@@ -34,8 +34,11 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     private static List<QuestionBasedTrackerData> _asthmaJsonObjectList = new List<QuestionBasedTrackerData>();
     private static List<QuestionBasedTrackerData> _symptomJsonObjectList = new List<QuestionBasedTrackerData>();
 
+    public static event Action<DateTime, QuestionBasedTrackerData> OnDataUpdated;
+    public static event Action<DateTime, QuestionBasedTrackerData> OnFirstDataAdded;
+
     // TODO - commented, but need to clarify, how big log can be
-    private const int LOG_LIFE_TIME = 360;
+    private const int LOG_LIFE_TIME = 3600;
     public const string LOGS_FOLDER = "logs";
 
     // SSA
@@ -45,6 +48,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     // CSU
     private const string CSU_LOG = "CSU_tracker.json";
     private const string UAS_LOG = "urticaria_activity_score.json";
+    
+    private const string NOTES_LOG = "notes.json";
 
     private void Awake()
     {
@@ -338,6 +343,11 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
     public static void UpdateEntry(DateTime day, CSUData data)
     {
+        DateTime dateTime = day.Date + DateTime.Now.TimeOfDay;
+        
+        // update reminder
+        OnDataUpdated?.Invoke(dateTime, data);
+        
         // if it's a new entry
         if (!_csuJsonObjectList.Contains(data))
         {
@@ -366,6 +376,11 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
     public static void UpdateEntry(DateTime day, UASData data)
     {
+        DateTime dateTime = day.Date + DateTime.Now.TimeOfDay;
+        
+        // update reminder
+        OnDataUpdated?.Invoke(dateTime, data);
+        
         // if it's a new entry
         if (!_uasJsonObjectList.Contains(data))
         {
@@ -392,46 +407,19 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         WriteToFile(GetPath(TrackerType.UAS), o.Print(true));
     }
 
-    public static void UpdateEntry(DateTime day, AsthmaData data)
-    {
-        // if it's a new entry
-        if (!_asthmaJsonObjectList.Contains(data))
-        {
-            _asthmaJsonObjectList.Add(data);
-
-            // each time new test passed - reschedule reminder
-            ReminderManager.Instance.ActivateAsthmaControlTestDefaultReminder(day.Date + DateTime.Now.TimeOfDay);
-        }
-
-        if (_trackerDictionary.ContainsKey(day))
-        {
-            // Debug.LogWarning($"Same date {day.ToLongDateString()} log data already exist. Updating it.");
-            _trackerDictionary[day].UpdateData(data);
-        }
-        else
-        {
-            _trackerDictionary.Add(day, new LogData {asthmaData = data});
-        }
-
-        // update log file
-        JSONObject o = new JSONObject();
-        for (int i = 0; i < _asthmaJsonObjectList.Count; i++)
-        {
-            o.Add(_asthmaJsonObjectList[i].FormatToJson());
-        }
-
-        WriteToFile(GetPath(TrackerType.Asthma), o.Print(true));
-    }
-
     public static void UpdateEntry(DateTime day, SymptomData data)
     {
+        DateTime dateTime = day.Date + DateTime.Now.TimeOfDay;
+
+        // update reminder
+        OnDataUpdated?.Invoke(dateTime, data);
+
         // if it's a new entry
         if (!_symptomJsonObjectList.Contains(data))
         {
             _symptomJsonObjectList.Add(data);
-
-            // each time new test passed - reschedule reminder
-            ReminderManager.Instance.ActivateSymptomTrackerDefaultReminder(day.Date + DateTime.Now.TimeOfDay);
+            
+            OnFirstDataAdded?.Invoke(dateTime, data);
         }
 
         if (_trackerDictionary.ContainsKey(day))
@@ -452,6 +440,41 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         }
 
         WriteToFile(GetPath(TrackerType.Symptom), o.Print(true));
+    }
+
+    public static void UpdateEntry(DateTime day, AsthmaData data)
+    {
+        DateTime dateTime = day.Date + DateTime.Now.TimeOfDay;
+
+        // update reminder
+        OnDataUpdated?.Invoke(dateTime, data);
+
+        // if it's a new entry
+        if (!_asthmaJsonObjectList.Contains(data))
+        {
+            _asthmaJsonObjectList.Add(data);
+            
+            OnFirstDataAdded?.Invoke(dateTime, data);
+        }
+
+        if (_trackerDictionary.ContainsKey(day))
+        {
+            // Debug.LogWarning($"Same date {day.ToLongDateString()} log data already exist. Updating it.");
+            _trackerDictionary[day].UpdateData(data);
+        }
+        else
+        {
+            _trackerDictionary.Add(day, new LogData {asthmaData = data});
+        }
+
+        // update log file
+        JSONObject o = new JSONObject();
+        for (int i = 0; i < _asthmaJsonObjectList.Count; i++)
+        {
+            o.Add(_asthmaJsonObjectList[i].FormatToJson());
+        }
+
+        WriteToFile(GetPath(TrackerType.Asthma), o.Print(true));
     }
 
     #endregion
@@ -604,6 +627,16 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     public static QuestionBasedTrackerData GetLastAsthmaData()
     {
         return _asthmaJsonObjectList.Count > 0 ? _asthmaJsonObjectList[_asthmaJsonObjectList.Count - 1] : null;
+    }
+    
+    public static QuestionBasedTrackerData GetLastCSUData()
+    {
+        return _csuJsonObjectList.Count > 0 ? _csuJsonObjectList[_csuJsonObjectList.Count - 1] : null;
+    }
+    
+    public static QuestionBasedTrackerData GetLastUASData()
+    {
+        return _uasJsonObjectList.Count > 0 ? _uasJsonObjectList[_uasJsonObjectList.Count - 1] : null;
     }
 
     #endregion

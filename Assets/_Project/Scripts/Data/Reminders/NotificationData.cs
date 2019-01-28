@@ -214,7 +214,7 @@ namespace App.Data.Reminders
                     new NotificationInfo {id = id, fireDate = fireDate, repeatInterval = repeatInterval});
                 idArray.Add(id);
                 Debug.Log(
-                    $"Registering notification with fire date: {fireDate}, interval: {repeatInterval}, and id: {id}");
+                    $"Registering notification with title: {title}, parent group id: {parentGroupId}, fire date: {fireDate}, interval: {repeatInterval}, and id: {id}");
             }
             else
             {

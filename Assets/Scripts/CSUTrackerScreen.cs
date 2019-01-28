@@ -86,10 +86,11 @@ public class CSUTrackerScreen : MonoBehaviour
         originalData.SetAnswers(_csuData.GetAnswers());
 
         // save all photos
-        Texture2D[] textures = _photosScrollController.GetSelectedPhotos();
-        if (textures != null && textures.Length > 0)
+        List<int> texturesIndexes = _photosScrollController.GetSelectedPhotosIndexes();
+        if (texturesIndexes != null && texturesIndexes.Count > 0)
         {
-            originalData.SavePhotos(_photosScrollController.GetSelectedPhotos());
+            List<string> paths = CameraManager.GetTexturesPaths(texturesIndexes, true);
+            originalData.SavePhotos(paths);
         }
 
         TrackerManager.UpdateEntry(DateTime.Today, originalData);

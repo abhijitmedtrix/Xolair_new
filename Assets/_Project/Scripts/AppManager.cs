@@ -1,9 +1,16 @@
 ﻿using System;
-using RogoDigital.Lipsync;
 using System.Collections.Generic;
 using MaterialUI;
 using UnityEngine.UI;
 using UnityEngine;
+
+[Flags]
+[Serializable]
+public enum AppMode
+{
+    SAA = 1,
+    CSU = 2
+}
 
 public class AppManager : MonoSingleton<AppManager>
 {
@@ -14,20 +21,12 @@ public class AppManager : MonoSingleton<AppManager>
     [SerializeField] private GameObject Notification, Notification_CSU;
     [SerializeField] private GameObject avatar;
     [SerializeField] private AudioSource audioSource;
-
     [SerializeField] public Text[] Saanotfn_txt, Csunotfn_text;
     [SerializeField] private Text[] currentinfo;
 
-    public enum Mode
-    {
-        SAA,
-        CSU
-    }
-
-    public Mode CurrentMode;
-
-    public static Action<Mode> OnModeChange;
-
+    public AppMode currentAppMode;
+    
+    public static Action<AppMode> OnModeChange;
     public static bool FirstTest, SecondTest;
     public static string User_name;
     public static string UserName, Gender, Age;
@@ -52,16 +51,16 @@ public class AppManager : MonoSingleton<AppManager>
         currentinfo[3].text = currentinfo[1].text = DateTime.Today.ToString("ddd");
     }
 
-    public void SetMode(Mode mode)
+    public void SetMode(AppMode appMode)
     {
-        CurrentMode = mode;
-        OnModeChange?.Invoke(CurrentMode);
+        currentAppMode = appMode;
+        OnModeChange?.Invoke(currentAppMode);
 
-        if (CurrentMode == Mode.SAA)
+        if (currentAppMode == AppMode.SAA)
         {
             ScreenManager.Instance.Set(2);
         }
-        else if (CurrentMode == Mode.CSU)
+        else if (currentAppMode == AppMode.CSU)
         {
             ScreenManager.Instance.Set(3);
         }

@@ -34,7 +34,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
     }
 
-    [SerializeField] protected AppManager.Mode _mode;
+    [SerializeField] protected AppMode appMode;
     [SerializeField] protected GraphController _graphController;
     [SerializeField] protected CSUViewController _CSUViewController;
     [SerializeField] protected GraphRenderer _graphRenderer;
@@ -81,12 +81,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         _screenConfig.OnShowStarted += OnShowStarted;
 
         // setup scroller parameters
-        if (_mode == AppManager.Mode.SAA)
+        if (appMode == AppMode.SAA)
         {
             // show 2 weeks + 1 day = 15
             _daysToShow = 15;
         }
-        else if (_mode == AppManager.Mode.CSU)
+        else if (appMode == AppMode.CSU)
         {
             // show 5 days according to UI reference
             _daysToShow = 5;
@@ -133,7 +133,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
 
         // for SAA we should add last some Data to set start with Sunday for weeks display        
-        if (_mode == AppManager.Mode.SAA)
+        if (appMode == AppMode.SAA)
         {
             DateTime firstEntryData = fullDateRange[0];
 
@@ -257,7 +257,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             // update graph mesh, labels and other data
             // _graphController.Initialize(_graphDatas.Where(x => !x.dontUseInGraph).ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
-            _graphController.Initialize(_graphDatas.ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
+            _graphController.Initialize(_graphDatas.ToArray(), appMode != AppMode.SAA, false, maxScore,
                 _daysToShow, numOfLabels);
 
             _graphController.UpdateCameraView(scroller.NormalizedScrollPosition);
@@ -283,7 +283,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // Debug.Log("toggleIsOn: " + toggleIsOn);
 
         // define what to show
-        if (_mode == AppManager.Mode.SAA)
+        if (appMode == AppMode.SAA)
         {
             if (!toggleIsOn)
             {
@@ -336,7 +336,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 _lastActiveDataIndex = activeCell.dataIndex;
 
                 // set focus of cells only for daily view in CSU mode
-                if (_mode == AppManager.Mode.CSU)
+                if (appMode == AppMode.CSU)
                 {
                     if (activeCell != null)
                     {
@@ -509,7 +509,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         GraphData graphData = _data[dataIndex];
 
         // define what data to provide
-        if (_mode == AppManager.Mode.SAA)
+        if (appMode == AppMode.SAA)
         {
             // Debug.Log($"data date: {data.date}, firstDate: {firstDate}");
             // show week text only for the 1st day of the week (Sunday)

@@ -48,6 +48,7 @@ public class CameraScreen : MonoBehaviour
     private void OnCameraStart(Texture texture)
     {
         _cameraRawImage.texture = texture;
+        _aspectRatioFitter.aspectRatio = (float)texture.width / texture.height;
     }
 
     private void OnPhotoTaken(Texture2D photo)
@@ -67,6 +68,8 @@ public class CameraScreen : MonoBehaviour
 
     public void SavePhoto()
     {
+        CameraManager.SaveLastPhoto();
+        
         _snapshotImage.gameObject.SetActive(false);
 
         _takePhotoContent.SetActive(true);
@@ -76,6 +79,7 @@ public class CameraScreen : MonoBehaviour
     public void RemovePhoto()
     {
         CameraManager.RemoveLastSnapshot();
+        
         _snapshotImage.gameObject.SetActive(false);
 
         _takePhotoContent.SetActive(true);

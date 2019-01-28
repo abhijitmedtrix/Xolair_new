@@ -13,7 +13,7 @@ public class CSU_UI_OUT : MonoBehaviour
 
     public void set()
     {
-        AppManager.Instance.SetMode(AppManager.Mode.CSU);
+        AppManager.Instance.SetMode(AppMode.CSU);
         //Welcome_txt.text = "Hai " + AppManager.UserName;
     }
 

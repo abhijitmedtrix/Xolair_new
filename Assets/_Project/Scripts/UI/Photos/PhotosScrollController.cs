@@ -139,9 +139,9 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
         scroller.scrollerScrolled = null;
     }
 
-    public Texture2D[] GetSelectedPhotos()
+    public List<int> GetSelectedPhotosIndexes()
     {
-        List<Texture2D> texturesList = new List<Texture2D>();
+        List<int> indexes = new List<int>();
         SmallList<EnhancedScrollerCellView> activeItems = scroller.GetActiveCellViews();
 
         PhotosUiItem[] items;
@@ -152,10 +152,12 @@ public class PhotosScrollController : MonoBehaviour, IEnhancedScrollerDelegate
 
             for (int j = 0; j < items.Length; j++)
             {
-                texturesList.Add(items[j].GetTexture());
+                int index = _data.IndexOf(items[j].GetTexture());
+                indexes.Add(index);
+                Debug.Log($"Index added as selected photo index: {index}");
             }
         }
 
-        return texturesList.ToArray();
+        return indexes;
     }
 }

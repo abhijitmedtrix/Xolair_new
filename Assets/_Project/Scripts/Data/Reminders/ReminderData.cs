@@ -46,6 +46,7 @@ namespace App.Data.Reminders
         /// this field can differ to <fireDate> because user can setup reminder in Monday for Wednesday
         /// </summary>
         public readonly DateTime registrationDate;
+        public AppMode appMode;
 
         public DateTime fireDate;
         public DateTime endDate = DateTime.MaxValue;
@@ -63,15 +64,17 @@ namespace App.Data.Reminders
         public ReminderData(ReminderData targetData)
         {
             this.registrationDate = targetData.registrationDate;
+            this.appMode = targetData.appMode;
             CopyData(targetData);
         }
 
-        public ReminderData(string id, DateTime fireDate, DateTime endDate, RepeatInterval repeatInterval, string title,
+        public ReminderData(AppMode appMode, string id, DateTime fireDate, DateTime endDate, RepeatInterval repeatInterval, string title,
             string message = null,
             DayOfWeek[] daysOfWeek = null)
         {
             // unchangeable value
             registrationDate = DateTime.Now;
+            this.appMode = appMode;
 
             this.id = id;
             this.fireDate = fireDate;
@@ -144,7 +147,7 @@ namespace App.Data.Reminders
 
         public void CheckReminderData()
         {
-            Debug.Log($"Reminder with title {title} has been loaded. Notifications count: {notifications.Count}");
+            Debug.Log($"Reminder with title {title} has been loaded. Notifications count: {notifications.Count}, mode: {appMode}");
 
             // check, is there any updates for completedDates
             // set yesterday by default 

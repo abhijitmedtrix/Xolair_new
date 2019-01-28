@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using App.Data;
+using App.Data.CSU;
 using App.Data.Reminders;
+using App.Data.SSA;
 using BayatGames.SaveGamePro;
 using DoozyUI;
 using Opencoding.CommandHandlerSystem;
@@ -11,11 +14,15 @@ using QuickEngine.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using VoxelBusters.NativePlugins;
+#if UNITY_EDITOR
+using UnityEditor;
+
+#endif
 
 public class ReminderManager : MonoSingleton<ReminderManager>
 {
     [SerializeField] protected Sprite _clockIcon;
-    
+
     public struct TimeDifference
     {
         public int years;
@@ -29,8 +36,12 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     private List<ReminderData> _reminders = new List<ReminderData>();
     private const string _ACTUAL_REMINDERS_FILE_PATH = "notifications.dat";
     private const string _DEFAULT_REMINDERS_ADDED_KEY = "defaultRemindersAdded";
+    private const string _REMOVE_REMINDERS_KEY = "removeAllRemindersOnStart";
     private const string _DEFAULT_SAA_ST_KEY = "SAA_ST";
     private const string _DEFAULT_SAA_ACT_KEY = "SAA_ACT";
+    private const string _DEFAULT_CSU_CSU_KEY = "CSU_CSU";
+    private const string _DEFAULT_CSU_UAS_KEY = "CSU_UAS";
+    private const string _DEFAULT_XOLAIR_SHOT_KEY = "XOLAIR_SHOT";
 
     public static event Action<List<ReminderData>> OnRemindersUpdate;
 
@@ -41,12 +52,22 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         // Subscribe to save and load events.
         SaveGame.OnSaved += SaveGame_OnSaved;
         SaveGame.OnLoaded += SaveGame_OnLoaded;
+        TrackerManager.OnDataUpdated += TrackerManagerOnDataUpdated;
+        TrackerManager.OnFirstDataAdded += TrackerManagerOnFirstDataAdded;
     }
 
     protected void Start()
     {
         Debug.Log("Start in ReminderManager");
         RegisterNotificationTypes(NotificationType.Sound | NotificationType.Badge | NotificationType.Alert);
+
+#if UNITY_EDITOR
+        if (PlayerPrefs.HasKey(_REMOVE_REMINDERS_KEY))
+        {
+            RemoveAllReminders();
+            PlayerPrefs.DeleteKey(_REMOVE_REMINDERS_KEY);
+        }
+#endif
         
         // parse all notifications to data for best control
         if (SaveGame.Exists(_ACTUAL_REMINDERS_FILE_PATH))
@@ -57,7 +78,8 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         if (!PlayerPrefs.HasKey(_DEFAULT_REMINDERS_ADDED_KEY))
         {
             // add default Symptom reminder
-            ReminderData reminderData = new ReminderData(_DEFAULT_SAA_ST_KEY, DateTime.Today.Tomorrow(),
+            ReminderData reminderData = new ReminderData(AppMode.SAA, _DEFAULT_SAA_ST_KEY,
+                DateTime.Today.Tomorrow(),
                 DateTime.MaxValue,
                 RepeatInterval.FORTNIGHT,
                 "Complete symptom tracker test");
@@ -67,17 +89,48 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             AddReminder(reminderData);
 
             // add default Asthma test reminder
-            reminderData = new ReminderData(_DEFAULT_SAA_ACT_KEY, DateTime.Today.Tomorrow(), DateTime.MaxValue,
+            reminderData = new ReminderData(AppMode.SAA, _DEFAULT_SAA_ACT_KEY, DateTime.Today.Tomorrow(),
+                DateTime.MaxValue,
                 RepeatInterval.WEEK,
                 "Take asthma control test");
             reminderData.isDefault = true;
             reminderData.isActive = TrackerManager.GetLastAsthmaData() != null;
             reminderData.SetupReminder();
-
             AddReminder(reminderData);
 
-            PlayerPrefs.SetInt(_DEFAULT_REMINDERS_ADDED_KEY, 1);
+            // add default CSU reminder
+            reminderData = new ReminderData(AppMode.CSU, _DEFAULT_CSU_CSU_KEY, DateTime.Today.Tomorrow(),
+                DateTime.MaxValue,
+                RepeatInterval.DAY,
+                "Track your hives through CSU tracker");
+            reminderData.isDefault = true;
+            reminderData.isActive = TrackerManager.GetLastCSUData() != null;
+            reminderData.SetupReminder();
+            AddReminder(reminderData);
 
+            // add default UAS reminder
+            reminderData = new ReminderData(AppMode.CSU, _DEFAULT_CSU_UAS_KEY, DateTime.Today.Tomorrow(),
+                DateTime.MaxValue,
+                RepeatInterval.DAY,
+                "Take the UAS 7 test");
+            reminderData.isDefault = true;
+            reminderData.isActive = TrackerManager.GetLastUASData() != null;
+            reminderData.SetupReminder();
+            AddReminder(reminderData);
+
+            // add default Xolair shot reminder
+            reminderData = new ReminderData(AppMode.SAA | AppMode.CSU, _DEFAULT_XOLAIR_SHOT_KEY,
+                DateTime.Today.Tomorrow(),
+                DateTime.MaxValue,
+                RepeatInterval.FORTNIGHT,
+                "Time for Xolair shot");
+            reminderData.isDefault = true;
+            reminderData.isActive = false;
+            reminderData.SetupReminder();
+            AddReminder(reminderData);
+
+            // save progress
+            PlayerPrefs.SetInt(_DEFAULT_REMINDERS_ADDED_KEY, 1);
             SaveProgress(false);
         }
 
@@ -86,20 +139,6 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             _reminders[i].OnDataUpdate += OnReminderDataUpdate;
             _reminders[i].CheckReminderData();
         }
-    }
-
-    public void ActivateSymptomTrackerDefaultReminder(DateTime testCompleteDateTime)
-    {
-        ReminderData data =  _reminders.Find(x => x.id == _DEFAULT_SAA_ST_KEY);
-        data.fireDate = testCompleteDateTime;
-        data.SetActive(true);
-    }
-    
-    public void ActivateAsthmaControlTestDefaultReminder(DateTime testCompleteDateTime)
-    {
-        ReminderData data =  _reminders.Find(x => x.id == _DEFAULT_SAA_ACT_KEY);
-        data.fireDate = testCompleteDateTime;
-        data.SetActive(true);
     }
 
     protected void OnEnable()
@@ -114,6 +153,57 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         // Un-Register from callbacks
         NotificationService.DidLaunchWithLocalNotificationEvent -= DidLaunchWithLocalNotificationEvent;
         NotificationService.DidReceiveLocalNotificationEvent -= DidReceiveLocalNotificationEvent;
+    }
+
+    private void TrackerManagerOnFirstDataAdded(DateTime dateTime, QuestionBasedTrackerData trackerData)
+    {
+        if (trackerData is SymptomData)
+        {
+            ActivateSymptomTrackerDefaultReminder(dateTime);
+        }
+        else if (trackerData is AsthmaData)
+        {
+            ActivateAsthmaControlTestDefaultReminder(dateTime);
+        }
+        else if (trackerData is CSUData)
+        {
+        }
+        else if (trackerData is UASData)
+        {
+        }
+    }
+
+    private void TrackerManagerOnDataUpdated(DateTime dateTime, QuestionBasedTrackerData trackerData)
+    {
+        ReminderData reminderData;
+        if (trackerData is SymptomData)
+        {
+            reminderData = _reminders.Find(x => x.id == _DEFAULT_SAA_ST_KEY);
+            reminderData.ChangeFireDate(dateTime);
+        }
+        else if (trackerData is AsthmaData)
+        {
+            reminderData = _reminders.Find(x => x.id == _DEFAULT_SAA_ACT_KEY);
+            reminderData.ChangeFireDate(dateTime);
+        }
+        else if (trackerData is CSUData)
+        {
+        }
+        else if (trackerData is UASData)
+        {
+        }
+    }
+
+    public void ActivateSymptomTrackerDefaultReminder(DateTime testCompleteDateTime)
+    {
+        ReminderData data = _reminders.Find(x => x.id == _DEFAULT_SAA_ST_KEY);
+        data.SetActive(true);
+    }
+
+    public void ActivateAsthmaControlTestDefaultReminder(DateTime testCompleteDateTime)
+    {
+        ReminderData data = _reminders.Find(x => x.id == _DEFAULT_SAA_ACT_KEY);
+        data.SetActive(true);
     }
 
 
@@ -177,12 +267,12 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         }
         else
         {
-            Debug.LogWarning("There is no reminder data found for current notification!");            
+            Debug.LogWarning("There is no reminder data found for current notification!");
             return;
         }
 
         SaveProgress(false);
-        
+
         // show popup notifications
         UIManager.NotificationManager.ShowNotification(
             "TwoOptionsIconUINotification",
@@ -234,17 +324,17 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     #endregion
 
-    
+
     private void OnReminderDataUpdate(ReminderData reminderData)
     {
         // save each time some important changes been made. NOTE - make sure event is not triggered without true need.
         SaveProgress(false);
     }
 
-    
     [CommandHandler(Description = "Remove all reminders")]
     public void RemoveAllReminders()
     {
+        Debug.Log("All reminders removed and data cleaned");
         for (int i = 0; i < _reminders.Count; i++)
         {
             _reminders[i].Reset();
@@ -254,7 +344,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         SaveGame.Delete(_ACTUAL_REMINDERS_FILE_PATH);
         PlayerPrefs.DeleteKey(_DEFAULT_REMINDERS_ADDED_KEY);
 
-        OnRemindersUpdate?.Invoke(GetAllReminders());
+        OnRemindersUpdate?.Invoke(GetAllReminders(AppManager.Instance.currentAppMode));
     }
 
     public void AddReminder(ReminderData data)
@@ -288,20 +378,20 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         SaveGame.Save(_ACTUAL_REMINDERS_FILE_PATH, _reminders);
         if (triggerEvent)
         {
-            OnRemindersUpdate?.Invoke(GetAllReminders());
+            OnRemindersUpdate?.Invoke(GetAllReminders(AppManager.Instance.currentAppMode));
         }
     }
 
-    public List<ReminderData> GetAllReminders(bool includeInactive = true, bool includeDeleted = false)
+    public List<ReminderData> GetAllReminders(AppMode appMode, bool includeInactive = true, bool includeDeleted = false)
     {
         if (includeInactive)
         {
-            return includeDeleted ? _reminders : _reminders.FindAll(x => !x.isDeleted);
+            return includeDeleted ? _reminders : _reminders.FindAll(x => x.appMode.HasFlag(appMode) && !x.isDeleted);
         }
 
         return includeDeleted
-            ? _reminders.FindAll(x => x.isActive)
-            : _reminders.FindAll(x => x.isActive && !x.isDeleted);
+            ? _reminders.FindAll(x => x.appMode.HasFlag(appMode) && x.isActive)
+            : _reminders.FindAll(x => x.appMode.HasFlag(appMode) && x.isActive && !x.isDeleted);
     }
 
     public List<ReminderData> GetRemindersByDate(DateTime dateTime, bool includePast)
@@ -319,7 +409,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         // make pretty time like 12:00am
         DateTime nowFixed = DateTime.Today.Date +
                             DateTime.ParseExact("03:00 PM", "hh:mm tt", CultureInfo.InvariantCulture).TimeOfDay;
-        return new ReminderData(Guid.NewGuid().ToString(), nowFixed, DateTime.MaxValue,
+        return new ReminderData(AppManager.Instance.currentAppMode, Guid.NewGuid().ToString(), nowFixed, DateTime.MaxValue,
             RepeatInterval.ONCE, "");
     }
 
@@ -421,4 +511,25 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
         return td;
     }
+
+
+#if UNITY_EDITOR
+    [MenuItem("Tools/Remove all reminders")]
+    public static void SetClearRemindersFlag()
+    {
+        bool removeOnStart = PlayerPrefs.HasKey(_REMOVE_REMINDERS_KEY);
+        removeOnStart = !removeOnStart;
+
+        if (removeOnStart)
+        {
+            Debug.LogWarning("On a next editor play reminders will be removed");
+            PlayerPrefs.SetInt(_REMOVE_REMINDERS_KEY, 1);
+        }
+        else
+        {
+            Debug.LogWarning("Clear reminders on Start flag set to false");
+            PlayerPrefs.DeleteKey(_REMOVE_REMINDERS_KEY);
+        }
+    }
+#endif
 }

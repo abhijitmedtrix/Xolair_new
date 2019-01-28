@@ -86,16 +86,16 @@ public class ExampleConversation : MonoBehaviour
         AppManager.OnModeChange -= Set_Avatar;
     }
 
-    public void Set_Avatar(AppManager.Mode mode)
+    public void Set_Avatar(AppMode appMode)
     {
-        if (mode == AppManager.Mode.CSU)
+        if (appMode == AppMode.CSU)
         {
             _workspaceId = WorkSpace_id[0];
             // Debug.Log(_workspaceId);
             LogSystem.InstallDefaultReactors();
             Runnable.Run(CreateService());
         }
-        else if (mode == AppManager.Mode.SAA)
+        else if (appMode == AppMode.SAA)
         {
             _workspaceId = WorkSpace_id[1];
             // Debug.Log(_workspaceId);
@@ -183,11 +183,11 @@ public class ExampleConversation : MonoBehaviour
     public void AskQuestion(string question)
     {
         audioSource.Stop();
-        if (AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
+        if (AppManager.Instance.currentAppMode == AppMode.SAA)
         {
             answertext[0].SetActive(false);
         }
-        else if (AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
+        else if (AppManager.Instance.currentAppMode == AppMode.CSU)
         {
             answertext[1].SetActive(false);
         }
@@ -225,12 +225,12 @@ public class ExampleConversation : MonoBehaviour
         // Debug.Log(messageResponse.output.nodes_visited[messageResponse.output.nodes_visited.Length]);
         if (messageResponse.output.text.Length == 0)
         {
-            if (AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
+            if (AppManager.Instance.currentAppMode == AppMode.SAA)
             {
                 answertext[0].SetActive(true);
                 sSA_UI_OUT.Answer_txt.text = "please type a valid question";
             }
-            else if (AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
+            else if (AppManager.Instance.currentAppMode == AppMode.CSU)
             {
                 answertext[1].SetActive(true);
                 cSU_UI_OUT.Answer_txt.text = "please type a valid question";
@@ -238,7 +238,7 @@ public class ExampleConversation : MonoBehaviour
         }
         else
         {
-            if (AppManager.Instance.CurrentMode == AppManager.Mode.SAA)
+            if (AppManager.Instance.currentAppMode == AppMode.SAA)
             {
                 temp = new string[2];
                 //temp = messageResponse.output.text[0].Split('/');
@@ -268,7 +268,7 @@ public class ExampleConversation : MonoBehaviour
                     cSU_UI_OUT.Answer_txt.text = "please type a valid question";
                 }
             }
-            else if (AppManager.Instance.CurrentMode == AppManager.Mode.CSU)
+            else if (AppManager.Instance.currentAppMode == AppMode.CSU)
 
             {
                 temp = new string[2];

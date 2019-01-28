@@ -39,7 +39,7 @@ public class TrackerScreen : MonoBehaviour
 
     public void NextQuestion(int answerIndex)
     {
-        Debug.LogWarning("Next question. Answer index: " + answerIndex);
+        // Debug.Log("Next question. Answer index: " + answerIndex);
         var question = _trackerData.GetQuestion();
 
         try
