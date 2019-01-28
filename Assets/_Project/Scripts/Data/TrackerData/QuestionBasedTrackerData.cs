@@ -8,6 +8,8 @@ namespace App.Data
     {
         protected List<Answer> _answers = new List<Answer>();
         protected int _currentQuestionIndex = 0;
+        protected int _totalScore;
+
 
         public class Answer
         {
@@ -35,6 +37,8 @@ namespace App.Data
                 return jsonObj;
             }
         }
+
+        public Action<int> OnComplete;
 
         protected QuestionBasedTrackerData(DateTime date) : base(date)
         {
@@ -186,6 +190,7 @@ namespace App.Data
             {
                 throw new Exception("You are requesting for the answer which wasn't provided yet");
             }
+
             if (_answers[questionIndex].option < 0)
             {
                 throw new Exception("You are requesting for the answer with option set to -1 (default)");
@@ -220,7 +225,7 @@ namespace App.Data
                 if (_answers[i].option > -1)
                 {
                     // Debug.Log(
-                        // $"Index: {i}, question answer options count: {questionDataList[i].answersOption.Length}, and selected answer option: {_answers[i].option}");
+                    // $"Index: {i}, question answer options count: {questionDataList[i].answersOption.Length}, and selected answer option: {_answers[i].option}");
                     _totalScore += questionDataList[i].answersOption[_answers[i].option].points;
                 }
             }
@@ -232,7 +237,7 @@ namespace App.Data
         {
             return questionDataList[questionIndex].answersOption[answerIndex].description;
         }
-        
+
         public virtual int GetMaxScore()
         {
             int max = 0;
@@ -248,7 +253,7 @@ namespace App.Data
         {
             return _answers;
         }
-        
+
         public abstract List<QuestionData> questionDataList { get; }
 
         public class QuestionData

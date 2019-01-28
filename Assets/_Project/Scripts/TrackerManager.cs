@@ -38,7 +38,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     public static event Action<DateTime, QuestionBasedTrackerData> OnFirstDataAdded;
 
     // TODO - commented, but need to clarify, how big log can be
-    private const int LOG_LIFE_TIME = 3600;
+    public const int LOG_LIFE_TIME = 3600;
     public const string LOGS_FOLDER = "logs";
 
     // SSA
@@ -48,8 +48,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     // CSU
     private const string CSU_LOG = "CSU_tracker.json";
     private const string UAS_LOG = "urticaria_activity_score.json";
-    
-    private const string NOTES_LOG = "notes.json";
 
     private void Awake()
     {
@@ -481,7 +479,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
     #region Helpers
 
-    private static List<JSONObject> GetJsonList(string path)
+    public static List<JSONObject> GetJsonList(string path)
     {
         if (File.Exists(path))
         {

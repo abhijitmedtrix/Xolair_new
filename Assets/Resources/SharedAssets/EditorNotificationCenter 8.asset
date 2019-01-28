@@ -11,5 +11,5 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: EditorNotificationCenter 8
   m_EditorClassIdentifier: Assembly-CSharp-firstpass:VoxelBusters.NativePlugins.Internal:EditorNotificationCenter
-  m_supportedNotificationTypes: 0
+  m_supportedNotificationTypes: 7
   m_isRegisteredForRemoteNotifications: 0

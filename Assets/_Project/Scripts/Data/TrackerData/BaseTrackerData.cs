@@ -9,9 +9,6 @@ namespace App.Data
         protected DateTime _dateTime = DateTime.MinValue;
         protected string _initialJson;
         protected JSONObject _jsonObject;
-        protected int _totalScore;
-
-        public Action<int> OnComplete;
         
         /// <summary>
         /// Creating new data instance (adding new entry) we must add date.
