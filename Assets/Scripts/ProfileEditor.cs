@@ -38,17 +38,32 @@ public class ProfileEditor : MonoBehaviour {
     }
     public void submit()
     {
-        Namesave.text = PlayerPrefs.GetString("UserName");
-       // Gendersave.text = PlayerPrefs.GetString("Gender");
-        //Agesave.text = PlayerPrefs.GetString("Age");
-        Update_info.gameObject.SetActive(true);
-        Invoke("delay", 1f);
+        Debug.Log("namesave" + Namesave.text);
+        Debug.Log("namehold" + Nameholder.text);
+        if(Ageholder.text.Length==0||Nameholder.text.Length==0)
+        {
+            Update_info.text = "Please enter valid data";
+            Invoke("hide", 1f);
+        }
+        else
+        {
+            Namesave.text = PlayerPrefs.GetString("UserName");
+            Update_info.text = "Your profile has been updated";
+            Update_info.gameObject.SetActive(true);
+            Invoke("delay", 1f);
+        }
+       // Namesave.text = PlayerPrefs.GetString("UserName");
+       //// Gendersave.text = PlayerPrefs.GetString("Gender");
+        ////Agesave.text = PlayerPrefs.GetString("Age");
+        //Update_info.gameObject.SetActive(true);
+        //Invoke("delay", 1f);
      
     }
     public void show()
     {
         Name.text = null;
         Age.text = null;
+        Update_info.text = "Your profile has been updated";
         Update_info.gameObject.SetActive(false);
         Nameinput.text = PlayerPrefs.GetString("UserName");
         Ageinput.text = PlayerPrefs.GetString("Age");
@@ -59,6 +74,10 @@ public class ProfileEditor : MonoBehaviour {
     public void delay()
     {
         gameObject.SetActive(false);
+    }
+    public void hide()
+    {
+        Update_info.gameObject.SetActive(false);
     }
 }
  
