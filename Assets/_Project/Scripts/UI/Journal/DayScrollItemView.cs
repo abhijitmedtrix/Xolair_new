@@ -11,7 +11,8 @@ public class DayScrollItemView : EnhancedScrollerCellView
     [SerializeField] protected Color _normalColor;
     [SerializeField] protected RectTransform _point;
     [SerializeField] protected RectTransform _pointContainer;
-
+    [SerializeField] protected GameObject _separator;
+    
     protected string _initialTextFormat;
     public PatientJournalScreen.GraphData graphData;
 
@@ -27,18 +28,20 @@ public class DayScrollItemView : EnhancedScrollerCellView
     /// <summary>
     /// Set the date to show.
     /// </summary>
-    public void SetData(PatientJournalScreen.GraphData graphData, bool showDay, int numOfWeek = -1,
+    public void SetData(PatientJournalScreen.GraphData graphData, bool showDay, string[] specialText = null, int numOfWeek = -1,
         string weekDateRange = null)
     {
         this.graphData = graphData;
 
         SetFocus(false);
         _text.enabled = true;
+        _separator.gameObject.SetActive(false);
         DateTime dt = this.graphData.date;
 
         // Debug.Log(
         // $"newData: {newData.date.ToShortDateString()}, showDay: {showDay}, numOfWeek: {numOfWeek}, weekDateRange: {weekDateRange}");
 
+        // TODO - must be optimised, now it looks like spaghetti. Normally DayScrollItemView must have parent class and some children inherit it
         if (numOfWeek > -1)
         {
             _text.text = string.Format(_initialTextFormat, "WEEK" + numOfWeek, weekDateRange);
@@ -51,6 +54,11 @@ public class DayScrollItemView : EnhancedScrollerCellView
 
             // set focus only for Today
             SetFocus(dt.Date == DateTime.Today.Date);
+        }
+        else if (specialText != null)
+        {
+            _separator.gameObject.SetActive(true);
+            _text.text = string.Format(_initialTextFormat, specialText[0], specialText[1]);
         }
         else
         {

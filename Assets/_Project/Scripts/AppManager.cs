@@ -25,7 +25,7 @@ public class AppManager : MonoSingleton<AppManager>
     [SerializeField] private Text[] currentinfo;
 
     public AppMode currentAppMode;
-    
+
     public static Action<AppMode> OnModeChange;
     public static bool FirstTest, SecondTest;
     public static string User_name;
@@ -38,12 +38,18 @@ public class AppManager : MonoSingleton<AppManager>
 
     private void Start()
     {
+#if FINAL_BUILD
+        Debug.unityLogger.logEnabled = false;
+#else
+        Debug.unityLogger.logEnabled = true;
+#endif
+
         // make sure login screen is displayed first
         if (!Application.isEditor)
         {
             ScreenManager.Instance.Set(0);
         }
-        
+
         // Debug.Log(UnityEngine.iOS.CalendarUnit.Year);
         //PlayerPrefs.DeleteAll();
         currentinfo[2].text =
@@ -64,7 +70,7 @@ public class AppManager : MonoSingleton<AppManager>
         {
             ScreenManager.Instance.Set(3);
         }
-        
+
         /*
         if (PlayerPrefs.HasKey("first"))
         {

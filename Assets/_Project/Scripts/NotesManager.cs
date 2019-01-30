@@ -74,8 +74,10 @@ public class NotesManager : MonoSingleton<NotesManager>
         }
     }
 
-    public static void SaveNote(NoteData data)
+    public static void AddNote(NoteData data)
     {
+        _notes.Add(data);
+        
         // update log file
         JSONObject o = new JSONObject();
         for (int i = 0; i < _notes.Count; i++)
@@ -84,6 +86,8 @@ public class NotesManager : MonoSingleton<NotesManager>
         }
 
         WriteToFile(_localPath, o.Print(true));
+        
+        OnNotesUpdate?.Invoke();
     }
 
     public static void DeleteNote(NoteData data)

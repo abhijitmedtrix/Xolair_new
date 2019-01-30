@@ -12,7 +12,7 @@ public class CameraScreen : MonoBehaviour
     [SerializeField] protected AudioClip _shutterClip;
     [SerializeField] protected AspectRatioFitter _aspectRatioFitter;
     [SerializeField] protected GameObject[] _objectsToHideForPhoto;
-    
+
     public void StartCamera()
     {
         _takePhotoContent.SetActive(true);
@@ -41,27 +41,27 @@ public class CameraScreen : MonoBehaviour
         {
             _objectsToHideForPhoto[i].SetActive(false);
         }
-        
+
         CameraManager.TakePhoto();
     }
 
     private void OnCameraStart(Texture texture)
     {
         _cameraRawImage.texture = texture;
-        _aspectRatioFitter.aspectRatio = (float)texture.width / texture.height;
+        _aspectRatioFitter.aspectRatio = (float) texture.width / texture.height;
     }
 
     private void OnPhotoTaken(Texture2D photo)
     {
         _snapshotImage.texture = photo;
-        
+
         // enable objects
         for (int i = 0; i < _objectsToHideForPhoto.Length; i++)
         {
             _objectsToHideForPhoto[i].SetActive(true);
         }
     }
-    
+
     private void CameraManagerOnCameraComplete(List<Texture2D> textures)
     {
     }
@@ -69,7 +69,7 @@ public class CameraScreen : MonoBehaviour
     public void SavePhoto()
     {
         CameraManager.SaveLastPhoto();
-        
+
         _snapshotImage.gameObject.SetActive(false);
 
         _takePhotoContent.SetActive(true);
@@ -79,7 +79,7 @@ public class CameraScreen : MonoBehaviour
     public void RemovePhoto()
     {
         CameraManager.RemoveLastSnapshot();
-        
+
         _snapshotImage.gameObject.SetActive(false);
 
         _takePhotoContent.SetActive(true);
@@ -91,7 +91,20 @@ public class CameraScreen : MonoBehaviour
         CameraManager.OnCameraStart -= OnCameraStart;
         CameraManager.OnPhotoTaken -= OnPhotoTaken;
         CameraManager.OnCameraComplete -= CameraManagerOnCameraComplete;
-        
+
+
+        if (_cameraRawImage.texture != null)
+        {
+            Destroy(_cameraRawImage.texture);
+            _cameraRawImage.texture = null;
+        }
+
+        if (_snapshotImage.texture != null)
+        {
+            Destroy(_snapshotImage.texture);
+            _snapshotImage.texture = null;
+        }
+
         _snapshotImage.gameObject.SetActive(false);
 
         // show previous screen

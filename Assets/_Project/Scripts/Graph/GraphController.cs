@@ -33,16 +33,11 @@ public class GraphController : MonoBehaviour
         _graphPoints.Clear();
         _totalWidth = datas.Length;
         
-        // _graphPoints = new Vector3[datas.Length];
-
-        // format datas to Vector3[]
-        // _validPointsCounter = 0;
         for (int i = 0; i < datas.Length; i++)
         {
             if (!datas[i].dontUseInGraph)
             {
                 _graphPoints.Add(new Vector3(i, datas[i].interpolatedScore, 0));
-                // _validPointsCounter++;
             }
         }
         

@@ -41,6 +41,7 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
     {
         _state = State.Default;
         _selectedNoteData = null;
+        NotesManager.OnNotesUpdate += NotesManagerOnNotesUpdate;
     }
 
     /// <summary>
@@ -49,8 +50,6 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void LoadData()
     {
         _targetDate = DateTime.MinValue;
-
-        NotesManager.OnNotesUpdate += NotesManagerOnNotesUpdate;
 
         _data = NotesManager.GetNoteData();
 
@@ -68,8 +67,6 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void LoadData(DateTime date)
     {
         _targetDate = date;
-
-        NotesManager.OnNotesUpdate += NotesManagerOnNotesUpdate;
 
         _data = NotesManager.GetNoteData(_targetDate);
 
@@ -192,7 +189,7 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
             NoteData data = new NoteData(DateTime.Now);
             data.EditNote(_noteInput.text);
 
-            NotesManager.SaveNote(data);
+            NotesManager.AddNote(data);
         }
         else
         {

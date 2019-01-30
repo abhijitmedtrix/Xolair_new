@@ -42,6 +42,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     private const string _DEFAULT_CSU_CSU_KEY = "CSU_CSU";
     private const string _DEFAULT_CSU_UAS_KEY = "CSU_UAS";
     private const string _DEFAULT_XOLAIR_SHOT_KEY = "XOLAIR_SHOT";
+    private const string _IS_FIRST_START_COMPLETED = "FIRST_START_COMPLETED";
 
     public static event Action<List<ReminderData>> OnRemindersUpdate;
 
@@ -58,8 +59,14 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     protected void Start()
     {
-        Debug.Log("Start in ReminderManager");
         RegisterNotificationTypes(NotificationType.Sound | NotificationType.Badge | NotificationType.Alert);
+
+        // TODO - not sure how, but sometimes during the test users received local notifications just after app start even before registration. May be that because of previous tests, when reminder been set to current DateTime... Just in case cleanup all notifications reminders.  
+        if (!PlayerPrefs.HasKey(_IS_FIRST_START_COMPLETED))
+        {
+            RemoveAllReminders();
+            PlayerPrefs.SetInt(_IS_FIRST_START_COMPLETED, 1);
+        }
 
 #if UNITY_EDITOR
         if (PlayerPrefs.HasKey(_REMOVE_REMINDERS_KEY))
@@ -68,7 +75,7 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             PlayerPrefs.DeleteKey(_REMOVE_REMINDERS_KEY);
         }
 #endif
-        
+
         // parse all notifications to data for best control
         if (SaveGame.Exists(_ACTUAL_REMINDERS_FILE_PATH))
         {
@@ -396,7 +403,8 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     public List<ReminderData> GetRemindersByDate(AppMode appMode, DateTime dateTime, bool includePast)
     {
-        return _reminders.Where(x => x.appMode.HasFlag(appMode) && x.HasNotificationByDate(dateTime, includePast)).ToList();
+        return _reminders.Where(x => x.appMode.HasFlag(appMode) && x.HasNotificationByDate(dateTime, includePast))
+            .ToList();
     }
 
     public ReminderData GetReminderByNotificationId(string id)
@@ -409,7 +417,8 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         // make pretty time like 12:00am
         DateTime nowFixed = DateTime.Today.Date +
                             DateTime.ParseExact("03:00 PM", "hh:mm tt", CultureInfo.InvariantCulture).TimeOfDay;
-        return new ReminderData(AppManager.Instance.currentAppMode, Guid.NewGuid().ToString(), nowFixed, DateTime.MaxValue,
+        return new ReminderData(AppManager.Instance.currentAppMode, Guid.NewGuid().ToString(), nowFixed,
+            DateTime.MaxValue,
             RepeatInterval.ONCE, "");
     }
 

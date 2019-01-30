@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using App.Data;
 using App.Data.CSU;
 using EnhancedUI.EnhancedScroller;
 using MaterialUI;
+using QuickEngine.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 {
+    public enum GraphView
+    {
+        Weekly,
+        Monthly
+    }
+
     public class GraphData
     {
         public GraphData(QuestionBasedTrackerData data, DateTime date, float interpolatedScore, float maxScore)
@@ -52,6 +58,9 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     protected Dictionary<TrackerManager.TrackerType, float> _scrollLastPositions =
         new Dictionary<TrackerManager.TrackerType, float>();
 
+    protected string[] _graphViewPickOptions;
+    protected Rect _nativePopupRect;
+    protected GraphView _graphView;
     protected TrackerManager.TrackerType _trackerType;
     private DayScrollItemView _lastActiveCellView;
     protected int _lastActiveCellIndex = -1;
@@ -80,22 +89,18 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     {
         _typeToggle.onValueChanged.AddListener(OnTrackerTypeToggleValueChanged);
         _screenConfig.OnShowStarted += OnShowStarted;
-
-        // setup scroller parameters
-        if (appMode == AppMode.SAA)
-        {
-            // show 2 weeks + 1 day = 15
-            _daysToShow = 15;
-        }
-        else if (appMode == AppMode.CSU)
-        {
-            // show 5 days according to UI reference
-            _daysToShow = 5;
-        }
     }
 
     private void Start()
     {
+        _nativePopupRect = new Rect(new Vector2(Screen.width / 2f, Screen.height / 2f),
+            new Vector2(Screen.width * 0.25f, Screen.height * 0.3f));
+
+        // set native picker dialog options
+        _graphViewPickOptions = Enum.GetNames(typeof(GraphView));
+        Array.Resize(ref _graphViewPickOptions, _graphViewPickOptions.Length + 1);
+        _graphViewPickOptions[_graphViewPickOptions.Length - 1] = "Cancel";
+
         RectOffset offset = scroller.padding;
         offset.left = offset.right = Mathf.RoundToInt(_scrollerRectTransform.rect.width / 2);
         scroller.padding = offset;
@@ -109,6 +114,26 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
     private void Initialize()
     {
+        // setup scroller parameters
+        if (appMode == AppMode.SAA)
+        {
+            if (_graphView == GraphView.Weekly)
+            {
+                // show 2 weeks + 1 day = 15
+                _daysToShow = 15;
+            }
+            else if (_graphView == GraphView.Monthly)
+            {
+                // 2 months to show (max is Dec 31 + Jan 31 + 3 days)
+                _daysToShow = 65;
+            }
+        }
+        else if (appMode == AppMode.CSU)
+        {
+            // show 5 days according to UI reference
+            _daysToShow = 5;
+        }
+
         // clear old data
         Dispose();
 
@@ -139,15 +164,25 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             DateTime firstEntryData = fullDateRange[0];
 
-            // originally DayOfWeek enum starts with Sunday, so if it's not Sunday, insert some days in a list 
-            int dayInt = (int) firstEntryData.DayOfWeek;
+            int daysToAdd = 0;
 
-            for (int i = 0; i < dayInt; i++)
+            if (_graphView == GraphView.Weekly)
+            {
+                // originally DayOfWeek enum starts with Sunday, so if it's not Sunday, insert some days in a list 
+                daysToAdd = (int) firstEntryData.DayOfWeek;
+            }
+            else if (_graphView == GraphView.Monthly)
+            {
+                // check how many days starting fro the 1st date of the month
+                daysToAdd = firstEntryData.Day - 1;
+            }
+
+            for (int i = 0; i < daysToAdd; i++)
             {
                 fullDateRange.Insert(0, firstEntryData.AddDays(-(i + 1)));
             }
 
-            Debug.Log($"Added {dayInt} days");
+            Debug.Log($"Added {daysToAdd} days");
         }
 
         int maxScore = 0;
@@ -182,7 +217,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // fill up all data with struct
         List<GraphData> listWithData = new List<GraphData>();
         List<GraphData> interpolationList = new List<GraphData>();
-
 
         int firstDataEntryIndex = -1;
         int lastDataEntryIndex = -1;
@@ -259,8 +293,8 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             // update graph mesh, labels and other data
             // _graphController.Initialize(_graphDatas.Where(x => !x.dontUseInGraph).ToArray(), _mode != AppManager.Mode.SAA, false, maxScore,
-            _graphController.Initialize(_graphDatas.ToArray(), appMode != AppMode.SAA, false, maxScore,
-                _daysToShow, numOfLabels);
+            _graphController.Initialize(_graphDatas.ToArray(), appMode != AppMode.SAA, false, maxScore, _daysToShow,
+                numOfLabels);
 
             _graphController.UpdateCameraView(scroller.NormalizedScrollPosition);
         }
@@ -336,7 +370,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             if (activeCell != null)
             {
-
                 // set focus of cells only for daily view in CSU mode
                 if (appMode == AppMode.CSU)
                 {
@@ -396,11 +429,10 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             _scrollLastPositions.Add(_trackerType, val.x);
         }
 
-
         // check notes
-        if (_lastActiveCellView != null)
+        if (_lastActiveCellIndex > -1)
         {
-            List<NoteData> notes = NotesManager.GetNoteData(_lastActiveCellView.graphData.date);
+            List<NoteData> notes = NotesManager.GetNoteData(_data[_lastActiveCellIndex].date);
             if (notes.Count > 0)
             {
                 _notesHint.UpdateValue(notes.Count.ToString());
@@ -467,6 +499,15 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
     }
 
+    public void AddNote()
+    {
+        if (_lastActiveCellIndex > -1)
+        {
+            _notesScreen.LoadData(_data[_lastActiveCellIndex].date);
+            ScreenManager.Instance.Set(11);
+        }
+    }
+
     public void Dispose()
     {
         _graphDatas.Clear();
@@ -475,6 +516,33 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // set up the scroller delegates
         scroller.Delegate = null;
         scroller.scrollerScrolled = null;
+    }
+
+    public void ChangeGraphView()
+    {
+        if (Application.isEditor)
+        {
+            GraphViewPicked(_graphView == GraphView.Weekly ? (long) GraphView.Monthly : (long) GraphView.Weekly);
+        }
+        else
+        {
+            NativePicker.Instance.ShowCustomPicker(_nativePopupRect, _graphViewPickOptions, (int) _graphView,
+                GraphViewPicked, null);
+        }
+    }
+
+    private void GraphViewPicked(long option)
+    {
+        GraphView newView = (GraphView) (int) option;
+
+        if (_graphView != newView)
+        {
+            _graphView = newView;
+
+            Initialize();
+
+            scroller.RefreshActiveCellViews();
+        }
     }
 
     #region EnhancedScroller Handlers
@@ -531,23 +599,46 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // define what data to provide
         if (appMode == AppMode.SAA)
         {
-            // Debug.Log($"data date: {data.date}, firstDate: {firstDate}");
-            // show week text only for the 1st day of the week (Sunday)
-            if (graphData.date.DayOfWeek == DayOfWeek.Sunday)
+            if (_graphView == GraphView.Weekly)
             {
-                // check num of week
-                int numOfWeek = Mathf.FloorToInt(graphData.date.Subtract(firstDate).Days / 7f) + 1;
+                // Debug.Log($"data date: {data.date}, firstDate: {firstDate}");
+                // show week text only for the 1st day of the week (Sunday)
+                if (graphData.date.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    // check num of week
+                    int numOfWeek = Mathf.FloorToInt(graphData.date.Subtract(firstDate).Days / 7f) + 1;
 
-                DateTime periodEndDate = graphData.date.AddDays(7);
+                    DateTime periodEndDate = graphData.date.AddDays(7);
 
-                cellView.SetData(graphData, false, numOfWeek,
-                    new StringBuilder(graphData.date.FormatToDateMonth()).Append("-")
-                        .Append(periodEndDate.FormatToDateMonth())
-                        .ToString());
+                    cellView.SetData(graphData, false, null, numOfWeek,
+                        new StringBuilder(graphData.date.FormatToDateMonth()).Append("-")
+                            .Append(periodEndDate.FormatToDateMonth())
+                            .ToString());
+                }
+                else
+                {
+                    cellView.SetData(graphData, false);
+                }
             }
-            else
+            else if (_graphView == GraphView.Monthly)
             {
-                cellView.SetData(graphData, false);
+                // show month only for the 1st day of the month
+                if (graphData.date.Day == 1)
+                {
+                    // check what week range does this month it include
+                    int daysToMonthStart = graphData.date.Subtract(firstDate).Days;
+                    int daysToMonthEnd = graphData.date.EndOfMonth().Subtract(firstDate).Days;
+                    
+                    int startNumOfWeek = Mathf.FloorToInt(daysToMonthStart / 7f) + 1;
+                    int endNumOfWeek = Mathf.FloorToInt(daysToMonthEnd / 7f) + 1;
+                    StringBuilder sb = new StringBuilder("WEEK ").Append(startNumOfWeek).Append(" - WEEK ").Append(endNumOfWeek);
+                    
+                    cellView.SetData(graphData, false, new []{graphData.date.ToString("MMM").ToUpper(), sb.ToString()});
+                }
+                else
+                {
+                    cellView.SetData(graphData, false);
+                }
             }
         }
         else
@@ -560,15 +651,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     }
 
     #endregion
-
-    public void AddNote()
-    {
-        if (_lastActiveCellView != null)
-        {
-            _notesScreen.LoadData(_lastActiveCellView.graphData.date);
-            ScreenManager.Instance.Set(11);
-        }
-    }
 
     #region Tests
 

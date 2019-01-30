@@ -674,7 +674,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         // load random textures form resources
         Texture2D[] textures = Resources.LoadAll<Texture2D>("RandomTextures");
 
-        int days = Random.Range(15, 30);
+        int days = Random.Range(65, 120);
         // int days = 1;
         // stay today date empty to use
         DateTime date = DateTime.Now.AddDays(-days).Date;
@@ -687,74 +687,86 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         for (int i = 0; i < days; i++)
         {
-            // symptom tracker
-            SymptomData symptomData = new SymptomData(date);
-            for (int j = 0; j < symptomData.questionDataList.Count; j++)
+            if (i % 7 == 0)
             {
-                QuestionBasedTrackerData.QuestionData qData = symptomData.GetQuestion();
-                symptomData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+                // symptom tracker
+                SymptomData symptomData = new SymptomData(date);
+                for (int j = 0; j < symptomData.questionDataList.Count; j++)
+                {
+                    QuestionBasedTrackerData.QuestionData qData = symptomData.GetQuestion();
+                    symptomData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+                }
+    
+                symptomJsonObject.Add(symptomData.FormatToJson());
             }
 
-            symptomJsonObject.Add(symptomData.FormatToJson());
-
-            // asthma test
-            AsthmaData asthmaData = new AsthmaData(date);
-            for (int j = 0; j < asthmaData.questionDataList.Count; j++)
+            if (i % 14 == 0)
             {
-                QuestionBasedTrackerData.QuestionData qData = asthmaData.GetQuestion();
-                asthmaData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+                // asthma test
+                AsthmaData asthmaData = new AsthmaData(date);
+                for (int j = 0; j < asthmaData.questionDataList.Count; j++)
+                {
+                    QuestionBasedTrackerData.QuestionData qData = asthmaData.GetQuestion();
+                    asthmaData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+                }
+    
+                asthmaJsonObject.Add(asthmaData.FormatToJson());
             }
 
-            asthmaJsonObject.Add(asthmaData.FormatToJson());
-
-            // CSU test
-            CSUData csuData = new CSUData(date);
-            for (int j = 0; j < csuData.questionDataList.Count * 3; j++)
+            if (Random.Range(0f, 1f) > 0.5f)
             {
-                if (j == 0)
+                // CSU test
+                CSUData csuData = new CSUData(date);
+                for (int j = 0; j < csuData.questionDataList.Count * 3; j++)
                 {
-                    csuData.ChangeBodyPart(BodyPart.Head);
+                    if (j == 0)
+                    {
+                        csuData.ChangeBodyPart(BodyPart.Head);
+                    }
+                    else if (j == 2)
+                    {
+                        csuData.ChangeBodyPart(BodyPart.Chest);
+                    }
+                    else if (j == 4)
+                    {
+                        csuData.ChangeBodyPart(BodyPart.Legs);
+                    }
+    
+                    QuestionBasedTrackerData.QuestionData qData = csuData.GetQuestion();
+                    csuData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+    
+                    if (Random.value > 0.5f)
+                    {
+                        // add some random textures
+                        int count = Random.Range(0, textures.Length);
+    
+                        // shuffle textures
+                        System.Random rnd = new System.Random();
+                        Texture2D[] shuffled = textures.OrderBy(x => rnd.Next()).ToArray();
+    
+                        // and cut out the array
+                        Array.Resize(ref shuffled, count);
+    
+                        csuData.SavePhotos(shuffled);
+                    }
                 }
-                else if (j == 2)
-                {
-                    csuData.ChangeBodyPart(BodyPart.Chest);
-                }
-                else if (j == 4)
-                {
-                    csuData.ChangeBodyPart(BodyPart.Legs);
-                }
-
-                QuestionBasedTrackerData.QuestionData qData = csuData.GetQuestion();
-                csuData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
-
-                if (Random.value > 0.5f)
-                {
-                    // add some random textures
-                    int count = Random.Range(0, textures.Length);
-
-                    // shuffle textures
-                    System.Random rnd = new System.Random();
-                    Texture2D[] shuffled = textures.OrderBy(x => rnd.Next()).ToArray();
-
-                    // and cut out the array
-                    Array.Resize(ref shuffled, count);
-
-                    csuData.SavePhotos(shuffled);
-                }
+    
+                csuJsonObject.Add(csuData.FormatToJson());
             }
 
-            csuJsonObject.Add(csuData.FormatToJson());
-
-            // UAS test
-            UASData uasData = new UASData(date);
-            for (int j = 0; j < uasData.questionDataList.Count; j++)
+            if (Random.Range(0f, 1f) > 0.5f)
             {
-                QuestionBasedTrackerData.QuestionData qData = uasData.GetQuestion();
-                uasData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+                // UAS test
+                UASData uasData = new UASData(date);
+                for (int j = 0; j < uasData.questionDataList.Count; j++)
+                {
+                    QuestionBasedTrackerData.QuestionData qData = uasData.GetQuestion();
+                    uasData.SetAnswer(qData, Random.Range(1, qData.answersOption.Length));
+                }
+    
+                uasJsonObject.Add(uasData.FormatToJson());
             }
-
-            uasJsonObject.Add(uasData.FormatToJson());
-
+            
             // add a single day
             date = date.AddDays(1);
         }
