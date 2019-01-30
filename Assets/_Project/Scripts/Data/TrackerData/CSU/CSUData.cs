@@ -271,14 +271,23 @@ namespace App.Data.CSU
             return 0;
         }
 
-        public Texture2D[] GetAllPhotos()
+        public string[] GetAllPhotosPaths()
         {
             string folderPath = Path.Combine(Helper.GetDataPath(), TrackerManager.LOGS_FOLDER, CSU_FOLDER,
                 this.GetDate().ToString("dd-MM-yyyy"));
 
+
             if (Directory.Exists(folderPath))
             {
                 FileInfo[] fileList = new DirectoryInfo(folderPath).GetFiles("*.png", SearchOption.AllDirectories);
+                string[] paths = new string[fileList.Length];
+
+                for (int i = 0; i < fileList.Length; i++)
+                {
+                    paths[i] = fileList[i].FullName;
+                }
+                
+                /*
                 Texture2D[] textures = new Texture2D[fileList.Length];
 
                 for (int i = 0; i < fileList.Length; i++)
@@ -286,8 +295,9 @@ namespace App.Data.CSU
                     textures[i] = new Texture2D(2, 2);
                     textures[i].LoadImage(File.ReadAllBytes(fileList[i].FullName));
                 }
+                */
 
-                return textures;
+                return paths;
             }
 
             return null;

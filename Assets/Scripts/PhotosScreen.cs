@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using MaterialUI;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,17 +12,20 @@ public class PhotosScreen : MonoBehaviour
     [SerializeField] private Text _dateText;
     [SerializeField] private Text _pagesText;
 
+    private Texture2D _currentTexture;
     private int _currentIndex = 0;
-    private Texture2D[] _textures;
+    private string[] _texturesPaths;
 
-    public void Show(Texture2D[] textures, DateTime date)
+    public void Show(string[] texturesPaths, DateTime date)
     {
+        _currentTexture = new Texture2D(2, 2);
+        
         // show previous screen
         ScreenManager.Instance.Set(30);
 
         _dateText.text = date.ToString("d MMM");
 
-        _textures = textures;
+        _texturesPaths = texturesPaths;
         _currentIndex = 0;
 
         ShowByIndex(_currentIndex);
@@ -29,26 +33,23 @@ public class PhotosScreen : MonoBehaviour
 
     public async void Hide()
     {
-        if (_textures != null)
+        if (_currentTexture != null)
         {
-            for (int i = 0; i < _textures.Length; i++)
-            {
-                Destroy(_textures[i]);
-            }
+            Destroy(_currentTexture);
         }
 
-        _textures = null;
+        _texturesPaths = null;
 
         // wait for memory cleanup to avoid ui transition lags
         await Resources.UnloadUnusedAssets();
-        
+
         // show previous screen
         ScreenManager.Instance.Back();
     }
 
     public void Next()
     {
-        if (_currentIndex < _textures.Length - 1)
+        if (_currentIndex < _texturesPaths.Length - 1)
         {
             _currentIndex++;
             ShowByIndex(_currentIndex);
@@ -66,12 +67,13 @@ public class PhotosScreen : MonoBehaviour
 
     private void ShowByIndex(int index)
     {
-        _rawImage.texture = _textures[index];
+        _currentTexture.LoadImage(File.ReadAllBytes(_texturesPaths[index]));
+        _rawImage.texture = _currentTexture;
 
         // show/hide buttons
-        _nextButton.gameObject.SetActive(index < _textures.Length - 1);
+        _nextButton.gameObject.SetActive(index < _texturesPaths.Length - 1);
         _prevButton.gameObject.SetActive(index > 0);
 
-        _pagesText.text = $"{_currentIndex + 1}/{_textures.Length}";
+        _pagesText.text = $"{_currentIndex + 1}/{_texturesPaths.Length}";
     }
 }

@@ -163,6 +163,19 @@ namespace App.Data.Reminders
 
             if (dateTime.IsLaterDate(fireDate))
             {
+                // for fortnight notifications we should check 1st and by other logic
+                if (isFortnight)
+                {
+                    float daysDifference = (float)dateTime.Subtract(fireDate).TotalDays;
+                    // Debug.Log($"daysDifference: {daysDifference}, floor: {Mathf.FloorToInt(daysDifference / 7)}, reminder: {Mathf.FloorToInt(daysDifference / 7) % 2}");
+                    
+                    // we need just not even numbers
+                    if (Mathf.FloorToInt(daysDifference / 7) % 2 == 0 && dateTime.DayOfWeek == fireDate.DayOfWeek)
+                    {
+                        return true;
+                    }
+                }
+                
                 // check, does a day fit to requested day of week
                 switch (repeatInterval)
                 {

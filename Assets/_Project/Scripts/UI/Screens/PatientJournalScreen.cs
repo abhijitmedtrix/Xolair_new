@@ -55,7 +55,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     protected TrackerManager.TrackerType _trackerType;
     private DayScrollItemView _lastActiveCellView;
     protected int _lastActiveCellIndex = -1;
-    protected int _lastActiveDataIndex = 0;
     protected int _daysToShow;
     protected bool _initialized;
     protected List<GraphData> _graphDatas = new List<GraphData>();
@@ -325,7 +324,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
         int currentActiveCellIndex = scroller.GetClosestCellIndex();
-        // Debug.Log($"focusedCellIndex: {currentActiveCellIndex}, total data count: {_data.Count}");
+        // Debug.Log($"ScrollerScrolled. _lastActiveCellIndex: {_lastActiveCellIndex}, currentActiveCellIndex: {currentActiveCellIndex}, total data count: {_data.Count}");
 
         // check is start and end cell items indexes are in a range of 7 days and value not equals to previously cached value
         if (_lastActiveCellIndex != currentActiveCellIndex && currentActiveCellIndex > -1 &&
@@ -337,7 +336,6 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             if (activeCell != null)
             {
-                _lastActiveDataIndex = activeCell.dataIndex;
 
                 // set focus of cells only for daily view in CSU mode
                 if (appMode == AppMode.CSU)
@@ -355,8 +353,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             }
         }
 
-        // Debug.Log($"_data count: {_data.Count}, _lastActiveDataIndex: {_lastActiveDataIndex}, data: {_data[_lastActiveDataIndex].data}");
-        QuestionBasedTrackerData data = _data[_lastActiveDataIndex].data;
+        QuestionBasedTrackerData data = _data[_lastActiveCellIndex].data;
 
         // for CSU
         if (_trackerType == TrackerManager.TrackerType.CSU)
@@ -464,8 +461,8 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             // if data exists
             if (csuData != null)
             {
-                Texture2D[] textures = csuData.GetAllPhotos();
-                photosScreen.Show(textures, csuData.GetDate());
+                string[] texturesPaths = csuData.GetAllPhotosPaths();
+                photosScreen.Show(texturesPaths, csuData.GetDate());
             }
         }
     }

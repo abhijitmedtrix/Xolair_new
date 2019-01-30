@@ -28,7 +28,7 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
     private List<NoteData> _data;
     private List<NoteData> _selectedNotesData = new List<NoteData>();
     private NoteData _selectedNoteData;
-    
+
     private DateTime _targetDate;
     private State _state;
 
@@ -49,15 +49,15 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void LoadData()
     {
         _targetDate = DateTime.MinValue;
-        
+
         NotesManager.OnNotesUpdate += NotesManagerOnNotesUpdate;
 
         _data = NotesManager.GetNoteData();
-        
+
         _topBarTitle.text = "Notes";
-        
+
         SetScroller(_data);
-        
+
         SetState(State.Default);
     }
 
@@ -68,15 +68,15 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
     public void LoadData(DateTime date)
     {
         _targetDate = date;
-        
+
         NotesManager.OnNotesUpdate += NotesManagerOnNotesUpdate;
 
         _data = NotesManager.GetNoteData(_targetDate);
-        
+
         _topBarTitle.text = date.ToString("d MMMM, yyyy");
-        
+
         SetScroller(_data);
-        
+
         SetState(State.Default);
     }
 
@@ -91,7 +91,7 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
             LoadData();
         }
     }
-    
+
     private void SetScroller(List<NoteData> data)
     {
         // set up the scroller delegates
@@ -140,10 +140,19 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
         }
         else if (_state == State.Edit)
         {
-            _editScrenTopBarTitle.text = _selectedNoteData.GetDate().ToString("d MMMM, yyyy");
+            if (_selectedNoteData != null)
+            {
+                _editScrenTopBarTitle.text = _selectedNoteData.GetDate().ToString("d MMMM, yyyy");
+                _noteInput.text = _selectedNoteData.noteText;
+            }
+            else
+            {
+                _editScrenTopBarTitle.text = _targetDate.ToString("d MMMM, yyyy");
+                _noteInput.text = "";
+            }
+
             _addAndEditScreen.SetActive(true);
-            _noteInput.text = _selectedNoteData != null ? _selectedNoteData.noteText : "";
-            
+
             // activate input field and show mobile keyboard automatically
             _noteInput.ActivateInputField();
             _noteInput.MoveTextEnd(false);
@@ -175,14 +184,14 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             return;
         }
-        
+
         // if we didn't edit existing note
         if (_selectedNoteData == null)
         {
             // add new one
             NoteData data = new NoteData(DateTime.Now);
             data.EditNote(_noteInput.text);
-            
+
             NotesManager.SaveNote(data);
         }
         else
@@ -193,10 +202,10 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
         // remove selection
         _selectedNoteData = null;
-        
+
         CloseEditNoteScreen();
     }
-    
+
     public void Close()
     {
         NotesManager.OnNotesUpdate -= NotesManagerOnNotesUpdate;
@@ -241,7 +250,7 @@ public class NotesScreen : MonoBehaviour, IEnhancedScrollerDelegate
         else
         {
             _selectedNotesData.Remove(item.data);
-            
+
             // if last element been deselected, change state to default
             if (_selectedNotesData.Count == 0)
             {

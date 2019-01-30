@@ -40,7 +40,7 @@ public class CalendarScreen : MonoBehaviour, IEnhancedScrollerDelegate
         scroller.cellViewInstantiated = CellViewInstantiated;
 
         // set 
-        SetScrollData(ReminderManager.Instance.GetRemindersByDate(_calendar.focusedDate.Date, true));
+        SetScrollData(ReminderManager.Instance.GetRemindersByDate(AppManager.Instance.currentAppMode, _calendar.focusedDate.Date, true));
     }
 
     private void SetCalendar(DateTime date)

@@ -394,9 +394,9 @@ public class ReminderManager : MonoSingleton<ReminderManager>
             : _reminders.FindAll(x => x.appMode.HasFlag(appMode) && x.isActive && !x.isDeleted);
     }
 
-    public List<ReminderData> GetRemindersByDate(DateTime dateTime, bool includePast)
+    public List<ReminderData> GetRemindersByDate(AppMode appMode, DateTime dateTime, bool includePast)
     {
-        return _reminders.Where(x => x.HasNotificationByDate(dateTime, includePast)).ToList();
+        return _reminders.Where(x => x.appMode.HasFlag(appMode) && x.HasNotificationByDate(dateTime, includePast)).ToList();
     }
 
     public ReminderData GetReminderByNotificationId(string id)
