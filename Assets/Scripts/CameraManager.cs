@@ -81,7 +81,7 @@ public class CameraManager : MonoSingleton<CameraManager>
         // $"After Cam params. dimension: {NatCam.Preview.dimension}, anisoLevel: {NatCam.Preview.anisoLevel}, w: {NatCam.Preview.width}, h: {NatCam.Preview.height}");
 
         OnCameraStart?.Invoke(NatCam.Preview);
-        
+
         // remove temp folder if exists
         string dirPath = Path.Combine(Helper.GetDataPath(), _TEMP_PHOTO_PATH);
         DirectoryInfo dirInfo = new DirectoryInfo(dirPath);
@@ -89,7 +89,7 @@ public class CameraManager : MonoSingleton<CameraManager>
         {
             dirInfo.Delete(true);
         }
-        
+
         dirInfo.Create();
     }
 
@@ -97,6 +97,34 @@ public class CameraManager : MonoSingleton<CameraManager>
     {
         Debug.Log($"Photo resolution w: {photo.width}, h: {photo.height}");
 
+        float screenAspect = (float) Screen.width / Screen.height;
+        float cameraAspect = (float) photo.width / photo.height;
+
+        Rect rect;
+        
+        // if screen is wider then camera
+        if (screenAspect > cameraAspect)
+        {
+            float diff = photo.height - photo.width / cameraAspect;
+            rect = new Rect(0, diff / 2, photo.width, photo.height - diff);
+        }
+        else
+        {
+            float diff = photo.width - photo.height * screenAspect;
+            rect = new Rect(diff / 2, 0, photo.width - diff, photo.height);
+        }
+         
+        // crop texture to fit the screen dimension
+        Color[] c = photo.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
+        
+        Texture2D cropped = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGB24, false);
+        // photo.Resize((int)rect.width, (int)rect.height);
+        cropped.SetPixels(c);
+        cropped.Apply();
+        c = null;
+        Destroy(photo);
+        photo = cropped;
+        
         // Cache the photo
         _snapshots.Add(photo);
 
@@ -111,7 +139,7 @@ public class CameraManager : MonoSingleton<CameraManager>
 
         File.WriteAllBytes(filePath, photo.EncodeToPNG());
         TextureScale.Bilinear(photo, photo.width / 4, photo.height / 4);
-        
+
         _savedCounter++;
     }
 

@@ -475,6 +475,13 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         WriteToFile(GetPath(TrackerType.Asthma), o.Print(true));
     }
 
+    private static void WriteToFile(string path, string content)
+    {
+        FileInfo fileInfo = new FileInfo(path);
+        fileInfo.Directory.Create();
+        File.WriteAllText(path, content);
+    }
+    
     #endregion
 
     #region Helpers
@@ -494,13 +501,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             Debug.LogWarning($"No log file found by path: {path}. Returning empty list.");
             return new List<JSONObject>();
         }
-    }
-
-    private static void WriteToFile(string path, string content)
-    {
-        FileInfo fileInfo = new FileInfo(path);
-        fileInfo.Directory.Create();
-        File.WriteAllText(path, content);
     }
 
     public static List<DateTime> GetMaxDateRange()
@@ -656,7 +656,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     }
 #endif
 
-
     [CommandHandler(Description = "Fill logs with the data")]
     public void FillTestDataInternal()
     {
@@ -668,7 +667,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
     {
         DeleteLogs();
     }
-
 
     public static void FillTestData()
     {
@@ -766,6 +764,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         WriteToFile(Path.Combine(Helper.GetDataPath(), LOGS_FOLDER, SYMPTOM_LOG), symptomJsonObject.Print(true));
         WriteToFile(Path.Combine(Helper.GetDataPath(), LOGS_FOLDER, ASTHMA_TEST_LOG), asthmaJsonObject.Print(true));
 
+        NotesManager.FillTestData(days);
+        
         Debug.LogWarning($"Random log data generated for {days} days");
     }
 
@@ -776,6 +776,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         {
             Directory.Delete(dir, true);
         }
+        
+        NotesManager.DeleteLogs();
     }
 
     public static string GetPath(TrackerType type)

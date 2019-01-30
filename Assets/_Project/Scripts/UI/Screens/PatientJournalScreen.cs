@@ -42,8 +42,10 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     [SerializeField] protected RectTransform _graphContainer;
     [SerializeField] protected RectTransform _scrollerRectTransform;
     [SerializeField] protected Toggle _typeToggle;
+    [SerializeField] protected NotesScreen _notesScreen;
 
     [Header("Hints")] [SerializeField] protected Hint _scoreHint;
+    [SerializeField] protected Hint _notesHint;
     [SerializeField] protected Hint _photoHint;
     [SerializeField] private PhotosScreen photosScreen;
 
@@ -119,6 +121,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // hide both hints
         _scoreHint.UpdateValue(string.Empty);
         _photoHint.UpdateValue(string.Empty);
+        _notesHint.UpdateValue(string.Empty);
 
         List<DateTime> fullDateRange = TrackerManager.GetDataDateRange(_trackerType);
 
@@ -199,7 +202,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
                 {
                     firstDataEntryIndex = i;
                 }
-                
+
                 listWithData.Add(graphData);
                 graphData.UpdateScore(data.GetScore());
 
@@ -229,12 +232,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             _graphDatas.Add(graphData);
         }
-        
+
         // if last real data index doesn't equals to total count, that means some last entries doesn't have a real data filled by user. Flag it to skip in graph renderer
         if (lastDataEntryIndex < _graphDatas.Count - 1)
         {
             int startIndex = lastDataEntryIndex > -1 ? lastDataEntryIndex + 1 : 0;
-            
+
             for (int i = lastDataEntryIndex + 1; i < _graphDatas.Count; i++)
             {
                 _graphDatas[i].dontUseInGraph = true;
@@ -313,11 +316,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         Initialize();
     }
 
-    private void ScrollerSnapped(EnhancedScroller enhancedScroller, int cellindex, int dataindex, EnhancedScrollerCellView cellview)
+    private void ScrollerSnapped(EnhancedScroller enhancedScroller, int cellindex, int dataindex,
+        EnhancedScrollerCellView cellview)
     {
         // Debug.Log($"ScrollerSnapped. DataIndex: {dataindex}, cellIndex: {cellview}");
     }
-    
+
     private void ScrollerScrolled(EnhancedScroller enhancedScroller, Vector2 val, float scrollposition)
     {
         int currentActiveCellIndex = scroller.GetClosestCellIndex();
@@ -394,6 +398,25 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         {
             _scrollLastPositions.Add(_trackerType, val.x);
         }
+
+
+        // check notes
+        if (_lastActiveCellView != null)
+        {
+            List<NoteData> notes = NotesManager.GetNoteData(_lastActiveCellView.graphData.date);
+            if (notes.Count > 0)
+            {
+                _notesHint.UpdateValue(notes.Count.ToString());
+            }
+            else
+            {
+                _notesHint.UpdateValue(null);
+            }
+        }
+        else
+        {
+            _notesHint.UpdateValue(null);
+        }
     }
 
     public void SetType(TrackerManager.TrackerType type)
@@ -414,7 +437,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
         // tell the scroller to reload now that we have the data
         scroller.ReloadData(scrollPosition);
-        
+
         // we need to snap immediately but scroller asset got some limitation here, that's why need to use this workaround
         EnhancedScroller.TweenType tween = scroller.snapTweenType;
         scroller.snapTweenType = EnhancedScroller.TweenType.immediate;
@@ -540,6 +563,15 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
     }
 
     #endregion
+
+    public void AddNote()
+    {
+        if (_lastActiveCellView != null)
+        {
+            _notesScreen.LoadData(_lastActiveCellView.graphData.date);
+            ScreenManager.Instance.Set(11);
+        }
+    }
 
     #region Tests
 
