@@ -40,17 +40,20 @@ public class ProfileEditor : MonoBehaviour {
     {
         Debug.Log("namesave" + Namesave.text);
         Debug.Log("namehold" + Nameholder.text);
-        if(Ageholder.text.Length==0||Nameholder.text.Length==0)
-        {
-            Update_info.text = "Please enter valid data";
-            Invoke("hide", 1f);
-        }
-        else
+        if(Ageholder.text.Length!=0||Nameholder.text.Length!=0)
         {
             Namesave.text = PlayerPrefs.GetString("UserName");
             Update_info.text = "Your profile has been updated";
             Update_info.gameObject.SetActive(true);
             Invoke("delay", 1f);
+           
+        }
+      
+        else
+        {
+            Update_info.gameObject.SetActive(true);
+            Update_info.text = "Please enter valid data";
+            Invoke("hide", 1f);
         }
        // Namesave.text = PlayerPrefs.GetString("UserName");
        //// Gendersave.text = PlayerPrefs.GetString("Gender");

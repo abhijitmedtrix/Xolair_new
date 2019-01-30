@@ -219,7 +219,7 @@ public class FAQDrugSAA : FAQ.Faq
         //24
 
 
-        new FAQDrugSAA("Can I take Xolair if I am pregnant or plan to become pregnant. ",
+        new FAQDrugSAA("Can I take Xolair if I am pregnant or plan to become pregnant? ",
                        "Before receiving Xolair, tell your healthcare provider if you are/or planning to become pregnant. It is not known if Xolair may " +
                        "harm your unborn baby. Xolair should not be used during pregnancy unless clearly necessary."),
 
