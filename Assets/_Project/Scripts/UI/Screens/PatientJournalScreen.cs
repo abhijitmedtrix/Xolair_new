@@ -217,10 +217,31 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
         // fill up all data with struct
         List<GraphData> listWithData = new List<GraphData>();
         List<GraphData> interpolationList = new List<GraphData>();
+        GraphData graphData;
+        
+        for (int i = 0; i < fullDateRange.Count; i++)
+        {
+            QuestionBasedTrackerData data = TrackerManager.GetData(fullDateRange[i], _trackerType, false);
 
+            // create default struct
+            graphData = new GraphData(data, fullDateRange[i], 0, maxScore);
+
+            // if some entry exist at this date that GraphStruct will be 1 of 2 interpolation side values
+            if (data != null)
+            {
+                graphData.UpdateScore(data.GetScore());
+            }
+
+            graphData.dontUseInGraph = data == null;
+            _graphDatas.Add(graphData);
+        }
+        
+        // that is a complex solution in case when needed interpolation between 2 actual data entries, to shop <middle> value. It doesn't work correctly so should be fixes later on
+        #region Complex solution
+        /*
         int firstDataEntryIndex = -1;
         int lastDataEntryIndex = -1;
-        GraphData graphData;
+        
         for (int i = 0; i < fullDateRange.Count; i++)
         {
             QuestionBasedTrackerData data = TrackerManager.GetData(fullDateRange[i], _trackerType, false);
@@ -260,6 +281,7 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
             }
             else
             {
+                Debug.Log($"Graph data dated: {graphData.date} should be skipped in graph");
                 graphData.dontUseInGraph = true;
             }
 
@@ -273,9 +295,12 @@ public class PatientJournalScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             for (int i = lastDataEntryIndex + 1; i < _graphDatas.Count; i++)
             {
+                Debug.Log($"Graph data dated: {_graphDatas[i].date} should be skipped in graph");
                 _graphDatas[i].dontUseInGraph = true;
             }
         }
+        */
+        #endregion
 
         // set up the scroller delegates
         scroller.Delegate = this;

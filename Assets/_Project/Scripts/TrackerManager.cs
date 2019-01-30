@@ -57,9 +57,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         // symptom tracker
         string path = Path.Combine(Helper.GetDataPath(), LOGS_FOLDER, SYMPTOM_LOG);
-        // Debug.Log(path);
-        //Debug.Log(Helper.GetDataPath());
-
         List<JSONObject> jsonList = GetJsonList(path);
 
         for (int i = 0; i < jsonList.Count; i++)
@@ -165,6 +162,9 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                 UpdateEntry(data.GetDate(), new LogData {uasData = data});
             }
         }
+
+        _logDataList = _logDataList.OrderBy(x => x.date).ToList();
+        Debug.Log(_logDataList);
     }
 
     private void Start()
@@ -527,7 +527,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         // find a 1st entry date
         DateTime firstDate = DateTime.MinValue;
-        // Debug.Log("First log data: " + _logDataList[0].date);
+        Debug.Log($"First log data: {_logDataList[0].date} and requested type: {type}");
 
         for (int i = 0; i < _logDataList.Count; i++)
         {
@@ -538,6 +538,8 @@ public class TrackerManager : MonoSingleton<TrackerManager>
                 break;
             }
         }
+        
+        Debug.Log("First date: "+firstDate);
 
         // if there is no entry at all
         if (firstDate == DateTime.MinValue || firstDate.IsSameDay(DateTime.Today))
