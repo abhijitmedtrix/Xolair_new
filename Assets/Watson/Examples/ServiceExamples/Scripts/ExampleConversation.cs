@@ -75,9 +75,9 @@ public class ExampleConversation : MonoBehaviour
 
     private void Start()
     {
-        var check = Resources.Load<LipSyncData>("CSU_datafiles/1");
-        currentdat = check;
-
+       // var check = Resources.Load<LipSyncData>("General_datafiles/1");
+        //currentdat = check;
+        //SAA_Avatar.GetComponent<LipSync>().Play(currentdat);
         AppManager.OnModeChange += Set_Avatar;
     }
 
@@ -245,7 +245,7 @@ public class ExampleConversation : MonoBehaviour
                 //Debug.Log(temp[0]+"answer"+temp[1]);
                 Debug.Log(messageResponse.intents[0].confidence);
                 float confdc = messageResponse.intents[0].confidence;
-                if (confdc > 0.7f)
+                if (confdc > 0.5f)
                 {
                     temp = messageResponse.output.text[0].Split('/');
                     sSA_UI_OUT.Answer_txt.text = temp[0];
@@ -276,7 +276,7 @@ public class ExampleConversation : MonoBehaviour
                 //Debug.Log(temp[0]+"answer"+temp[1]);
                 Debug.Log(messageResponse.intents[0].confidence);
                 float confdc = messageResponse.intents[0].confidence;
-                if (confdc > 0.7f)
+                if (confdc > 0.5f)
                 {
                     temp = messageResponse.output.text[0].Split('/');
                     answertext[1].SetActive(true);

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using MaterialUI;
 using UnityEngine.UI;
 using UnityEngine;
-
+using RogoDigital.Lipsync;
 [Flags]
 [Serializable]
 public enum AppMode
@@ -13,9 +14,14 @@ public enum AppMode
 }
 
 public class AppManager : MonoSingleton<AppManager>
-{
+{   
+    public static bool firstTime=false;
+    [SerializeField] private LipSyncData catdat;
+    [SerializeField] private MaterialUI.ScreenManager screenManager;
     private DateTime _currentDate;
-
+    [SerializeField] private Camera avatarCam;
+    [SerializeField] private RawImage saarawImg, csurawImg;
+    [SerializeField] private RenderTexture avatarTexture;
     [SerializeField] private GameObject CSU_not;
     [SerializeField] private GameObject SAA_not;
     [SerializeField] private GameObject Notification, Notification_CSU;
@@ -35,7 +41,7 @@ public class AppManager : MonoSingleton<AppManager>
 
     public static List<string> Saanotfn = new List<string>();
     public static List<string> cusnotfn = new List<string>();
-
+    private WaitForSeconds delay;
     private void Start()
     {
 #if FINAL_BUILD
@@ -55,6 +61,7 @@ public class AppManager : MonoSingleton<AppManager>
         currentinfo[2].text =
             currentinfo[0].text = DateTime.Today.ToString("MMM") + " " + DateTime.Today.Day.ToString();
         currentinfo[3].text = currentinfo[1].text = DateTime.Today.ToString("ddd");
+        createRenderTexture();
     }
 
     public void SetMode(AppMode appMode)
@@ -71,22 +78,36 @@ public class AppManager : MonoSingleton<AppManager>
             ScreenManager.Instance.Set(3);
         }
 
-        /*
         if (PlayerPrefs.HasKey("first"))
         {
             //avatar.GetComponent<LipSync>().Play(lipsync[UnityEngine.Random.Range(0, lipsync.Length - 1)]);
             LipSyncData currentdat =
                 Resources.Load<LipSyncData>("General_datafiles/" + UnityEngine.Random.Range(1, 28).ToString());
+            catdat = currentdat;
             avatar.GetComponent<LipSync>().Play(currentdat);
+            if(!firstTime)
+            {
+                delay = new WaitForSeconds(0.5f);
+                StartCoroutine(setMood());
+            }
+
         }
         else
         {
             PlayerPrefs.SetString("first", "first");
             LipSyncData currentdat = Resources.Load<LipSyncData>("General_datafiles/" + "xen");
+            catdat = currentdat;
             avatar.GetComponent<LipSync>().Play(currentdat);
+            if(!firstTime)
+            {
+                delay = new WaitForSeconds(0.5f);
+                StartCoroutine(setMood());
+            }
+
         }
-        */
+        firstTime = true;
     }
+
 
     #region Test
 
@@ -149,45 +170,7 @@ public class AppManager : MonoSingleton<AppManager>
 
         Notification.SetActive(false);
         Saanotfn.Clear();
-        //if (SAA_not.active)
-        //{
-        //    Notification.SetActive(false);
-        //    SAA_not.SetActive(false);
-        //}
-        //else
-        //{
-        //    Notification.SetActive(false);
-        //    SAA_not.SetActive(true);
-        //}
-        //var asthma = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Asthma);
-        //var symptom = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.Symptom);
 
-
-        //if (asthma.GetScore() > 19 && symptom.GetScore() >= 1)
-        //{
-        //    //UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
-        //    //notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
-        //    //notif.alertBody = "PLEASE TAKE THE CSU TEST";
-        //   // Notification.SetActive(true);
-        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE CONSULT A PHYSICIAN SOON";
-        //}
-        //else if (asthma.GetScore() >= 19)
-        //{
-
-        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE SYMPTOM TRACKER TEST";
-        //}
-        //else if (symptom.GetScore() >= 1)
-        //{
-
-        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE VISIT A PHYSICIAN";
-        //}
-        //else
-        //{
-        //    Notification.gameObject.SetActive(false);
-        //    //SAA_not.SetActive(true);
-        //    SAA_not.transform.GetChild(0).GetComponent<Text>().text = "NO NEW NOTIFICATIONS";
-        //}
-        //SAA_not.transform.GetChild(0).GetComponent<Text>()=
     }
 
     public void Onclick_csu()
@@ -212,38 +195,62 @@ public class AppManager : MonoSingleton<AppManager>
 
         Notification_CSU.SetActive(false);
         cusnotfn.Clear();
-        //if(csuno)
-        //var CSU = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.CSU);
-        //var UAS = TrackerManager.GetData(DateTime.Today, TrackerManager.TrackerType.UAS);
-
-        //if (CSU.GetScore() > 1 && UAS.GetScore() >= 2)
-        //{
-        //    UnityEngine.iOS.LocalNotification notif = new UnityEngine.iOS.LocalNotification();
-        //    notif.fireDate = DateTime.Now.AddDays(1).AddSeconds(-1);
-        //    notif.alertBody = "PLEASE TAKE THE CSU TEST";
-        //    // Notification.SetActive(true);
-        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE VISIT A PHYSICIAN";
-        //}
-        //else if (CSU.GetScore() >= 1)
-        //{
-
-        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE UAS TEST";
-        //}
-        //else if (UAS.GetScore() >= 2)
-        //{
-        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "PLEASE TAKE CSU TEST";
-        //}
-        //else
-        //{
-        //    Notification_CSU.SetActive(false);
-        //    CSU_not.SetActive(true);
-
-        //    CSU_not.transform.GetChild(0).GetComponent<Text>().text = "NO NEW NOTIFICATIONS";
-        //}
+       
     }
 
     public void Stop_avtranim()
     {
         audioSource.Stop();
+    }
+    private void createRenderTexture()
+    {
+        avatarTexture = new RenderTexture(Screen.width, Screen.height,16);
+        avatarCam.targetTexture = avatarTexture;
+        csurawImg.texture = avatarTexture;
+        saarawImg.texture = avatarTexture;
+
+    }
+    //public void avatarSet()
+    //{
+
+    // if (PlayerPrefs.HasKey("first"))
+    // {
+    //     //avatar.GetComponent<LipSync>().Play(lipsync[UnityEngine.Random.Range(0, lipsync.Length - 1)]);
+    //     LipSyncData currentdat =
+    //         Resources.Load<LipSyncData>("General_datafiles/" + UnityEngine.Random.Range(1, 28).ToString());
+    //        catdat = currentdat;
+    //        avatar.GetComponent<LipSync>().Play(currentdat);
+    //        delay = new WaitForSeconds(6f);
+    //        StartCoroutine(setMood());
+    // }
+    // else
+    // {
+    //     PlayerPrefs.SetString("first", "first");
+    //        LipSyncData currentdat  =Resources.Load<LipSyncData>("General_datafiles/" + "xen");
+    //        catdat = currentdat;
+    //     avatar.GetComponent<LipSync>().Play(currentdat);
+    //        delay = new WaitForSeconds(6f);
+    //        StartCoroutine(setMood());
+    //    }
+     
+    //}
+    IEnumerator setMood()
+    {
+        while(true)
+        {
+            yield return delay;
+            if(!audioSource.isPlaying)
+            {
+                if(currentAppMode==AppMode.CSU)
+                {
+                    screenManager.Set(12);
+                }
+                else if(currentAppMode==AppMode.SAA)
+                {
+                    screenManager.Set(19);
+                }
+                yield break;
+            }
+        }
     }
 }
