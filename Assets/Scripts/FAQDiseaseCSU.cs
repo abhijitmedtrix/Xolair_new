@@ -27,11 +27,18 @@ public class FAQDiseaseCSU : FAQ.Faq
         //2
 
 
-        new FAQDiseaseCSU("Are there other forms of chronic urticaria.",
+        new FAQDiseaseCSU("Are there other forms of chronic urticaria?",
            "Yes, there are two types of chronic urticaria: chronic spontaneous urticaria and chronic inducible urticaria"),
 
 
-        //3
+         //3
+
+
+        new FAQDiseaseCSU("What is chronic inducible urticaria?",
+           "Chronic inducible urticaria is that which is caused by a particular trigger."),
+
+
+        //4
 
 
         new FAQDiseaseCSU("Is urticaria a common disease?",
@@ -41,7 +48,7 @@ public class FAQDiseaseCSU : FAQ.Faq
                           "affected, but the peak incidence is between 20–40 years of age."),
 
 
-        //4
+        //5
 
 
         new FAQDiseaseCSU("What happens in chronic spontaneous urticaria?",
@@ -50,7 +57,7 @@ public class FAQDiseaseCSU : FAQ.Faq
                           "cells in response to an infection or allergen (such as pollen)."),
 
 
-        //5
+        //6
 
 
         new FAQDiseaseCSU("What happens during a flare-up?",
@@ -59,7 +66,7 @@ public class FAQDiseaseCSU : FAQ.Faq
                           "angioedema, or hives"),
 
 
-        //6
+        //7
 
 
         new FAQDiseaseCSU("What happens when histamine is released?",
@@ -67,20 +74,14 @@ public class FAQDiseaseCSU : FAQ.Faq
                           "presents as angioedema, or hives."),
 
 
-        //7
-
-
-        new FAQDiseaseCSU("How many people have CSU?",
-           ""),
-
-
         //8
 
 
-        new FAQDiseaseCSU("",
+        new FAQDiseaseCSU("How many people have CSU?",
            "CSU affects 0.5%-1% of the world population."),
 
 
+       
         //9
 
 
@@ -226,6 +227,13 @@ public class FAQDiseaseCSU : FAQ.Faq
         //27
 
 
+        new FAQDiseaseCSU("Will urticaria worsen during periods?",
+           "Yes, urticaria may worsen during the premenstrual period."),
+
+
+        //28
+
+
         new FAQDiseaseCSU("Is urticaria common in Arab countries?",
            "There is limited data on the prevalence of urticaria in Arab or countries in the Middle East. A study conducted in a general hospital in Makkah, " +
                           "Saudi Arabia showed that urticaria was prevalent among 0.4% of patients. Chronic idiopathic urticaria (CIU) was seen in 44.3% of " +
@@ -233,7 +241,7 @@ public class FAQDiseaseCSU : FAQ.Faq
                           "showed the prevalence of chronic urticaria to be 2%. Out of this, 80% of patients had CIU. "),
 
 
-        //28
+        //29
 
 
         new FAQDiseaseCSU("What is cold urticaria?",
@@ -243,19 +251,13 @@ public class FAQDiseaseCSU : FAQ.Faq
                           "breathing."),
 
 
-        //29
+        //30
 
 
         new FAQDiseaseCSU("Can you tell me about dermatographism?",
            "Dermatographism is a type of urticaria in which the skin is hypersensitive to pressure. This is the most frequent cause of physical urticaria. " +
                           "The rashes develop suddenly at a site or part of the body which has been rubbed or scratched and fades away within 60 minutes or so."),
 
-
-        //30
-
-
-        new FAQDiseaseCSU("What is chronic inducible urticaria?",
-           "Chronic inducible urticaria is that which is caused by a particular trigger.")
 
 
     };
@@ -688,7 +690,7 @@ public class FAQDiseaseCSU : FAQ.Faq
         //2
 
 
-        new FAQDiseaseCSU("What is the Dermatology Life Quality Index ?",
+        new FAQDiseaseCSU("What is the Dermatology Life Quality Index?",
                        "The Dermatology Life Quality Index (DLQI) is a validated tool that helps in measuring the quality of life in patients with chronic urticaria."),
 
 

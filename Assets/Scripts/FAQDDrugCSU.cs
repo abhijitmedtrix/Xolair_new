@@ -82,14 +82,14 @@ public class FAQDDrugCSU : FAQ.Faq
         new FAQDDrugCSU("What is the recommended treatment algorithm for chronic urticaria?",
                   "The International EAACI/GA2LEN/EDF/WAO guidelines for the management of CSU, updated in 2013 and published in 2014 recommend first-line " +
                    "treatment with a second generation H1-antihistamine at the licensed dose. Second-line treatment with a second generation H1-antihistamine " +
-                   "at up to 4-fold increased dosage. Third-line treatment, of CSU refractory to high-dose H1-antihistamine therapy, by addition of either" +
+                   "at up to 4-fold increased dosage. Third-line treatment, of CSU refractory to high-dose H1-antihistamine therapy, by addition of either " +
                    "omalizumab, cyclosporin A or montelukast to existing H1-antihistamine treatment."),
 
         //11
 
         new FAQDDrugCSU("What will happen if I stop my CSU treatment?",
                   "Do not stop treatment with Xolair unless instructed to do so by your doctor. Interrupting or stopping treatment with Xolair may cause " +
-                   "CSU symptoms to return. However, if you are being treated for CSU, your doctor may stop Xolair treatment from time to time so that your" +
+                   "CSU symptoms to return. However, if you are being treated for CSU, your doctor may stop Xolair treatment from time to time so that your " +
                    "symptoms can be assessed. Follow your doctor’s instructions."),
 
         //12
@@ -196,7 +196,7 @@ public class FAQDDrugCSU : FAQ.Faq
         //11
 
 
-        new FAQDDrugCSU("Can I administer Xolair injection by myself.",
+        new FAQDDrugCSU("Can I administer Xolair injection by myself?",
                    "There is limited experience with self-administration of Xolair. Therefore treatment is intended to be administered by a healthcare " +
                    "provider only."),
 
@@ -309,7 +309,7 @@ public class FAQDDrugCSU : FAQ.Faq
         //2
 
 
-        new FAQDDrugCSU("Can Xolair overdose cause toxicities.",
+        new FAQDDrugCSU("Can Xolair overdose cause toxicities?",
                    "The maximum tolerated dose of Xolair has not been determined. Single intravenous doses of up to 4,000 mg have been administered to " +
                    "patients without evidence of dose limiting toxicities. The highest cumulative dose administered to patients was 44,000 mg over a " +
                    "20 week period, this dose did not result in any untoward acute effects. If an overdose is suspected, the patient should be monitored " +
@@ -450,7 +450,7 @@ public class FAQDDrugCSU : FAQ.Faq
 
         new FAQDDrugCSU("Can Xolair affect my platelet count?",
                    "In clinical trials few patients had platelet counts below the lower limit of the normal laboratory range. None of these changes were " +
-                   "associated with bleeding episodes or a decrease in haemoglobin. No pattern of persistent decrease in platelet counts, as observed in" +
+                   "associated with bleeding episodes or a decrease in haemoglobin. No pattern of persistent decrease in platelet counts, as observed in " +
                    "non-human primates, has been reported in humans (patients above 6 years of age), even though isolated cases of idiopathic thrombocytopenia, " +
                    "including severe cases, have been reported in the post-marketing setting."),
 

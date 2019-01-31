@@ -14,7 +14,8 @@ public class InputValue : MonoBehaviour
     public InputField password;
     public Text Name;
     public Text Age;
-
+    [SerializeField]
+    private Text errText;
     // public Text Gender;
     public Text CSUName;
 
@@ -42,7 +43,12 @@ public class InputValue : MonoBehaviour
 
         // AppManager.Gender = gender.text.ToLower();
         AppManager.Age = age.text.ToLower();
-        if (AppManager.UserName.Length >= 3 && AppManager.Password == password.text.ToLower() &&
+        if (password.text.Length > 0 && AppManager.Password != password.text.ToLower())
+        {
+            errText.gameObject.SetActive(true);
+            Invoke("hideText", 1f);
+        }
+        else if (AppManager.UserName.Length >= 3 && AppManager.Password == password.text.ToLower() &&
             AppManager.Age.Length != 0)
 
         {
@@ -53,5 +59,11 @@ public class InputValue : MonoBehaviour
             CSUName.text = Myname.text;
             screenManager.Set(1);
         }
+      
+        
+    }
+    public void hideText()
+    {
+        errText.gameObject.SetActive(false);
     }
 }

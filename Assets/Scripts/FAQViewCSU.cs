@@ -75,27 +75,27 @@ public class FAQViewCSU : MonoBehaviour
                 }
             case "diagoniseCsu":
                 {
-                    setextDisease(FAQDDrugCSU.drugInteraction.Count, FAQDiseaseCSU.diagoniseCsu);
+                    setextDisease(FAQDiseaseCSU.diagoniseCsu.Count, FAQDiseaseCSU.diagoniseCsu);
                     break;
                 }
             case "symptomCsu":
                 {
-                    setextDisease(FAQDDrugCSU.drugInteraction.Count, FAQDiseaseCSU.symptomCsu);
+                    setextDisease(FAQDiseaseCSU.symptomCsu.Count, FAQDiseaseCSU.symptomCsu);
                     break;
                 }
             case "triggerCsu":
                 {
-                    setextDisease(FAQDDrugCSU.drugInteraction.Count, FAQDiseaseCSU.triggerCsu);
+                    setextDisease(FAQDiseaseCSU.triggerCsu.Count, FAQDiseaseCSU.triggerCsu);
                     break;
                 }
             case "measureCsu":
                 {
-                    setextDisease(FAQDDrugCSU.drugInteraction.Count, FAQDiseaseCSU.measureCsu);
+                    setextDisease(FAQDiseaseCSU.measureCsu.Count, FAQDiseaseCSU.measureCsu);
                     break;
                 }
             case "modifyCsu":
                 {
-                    setextDisease(FAQDDrugCSU.drugInteraction.Count, FAQDiseaseCSU.modifyCsu);
+                    setextDisease(FAQDiseaseCSU.modifyCsu.Count, FAQDiseaseCSU.modifyCsu);
                     break;
                 }
         }
