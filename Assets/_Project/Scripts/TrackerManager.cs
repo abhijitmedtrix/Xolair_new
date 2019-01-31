@@ -65,7 +65,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             SymptomData data = new SymptomData(jsonObj.ToString());
 
             // don't manage outdated logs
-            if ((today - data.GetDate()).TotalDays > LOG_LIFE_TIME) continue;
+            if ((today - data.GetDate()).Days > LOG_LIFE_TIME) continue;
 
             _symptomJsonObjectList.Add(data);
 
@@ -92,7 +92,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             AsthmaData data = new AsthmaData(jsonObj.ToString());
 
             // don't manage outdated logs
-            if ((today - data.GetDate()).TotalDays > LOG_LIFE_TIME) continue;
+            if ((today - data.GetDate()).Days > LOG_LIFE_TIME) continue;
 
             _asthmaJsonObjectList.Add(data);
 
@@ -119,7 +119,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             CSUData data = new CSUData(jsonObj.ToString());
 
             // don't manage outdated logs
-            if ((today - data.GetDate()).TotalDays > LOG_LIFE_TIME) continue;
+            if ((today - data.GetDate()).Days > LOG_LIFE_TIME) continue;
 
             _csuJsonObjectList.Add(data);
 
@@ -146,7 +146,7 @@ public class TrackerManager : MonoSingleton<TrackerManager>
             UASData data = new UASData(jsonObj.ToString());
 
             // don't manage outdated logs
-            if ((today - data.GetDate()).TotalDays > LOG_LIFE_TIME) continue;
+            if ((today - data.GetDate()).Days > LOG_LIFE_TIME) continue;
 
             _uasJsonObjectList.Add(data);
 
@@ -164,7 +164,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
         }
 
         _logDataList = _logDataList.OrderBy(x => x.date).ToList();
-        Debug.Log(_logDataList);
     }
 
     private void Start()

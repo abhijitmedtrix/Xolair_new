@@ -28,8 +28,6 @@ public class CameraScreen : MonoBehaviour
     public void TakePhoto()
     {
         // don't need anymore because NatCam play native shutter sound
-        // AudioManager.Instance.Play(_shutterClip);
-
         _takePhotoContent.SetActive(false);
         _managePhotoContent.SetActive(true);
 
@@ -92,16 +90,13 @@ public class CameraScreen : MonoBehaviour
         CameraManager.OnPhotoTaken -= OnPhotoTaken;
         CameraManager.OnCameraComplete -= CameraManagerOnCameraComplete;
 
-
         if (_cameraRawImage.texture != null)
         {
-            Destroy(_cameraRawImage.texture);
             _cameraRawImage.texture = null;
         }
 
         if (_snapshotImage.texture != null)
         {
-            Destroy(_snapshotImage.texture);
             _snapshotImage.texture = null;
         }
 

@@ -29,8 +29,9 @@ public class CSUTrackerScreen : MonoBehaviour
     [SerializeField] private GameObject _step3Content;
     [SerializeField] private GameObject _step4Content;
     [SerializeField] private PhotosScrollController _photosScrollController;
-
     [SerializeField] private Step _currentStep;
+
+    private List<Texture2D> _photos = new List<Texture2D>();
     private BodyPartToggle[] _bodyPartToggles;
     private BodyPart _selectedBodyPart;
     private int _option;
@@ -95,12 +96,10 @@ public class CSUTrackerScreen : MonoBehaviour
 
         TrackerManager.UpdateEntry(DateTime.Today, originalData);
 
-        _csuData = null;
-
         // open CSU tracker menu dialog asking for another body part data fillup
         ScreenManager.Instance.Set(24);
 
-        _photosScrollController.Dispose();
+        Dispose();
     }
 
     public void NextStep()
@@ -273,23 +272,50 @@ public class CSUTrackerScreen : MonoBehaviour
 
     private void CameraManagerOnOnCameraComplete(List<Texture2D> photos)
     {
+        _photos = photos;
+
         CameraManager.OnCameraComplete -= CameraManagerOnOnCameraComplete;
-        if (photos == null || photos.Count == 0)
+        if (_photos == null || _photos.Count == 0)
         {
             CompleteTracker();
         }
         else
         {
-            Debug.Log("Photos count: " + photos.Count);
+            Debug.Log("Photos count: " + _photos.Count);
 
             // enable screen
             ScreenManager.Instance.Set(23);
 
             // load photos to the scroller
-            _photosScrollController.SetData(photos);
+            _photosScrollController.SetData(_photos);
 
             // proceed to next step
             NextStep();
         }
+    }
+
+    public void Close()
+    {
+        ScreenManager.Instance.Set(15);
+
+        Dispose();
+    }
+    
+    private void Dispose()
+    {
+        _csuData = null;
+
+        _photosScrollController.Dispose();
+
+        // remove textures
+        for (int i = 0; i < _photos.Count; i++)
+        {
+            if (_photos[i] != null)
+            {
+                Destroy(_photos[i]);
+            }
+        }
+
+        _photos.Clear();
     }
 }

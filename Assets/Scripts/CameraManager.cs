@@ -8,8 +8,9 @@ using UnityEngine;
 public class CameraManager : MonoSingleton<CameraManager>
 {
     private static int _savedCounter;
-    private static List<Texture2D> _snapshots = new List<Texture2D>();
-
+    private static Texture2D _cachedPhoto;
+    private static List<Texture2D> _previews = new List<Texture2D>();
+    
     public static event Action<Texture> OnCameraStart;
     public static event Action<Texture2D> OnPhotoTaken;
     public static event Action<List<Texture2D>> OnCameraComplete;
@@ -37,15 +38,26 @@ public class CameraManager : MonoSingleton<CameraManager>
 
         NatCam.StartPreview(camera, OnStart);
 
-        for (int i = 0; i < _snapshots.Count; i++)
+        Clear();
+    }
+
+    private static void Clear()
+    {
+        if (_cachedPhoto != null)
         {
-            if (_snapshots[i] != null)
-            {
-                Destroy(_snapshots[i]);
-            }
+            Destroy(_cachedPhoto);
         }
 
-        _snapshots.Clear();
+        _cachedPhoto = null;
+
+        for (int i = 0; i < _previews.Count; i++)
+        {
+            if (_previews[i] != null)
+            {
+                Destroy(_previews[i]);
+            }
+        }
+        _previews.Clear();
     }
 
     public static void StopCamera()
@@ -55,7 +67,7 @@ public class CameraManager : MonoSingleton<CameraManager>
         // clear the memory
         Resources.UnloadUnusedAssets();
 
-        OnCameraComplete?.Invoke(_snapshots);
+        OnCameraComplete?.Invoke(_previews);
     }
 
 
@@ -68,18 +80,7 @@ public class CameraManager : MonoSingleton<CameraManager>
     {
         // Set flash to auto
         NatCam.Camera.FlashMode = FlashMode.Auto;
-
-        Debug.Log($"NatCam.Preview resolution w: {NatCam.Preview.width}, h: {NatCam.Preview.height}");
-        Debug.Log(
-            $"Cam params. dimension: {NatCam.Preview.dimension}, anisoLevel: {NatCam.Preview.anisoLevel}, w: {NatCam.Preview.width}, h: {NatCam.Preview.height}");
-
-        // Vector2Int newSize = new Vector2Int(768, 1366);
-        // NatCam.Camera.PreviewResolution = newSize;
-        // NatCam.Camera.PhotoResolution = newSize;
-
-        // Debug.Log(
-        // $"After Cam params. dimension: {NatCam.Preview.dimension}, anisoLevel: {NatCam.Preview.anisoLevel}, w: {NatCam.Preview.width}, h: {NatCam.Preview.height}");
-
+        
         OnCameraStart?.Invoke(NatCam.Preview);
 
         // remove temp folder if exists
@@ -101,7 +102,7 @@ public class CameraManager : MonoSingleton<CameraManager>
         float cameraAspect = (float) photo.width / photo.height;
 
         Rect rect;
-        
+
         // if screen is wider then camera
         if (screenAspect > cameraAspect)
         {
@@ -113,43 +114,45 @@ public class CameraManager : MonoSingleton<CameraManager>
             float diff = photo.width - photo.height * screenAspect;
             rect = new Rect(diff / 2, 0, photo.width - diff, photo.height);
         }
-         
-        // crop texture to fit the screen dimension
-        Color[] c = photo.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
-        
-        Texture2D cropped = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGB24, false);
-        // photo.Resize((int)rect.width, (int)rect.height);
-        cropped.SetPixels(c);
-        cropped.Apply();
-        c = null;
-        Destroy(photo);
-        photo = cropped;
-        
-        // Cache the photo
-        _snapshots.Add(photo);
 
+        // crop texture to fit the screen dimension
+        Color[] c = photo.GetPixels((int) rect.x, (int) rect.y, (int) rect.width, (int) rect.height);
+
+        photo.Resize((int) rect.width, (int) rect.height, TextureFormat.RGB24, false);
+        photo.SetPixels(c);
+        photo.Apply();
+        c = null;
+
+        _cachedPhoto = photo;
+        
         OnPhotoTaken?.Invoke(photo);
     }
 
     public static void SaveLastPhoto()
     {
-        Texture2D photo = _snapshots[_snapshots.Count - 1];
-
         string filePath = Path.Combine(Helper.GetDataPath(), _TEMP_PHOTO_PATH, $"{_savedCounter}.png");
+        byte[] bytes = _cachedPhoto.EncodeToPNG();
+        File.WriteAllBytes(filePath, bytes);
+        bytes = null;
 
-        File.WriteAllBytes(filePath, photo.EncodeToPNG());
-        TextureScale.Bilinear(photo, photo.width / 4, photo.height / 4);
+        // Debug.Log($"Photo texture format: {photo.format}");
+        TextureScale.Bilinear(_cachedPhoto, _cachedPhoto.width / 4, _cachedPhoto.height / 4);
+        Debug.Log("Resized texture");
+        // Destroy(_cachedPhoto);
+        // _cachedPhoto = null;
+        _previews.Add(_cachedPhoto);
 
         _savedCounter++;
+
+        Resources.UnloadUnusedAssets();
     }
 
     public static void RemoveLastSnapshot()
     {
-        if (_snapshots.Count > 0)
+        if (_cachedPhoto != null)
         {
-            Texture2D texture = _snapshots[_snapshots.Count - 1];
-            _snapshots.Remove(texture);
-            GameObject.Destroy(texture);
+            Destroy(_cachedPhoto);
+            _cachedPhoto = null;
         }
     }
 
@@ -157,7 +160,7 @@ public class CameraManager : MonoSingleton<CameraManager>
     {
         List<string> paths = new List<string>();
 
-        for (int i = 0; i < _snapshots.Count; i++)
+        for (int i = 0; i < _savedCounter; i++)
         {
             string path = Path.Combine(Helper.GetDataPath(), _TEMP_PHOTO_PATH, $"{i}.png");
 
@@ -181,7 +184,7 @@ public class CameraManager : MonoSingleton<CameraManager>
 
         if (clearVariables)
         {
-            _snapshots.Clear();
+            Clear();
             _savedCounter = 0;
         }
 

@@ -126,13 +126,15 @@ namespace App.Data.Reminders
             DateTime nextFireDate = fireDate;
 
             // get start date diff in secs
-            long startInSecs = this.fireDate.Subtract(DateTime.Now).Seconds;
+            long startInSecs = (long)this.fireDate.Subtract(DateTime.Now).TotalSeconds;
 
+            Debug.Log($"Set notification: title: {title}, parent id: {parentGroupId}. fireDate: {fireDate}, nextFireDate: {nextFireDate}, startInSecs: {startInSecs}");
+            
             // if fireDate is in a past (past will return always 0, not -value)
             if (startInSecs <= 0)
             {
                 nextFireDate = FindNextFireDate();
-                startInSecs = nextFireDate.Subtract(DateTime.Now).Seconds;
+                startInSecs = (long)nextFireDate.Subtract(DateTime.Now).TotalSeconds;
             }
 
             // schedule 2 notifications upfront for each week, so 4 totally
@@ -166,7 +168,7 @@ namespace App.Data.Reminders
                 // for fortnight notifications we should check 1st and by other logic
                 if (isFortnight)
                 {
-                    float daysDifference = (float)dateTime.Subtract(fireDate).TotalDays;
+                    float daysDifference = (float)dateTime.Subtract(fireDate).Days;
                     // Debug.Log($"daysDifference: {daysDifference}, floor: {Mathf.FloorToInt(daysDifference / 7)}, reminder: {Mathf.FloorToInt(daysDifference / 7) % 2}");
                     
                     // we need just not even numbers

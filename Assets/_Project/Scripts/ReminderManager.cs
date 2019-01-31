@@ -91,8 +91,15 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.FORTNIGHT,
                 "Complete symptom tracker test");
             reminderData.isDefault = true;
-            reminderData.isActive = TrackerManager.GetLastSymptomData() != null;
-            reminderData.SetupReminder();
+            
+            if (TrackerManager.GetLastSymptomData() != null)
+            {
+                reminderData.SetupReminder();
+            }
+            else
+            {
+                reminderData.isActive = false;
+            }
             AddReminder(reminderData);
 
             // add default Asthma test reminder
@@ -101,8 +108,15 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.WEEK,
                 "Take asthma control test");
             reminderData.isDefault = true;
-            reminderData.isActive = TrackerManager.GetLastAsthmaData() != null;
-            reminderData.SetupReminder();
+            
+            if (TrackerManager.GetLastAsthmaData() != null)
+            {
+                reminderData.SetupReminder();
+            }
+            else
+            {
+                reminderData.isActive = false;
+            }
             AddReminder(reminderData);
 
             // add default CSU reminder
@@ -111,8 +125,15 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.DAY,
                 "Track your hives through CSU tracker");
             reminderData.isDefault = true;
-            reminderData.isActive = TrackerManager.GetLastCSUData() != null;
-            reminderData.SetupReminder();
+            
+            if (TrackerManager.GetLastCSUData() != null)
+            {
+                reminderData.SetupReminder();
+            }
+            else
+            {
+                reminderData.isActive = false;
+            }
             AddReminder(reminderData);
 
             // add default UAS reminder
@@ -121,8 +142,15 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.DAY,
                 "Take the UAS 7 test");
             reminderData.isDefault = true;
-            reminderData.isActive = TrackerManager.GetLastUASData() != null;
-            reminderData.SetupReminder();
+            
+            if (TrackerManager.GetLastUASData() != null)
+            {
+                reminderData.SetupReminder();
+            }
+            else
+            {
+                reminderData.isActive = false;
+            }
             AddReminder(reminderData);
 
             // add default Xolair shot reminder
@@ -132,8 +160,6 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 RepeatInterval.FORTNIGHT,
                 "Time for Xolair shot");
             reminderData.isDefault = true;
-            reminderData.isActive = false;
-            reminderData.SetupReminder();
             AddReminder(reminderData);
 
             // save progress

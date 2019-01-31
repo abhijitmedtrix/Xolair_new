@@ -3,6 +3,10 @@
 *   Copyright (c) 2018 Yusuf Olokoba
 */
 
+using System.Collections.Generic;
+using System.IO;
+using App.Utils;
+
 namespace NatCamU.Examples
 {
     using UnityEngine;
@@ -56,10 +60,45 @@ namespace NatCamU.Examples
             NatCam.Camera.PhotoResolution = NatCam.Camera.PreviewResolution = new Vector2Int(720, 1280);
 
             SetFlashIcon();
+            
+            // remove temp folder if exists
+            string dirPath = Path.Combine(Helper.GetDataPath(), _TEMP_PHOTO_PATH);
+            DirectoryInfo dirInfo = new DirectoryInfo(dirPath);
+            if (dirInfo.Exists)
+            {
+                dirInfo.Delete(true);
+            }
+            dirInfo.Create();
         }
 
         private void OnPhoto(Texture2D photo)
         {
+            float screenAspect = (float) Screen.width / Screen.height;
+            float cameraAspect = (float) photo.width / photo.height;
+            Rect rect;
+            // if screen is wider then camera
+            if (screenAspect > cameraAspect)
+            {
+                float diff = photo.height - photo.width / cameraAspect;
+                rect = new Rect(0, diff / 2, photo.width, photo.height - diff);
+            }
+            else
+            {
+                float diff = photo.width - photo.height * screenAspect;
+                rect = new Rect(diff / 2, 0, photo.width - diff, photo.height);
+            }
+            // crop texture to fit the screen dimension
+            Color[] c = photo.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
+            // Texture2D cropped = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGB24, false);
+            photo.Resize((int) rect.width, (int) rect.height, TextureFormat.RGB24, false);
+            photo.SetPixels(c);
+            photo.Apply();
+            c = null;
+            // Destroy(photo);
+            // photo = cropped;
+
+            
+            
             // Cache the photo
             this.photo = photo;
             // Display the photo
@@ -87,16 +126,19 @@ namespace NatCamU.Examples
             // Enable the flash button
             flashButton.gameObject.SetActive(true);
             
-            /*
-            // need to test how much memory will we save in that case
-            photo.Resize(photo.width / 4, photo.height / 4);
-            photo.Apply();
-            */
+            string filePath = Path.Combine(Helper.GetDataPath(), _TEMP_PHOTO_PATH, $"{Random.Range(0, 100)}.png");
+            byte[] bytes = photo.EncodeToPNG();
+            File.WriteAllBytes(filePath, bytes);
             
             // Free the photo texture
-            Texture2D.Destroy(photo);
+            Destroy(photo);
             photo = null;
+            bytes = null;
+
+            Resources.UnloadUnusedAssets();
         }
+        
+        private const string _TEMP_PHOTO_PATH = "temp/photos";
 
         #endregion
 

@@ -30,7 +30,7 @@ public class NotesManager : MonoSingleton<NotesManager>
             NoteData data = new NoteData(jsonObj.ToString());
 
             // don't manage outdated logs
-            if ((DateTime.Today - data.GetDate()).TotalDays > TrackerManager.LOG_LIFE_TIME) continue;
+            if ((DateTime.Today - data.GetDate()).Days > TrackerManager.LOG_LIFE_TIME) continue;
 
             data.OnDataUpdate += DataUpdate;
             _notes.Insert(0, data);
