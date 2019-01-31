@@ -526,7 +526,6 @@ public class TrackerManager : MonoSingleton<TrackerManager>
 
         // find a 1st entry date
         DateTime firstDate = DateTime.MinValue;
-        Debug.Log($"First log data: {_logDataList[0].date} and requested type: {type}");
 
         for (int i = 0; i < _logDataList.Count; i++)
         {
