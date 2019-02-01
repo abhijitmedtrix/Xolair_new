@@ -19,6 +19,13 @@ public class AsthmaControlTrackerScreen : TrackerScreen
 
         base.StartTracker();
     }
+    
+    public override void SubmitResults()
+    {
+        base.SubmitResults();
+        
+        ScreenManager.Instance.Set(4);
+    }
 
     public override void SubmitAnswer()
     {

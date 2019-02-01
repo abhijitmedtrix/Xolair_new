@@ -10,6 +10,13 @@ public class UASTrackerScreen : TrackerScreen
         _progressController.OnBackClicked += SetPreviousQuestion;
         _trackerType = TrackerManager.TrackerType.UAS;
     }
+    
+    public override void SubmitResults()
+    {
+        base.SubmitResults();
+        
+        ScreenManager.Instance.Set(15);
+    }
 
     public override void StartTracker()
     {

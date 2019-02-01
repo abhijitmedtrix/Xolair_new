@@ -80,10 +80,16 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         if (SaveGame.Exists(_ACTUAL_REMINDERS_FILE_PATH))
         {
             _reminders = SaveGame.Load<List<ReminderData>>(_ACTUAL_REMINDERS_FILE_PATH);
+            for (int i = 0; i < _reminders.Count; i++)
+            {
+                Debug.Log($"reminder loaded: {_reminders[i].title} and notifications count: {_reminders[i].notifications.Count}");
+            }
         }
 
         if (!PlayerPrefs.HasKey(_DEFAULT_REMINDERS_ADDED_KEY))
         {
+            QuestionBasedTrackerData questionData;
+            
             // add default Symptom reminder
             ReminderData reminderData = new ReminderData(AppMode.SAA, _DEFAULT_SAA_ST_KEY,
                 DateTime.Today.Tomorrow(),
@@ -92,8 +98,9 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 "Complete symptom tracker test");
             reminderData.isDefault = true;
             
-            if (TrackerManager.GetLastSymptomData() != null)
+            if ((questionData = TrackerManager.GetLastSymptomData()) != null)
             {
+                reminderData.fireDate = questionData.GetDate().AddDays(14);
                 reminderData.SetupReminder();
             }
             else
@@ -109,8 +116,9 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 "Take asthma control test");
             reminderData.isDefault = true;
             
-            if (TrackerManager.GetLastAsthmaData() != null)
+            if ((questionData = TrackerManager.GetLastAsthmaData()) != null)
             {
+                reminderData.fireDate = questionData.GetDate().AddDays(7);
                 reminderData.SetupReminder();
             }
             else
@@ -126,8 +134,9 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 "Track your hives through CSU tracker");
             reminderData.isDefault = true;
             
-            if (TrackerManager.GetLastCSUData() != null)
+            if ((questionData = TrackerManager.GetLastCSUData()) != null)
             {
+                reminderData.fireDate = questionData.GetDate().AddDays(1);
                 reminderData.SetupReminder();
             }
             else
@@ -143,8 +152,9 @@ public class ReminderManager : MonoSingleton<ReminderManager>
                 "Take the UAS 7 test");
             reminderData.isDefault = true;
             
-            if (TrackerManager.GetLastUASData() != null)
+            if ((questionData = TrackerManager.GetLastUASData()) != null)
             {
+                reminderData.fireDate = questionData.GetDate().AddDays(1);
                 reminderData.SetupReminder();
             }
             else
@@ -190,6 +200,8 @@ public class ReminderManager : MonoSingleton<ReminderManager>
 
     private void TrackerManagerOnFirstDataAdded(DateTime dateTime, QuestionBasedTrackerData trackerData)
     {
+        // if 1st test passed, we don't want to set reminder to current time, because that will trigger reminder immediately.
+        
         if (trackerData is SymptomData)
         {
             ActivateSymptomTrackerDefaultReminder(dateTime);
@@ -200,9 +212,11 @@ public class ReminderManager : MonoSingleton<ReminderManager>
         }
         else if (trackerData is CSUData)
         {
+            ActivateCSUDefaultReminder(dateTime);
         }
         else if (trackerData is UASData)
         {
+            ActivateUASDefaultReminder(dateTime);
         }
     }
 
@@ -230,12 +244,44 @@ public class ReminderManager : MonoSingleton<ReminderManager>
     public void ActivateSymptomTrackerDefaultReminder(DateTime testCompleteDateTime)
     {
         ReminderData data = _reminders.Find(x => x.id == _DEFAULT_SAA_ST_KEY);
+        
+        // find next date to fire (it has fortnight interval) 
+        testCompleteDateTime = testCompleteDateTime.AddDays(14);
+        
+        data.fireDate = testCompleteDateTime;
         data.SetActive(true);
     }
 
     public void ActivateAsthmaControlTestDefaultReminder(DateTime testCompleteDateTime)
     {
         ReminderData data = _reminders.Find(x => x.id == _DEFAULT_SAA_ACT_KEY);
+        
+        // find next date to fire (it has weekly interval) 
+        testCompleteDateTime = testCompleteDateTime.AddDays(7);
+        
+        data.fireDate = testCompleteDateTime;
+        data.SetActive(true);
+    }
+    
+    public void ActivateCSUDefaultReminder(DateTime testCompleteDateTime)
+    {
+        ReminderData data = _reminders.Find(x => x.id == _DEFAULT_CSU_CSU_KEY);
+        
+        // find next date to fire (it has daily interval) 
+        testCompleteDateTime = testCompleteDateTime.AddDays(1);
+        
+        data.fireDate = testCompleteDateTime;
+        data.SetActive(true);
+    }
+    
+    public void ActivateUASDefaultReminder(DateTime testCompleteDateTime)
+    {
+        ReminderData data = _reminders.Find(x => x.id == _DEFAULT_CSU_UAS_KEY);
+        
+        // find next date to fire (it has daily interval) 
+        testCompleteDateTime = testCompleteDateTime.AddDays(1);
+        
+        data.fireDate = testCompleteDateTime;
         data.SetActive(true);
     }
 

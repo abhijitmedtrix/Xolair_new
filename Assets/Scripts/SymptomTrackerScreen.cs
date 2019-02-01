@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using App.Data.SSA;
 using System;
-using App.Data;
-using App.Data.CSU;
 using MaterialUI;
 
 public class SymptomTrackerScreen : TrackerScreen
@@ -26,8 +24,15 @@ public class SymptomTrackerScreen : TrackerScreen
         base.StartTracker();
     }
 
-    protected override void CompleteTracker()
+    public override void SubmitResults()
     {
-        base.CompleteTracker();
+        base.SubmitResults();
+        
+        ScreenManager.Instance.Set(4);
+    }
+
+    protected override void TryCompleteTracker()
+    {
+        base.TryCompleteTracker();
     }
 }

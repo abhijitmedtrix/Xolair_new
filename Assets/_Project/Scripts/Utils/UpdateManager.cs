@@ -98,6 +98,8 @@ namespace DTools
 			}
 
 			_instance = this;
+
+			_secondsCounter = DateTime.Now.Second;
 		}
 
 		private void OnDestroy()

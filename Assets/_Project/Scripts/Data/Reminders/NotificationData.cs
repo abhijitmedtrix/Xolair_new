@@ -140,12 +140,13 @@ namespace App.Data.Reminders
             // schedule 2 notifications upfront for each week, so 4 totally
             if (this.isFortnight)
             {
-                long twoWeeksToSeconds = 7 * 24 * 60 * 60 * 2;
+                long twoWeeksToSeconds = 2 * 7 * 24 * 60 * 60;
                 int notificationCount = notificationsDict.Count;
 
                 for (int i = notificationCount; i < 4; i++)
                 {
-                    RegisterNotification(startInSecs + twoWeeksToSeconds * (i + 1), repeatInterval);
+                    Debug.Log($"Start in secs: {startInSecs}, twoWeeksToSeconds {twoWeeksToSeconds}, partial: {twoWeeksToSeconds * i}, total: {startInSecs + twoWeeksToSeconds * i}, and date format: {new TimeSpan(0, 0, (int)(startInSecs + twoWeeksToSeconds * i))}");
+                    RegisterNotification(startInSecs + twoWeeksToSeconds * i, repeatInterval);
                 }
             }
             else
@@ -168,11 +169,10 @@ namespace App.Data.Reminders
                 // for fortnight notifications we should check 1st and by other logic
                 if (isFortnight)
                 {
-                    float daysDifference = (float)dateTime.Subtract(fireDate).Days;
-                    // Debug.Log($"daysDifference: {daysDifference}, floor: {Mathf.FloorToInt(daysDifference / 7)}, reminder: {Mathf.FloorToInt(daysDifference / 7) % 2}");
-                    
+                    float daysDifference = (float)dateTime.Midnight().Subtract(fireDate.Midnight()).TotalDays;
+                                        
                     // we need just not even numbers
-                    if (Mathf.FloorToInt(daysDifference / 7) % 2 == 0 && dateTime.DayOfWeek == fireDate.DayOfWeek)
+                    if ((int)daysDifference / 7 % 2 == 0 && dateTime.DayOfWeek == fireDate.DayOfWeek)
                     {
                         return true;
                     }
@@ -229,7 +229,7 @@ namespace App.Data.Reminders
                     new NotificationInfo {id = id, fireDate = fireDate, repeatInterval = repeatInterval});
                 idArray.Add(id);
                 Debug.Log(
-                    $"Registering notification with title: {title}, parent group id: {parentGroupId}, fire date: {fireDate}, interval: {repeatInterval}, and id: {id}");
+                    $"Registering notification with title: {title}, parent group id: {parentGroupId}, reminder start fire date: {fireDate} and actual fire date: {DateTime.Now.AddSeconds(startInSecs)}, interval: {repeatInterval}, and id: {id}");
             }
             else
             {

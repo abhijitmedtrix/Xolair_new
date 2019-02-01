@@ -89,6 +89,8 @@ namespace App.Data.Reminders
         /// </summary>
         public void SetupReminder()
         {
+            RemoveAllNotifications();
+            
             NotificationData data;
 
             eNotificationRepeatInterval notificationRepeatInterval = eNotificationRepeatInterval.NONE;
@@ -300,7 +302,6 @@ namespace App.Data.Reminders
             if (isActive)
             {
                 SetupReminder();
-                OnDataUpdate?.Invoke(this);
             }
             // if user turned off the reminder
             else
@@ -363,6 +364,7 @@ namespace App.Data.Reminders
             {
                 for (int i = 0; i < historyDates.Count; i++)
                 {
+                    Debug.Log($"Reminder {title} history date: {historyDates[i]}");
                     if (historyDates[i].IsSameDay(dateTime))
                     {
                         return true;

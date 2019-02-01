@@ -14,14 +14,12 @@ public class TimePanelController : MonoBehaviour
         _initialTimeText = _timeText.text;
 
         // set the date
-
         string dayInShortCapitals = DateTime.Today.ToString("ddd").ToUpper();
         string date = DateTime.Today.ToString("d/M/yyyy");
         _dateText.text = $"{dayInShortCapitals}, {date}";
 
         // set time
-        _timeText.text = string.Format(_initialTimeText, DateTime.Now.ToString("hh:mm", CultureInfo.InvariantCulture),
-            DateTime.Now.ToString("tt", CultureInfo.InvariantCulture));
+        UpdateManagerOnOnMinuteChange();
 
         // listen for minute change to update UI
         UpdateManager.OnMinuteChange += UpdateManagerOnOnMinuteChange;
@@ -34,6 +32,7 @@ public class TimePanelController : MonoBehaviour
 
     private void UpdateManagerOnOnMinuteChange()
     {
-        _timeText.text = DateTime.Today.ToString("tt", CultureInfo.InvariantCulture);
+        _timeText.text = string.Format(_initialTimeText, DateTime.Now.ToString("hh:mm", CultureInfo.InvariantCulture),
+            DateTime.Now.ToString("tt", CultureInfo.InvariantCulture));
     }
 }

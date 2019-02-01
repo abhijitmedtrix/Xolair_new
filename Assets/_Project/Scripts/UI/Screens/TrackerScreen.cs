@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using App.Data;
+using MaterialUI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -53,7 +54,7 @@ public class TrackerScreen : MonoBehaviour
                 "Exception caught trying to get new question. Seems there is no more questions for this data. Ex: " +
                 ex.Message);
 
-            CompleteTracker();
+            TryCompleteTracker();
         }
     }
 
@@ -102,14 +103,8 @@ public class TrackerScreen : MonoBehaviour
         }
     }
 
-    protected virtual void CompleteTracker()
+    protected virtual void TryCompleteTracker()
     {
-        // save progress
-        QuestionBasedTrackerData originalData = TrackerManager.GetData(DateTime.Today, _trackerType);
-
-        originalData.SetAnswers(_trackerData.GetAnswers());
-        TrackerManager.UpdateEntry(DateTime.Today, originalData);
-
         Debug.Log("Score: " + _trackerData.GetScore());
 
         _scorePanel.SetActive(true);
@@ -125,6 +120,15 @@ public class TrackerScreen : MonoBehaviour
         StartTracker();
     }
 
+    public virtual void SubmitResults()
+    {
+        // save progress
+        QuestionBasedTrackerData originalData = TrackerManager.GetData(DateTime.Today, _trackerType);
+
+        originalData.SetAnswers(_trackerData.GetAnswers());
+        TrackerManager.UpdateEntry(DateTime.Today, originalData);
+    }
+    
     /// <summary>
     /// Submit answer by clicking the button.
     /// </summary>

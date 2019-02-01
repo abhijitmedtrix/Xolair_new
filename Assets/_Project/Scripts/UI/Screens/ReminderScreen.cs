@@ -251,6 +251,19 @@ public class ReminderScreen : MonoBehaviour, IEnhancedScrollerDelegate
 
             // update variables and create new reminder
             _tempReminderData = _tempNewReminderData = ReminderManager.Instance.CreateSimpleTemplateReminder();
+            
+            // show error
+            UIManager.NotificationManager.ShowNotification(
+                "OneOptionTitleUINotification",
+                -1,
+                false,
+                "Done!",
+                "New reminder has been added!",
+                null,
+                new string[] {"Ok"},
+                new string[] {"Ok"}
+            );
+            
         }
         else if (this.state == State.Edit)
         {
