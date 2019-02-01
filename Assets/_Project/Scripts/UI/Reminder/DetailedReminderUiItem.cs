@@ -8,6 +8,7 @@ public class DetailedReminderUiItem : EnhancedScrollerCellView, IDisposable
 {
     [SerializeField] protected Text _titleText;
     [SerializeField] protected Text _dateText;
+    [SerializeField] protected Text _timeText;
     [SerializeField] protected Image _bgImage;
     [SerializeField] protected Button _button;
     [SerializeField] protected ToggleSlider _toggleSlider;
@@ -55,6 +56,7 @@ public class DetailedReminderUiItem : EnhancedScrollerCellView, IDisposable
     protected void UpdateView(ReminderData reminderData)
     {
         _titleText.text = data.title;
+        _timeText.text = data.fireDate.ToString("h:mm tt");
         
         // tint gray a bit to show that reminder is not active
         if (data.isActive)
